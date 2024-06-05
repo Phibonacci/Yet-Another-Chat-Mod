@@ -1,0 +1,42 @@
+VERSION = 1,
+
+option YetAnotherChatMod.WhisperRange
+{
+	type = integer,
+	min = 1,
+	max = 10000,
+	default = 3,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_WhisperRange,
+}
+option YetAnotherChatMod.LowRange
+{
+	type = integer,
+	min = 1,
+	max = 10000,
+	default = 10,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_LowRange,
+}
+option YetAnotherChatMod.SayRange
+{
+	type = integer,
+	min = 1,
+	max = 10000,
+	default = 60,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_SayRange,
+}
+option YetAnotherChatMod.YellRange
+{
+	type = integer,
+	min = 1,
+	max = 10000,
+	default = 120,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_YellRange,
+}
