@@ -11,6 +11,14 @@ function AToken:new(message, childs)
     return o
 end
 
+function AToken:getLength()
+    local length = 0
+    for _, child in pairs(self.childs) do
+        length = length + child:getLength()
+    end
+    return length
+end
+
 function AToken:formatCustom(keepTags, rgbCall)
     local colorObj = self:getColor()
     local color = rgbCall(colorObj)

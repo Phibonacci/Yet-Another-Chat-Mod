@@ -102,7 +102,7 @@ end
 local function FormatMessage(message, defaultColor)
     local tagsFound = ListTags(message)
     local token = Tokenize(message, tagsFound, defaultColor)
-    return token:format(false), token:formatBubble(false)
+    return token:format(false), token:formatBubble(false), token:getLength()
 end
 
 local function ParseYacmHeaderArg(header, pattern)
@@ -143,10 +143,11 @@ function ParseYacmMessage(message, defaultColor)
     --     return nil
     -- end
     local body = message --string.sub(message, headerEnd + 1)
-    local bodyChat, bodyBubble = FormatMessage(body, defaultColor)
+    local bodyChat, bodyBubble, length = FormatMessage(body, defaultColor)
     return {
         --['header'] = header,
         ['body'] = bodyChat,
-        ['bubble'] = bodyBubble
+        ['bubble'] = bodyBubble,
+        ['length'] = length
     }
 end

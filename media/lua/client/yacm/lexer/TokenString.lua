@@ -12,6 +12,10 @@ function TokenString.getName()
     return 'string'
 end
 
+function TokenString:getLength()
+    return #self.message
+end
+
 function TokenString:formatCustom()
     return self.message
 end

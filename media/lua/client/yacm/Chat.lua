@@ -1,5 +1,6 @@
 require('yacm/parser/Parser')
 require('yacm/parser/StringBuilder')
+local Bubble = require('yacm/ui/Bubble')
 local YacmClientSendCommands = require('yacm/network/SendYacmClient.lua')
 
 ISChat.allChatStreams = {}
@@ -28,13 +29,7 @@ local function GetCommandFromMessage(command)
     return nil
 end
 
-local function CreateHeader(streamName)
-    local author = getPlayer():getUsername()
-    return '<YACM t:' .. streamName .. ';a:' .. author .. ';>'
-end
-
 local function ProcessChatCommand(stream, command)
-    local header = CreateHeader(stream.name)
     local yacmCommand = ParseYacmMessage(command)
     if yacmCommand == nil then
         return false
@@ -175,14 +170,19 @@ function BuildVerbString(type)
 end
 
 function BuildMessageFromPacket(packet)
-    local message = ParseYacmMessage('"' .. packet.message .. '"', BuildColorFromMessageType(packet.type))
+    local messageColor = BuildColorFromMessageType(packet.type)
+    local message = ParseYacmMessage(packet.message, messageColor)
     local radioPrefix = ''
     if packet.type == 'radio' then
         radioPrefix = '(' .. string.format('%.1fMHz', packet.frequency / 1000) .. '), '
     end
-    return BuildBracketColorString({ 109, 93, 199 }) ..
+    local messageColorString = BuildBracketColorString(messageColor)
+    local formatedMessage = BuildBracketColorString({ 109, 93, 199 }) ..
         packet.author ..
-        BuildBracketColorString({ 150, 150, 150 }) .. BuildVerbString(packet.type) .. radioPrefix .. message.body
+        BuildBracketColorString({ 150, 150, 150 }) ..
+        BuildVerbString(packet.type) ..
+        radioPrefix .. messageColorString .. '"' .. message.body .. messageColorString .. '"'
+    return formatedMessage, message.body, message.length
 end
 
 function BuildChatMessage(fontSize, showTimestamp, rawMessage, time)
@@ -194,11 +194,21 @@ function BuildChatMessage(fontSize, showTimestamp, rawMessage, time)
     return line
 end
 
+function CreateBubble(author, message, length)
+    if ISChat.instance.bubble then
+        ISChat.instance.bubble:delete()
+    end
+    ISChat.instance.bubble = Bubble:new(getPlayer(), message, length)
+    ISChat.instance.bubble:initialise()
+    ISChat.instance.bubble:paginate()
+end
+
 function ISChat.addCustomLineInChat(packet)
-    local rawMessage = BuildMessageFromPacket(packet)
-    local time = Calendar.getInstance():getTimeInMillis()
+    local message, rawMessage, rawLength = BuildMessageFromPacket(packet)
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
-    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, rawMessage, time)
+    CreateBubble(packet.author, rawMessage, rawLength)
+    local time = Calendar.getInstance():getTimeInMillis()
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, message, time)
 
     if not ISChat.instance.chatText then
         ISChat.instance.chatText = ISChat.instance.defaultTab
@@ -209,7 +219,7 @@ function ISChat.addCustomLineInChat(packet)
     table.insert(chatText.chatTextRawLines,
         {
             time = time,
-            line = rawMessage,
+            line = message,
         })
     if chatText.tabTitle ~= ISChat.instance.chatText.tabTitle then
         local alreadyExist = false
@@ -265,6 +275,8 @@ ISChat.addLineInChat = function(message, tabID)
             type = 'radio',
             frequency = message:getRadioChannel()
         })
+    else
+        message:setOverHeadSpeech(false)
     end
     if message:isServerAlert() then
         ISChat.instance.servermsg = ''
