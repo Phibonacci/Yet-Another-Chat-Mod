@@ -16,8 +16,27 @@ function TokenString:getLength()
     return #self.message
 end
 
-function TokenString:formatCustom()
-    return self.message
+function TokenString:formatCustom(wrapWords)
+    if wrapWords == nil or wrapWords <= 0 then
+        return self.message
+    end
+    local newMessage = ''
+    local wordSize = 0
+    for i = 1, #self.message do
+        local c = self.message:sub(i, i)
+        if c == ' ' then
+            wordSize = 0
+        else
+            wordSize = wordSize + 1
+        end
+        if wordSize == wrapWords + 1 then
+            wordSize = 2
+            local lastC = newMessage:sub(#newMessage, #newMessage)
+            newMessage = newMessage:sub(1, #newMessage - 1) .. '- ' .. lastC
+        end
+        newMessage = newMessage .. c
+    end
+    return newMessage
 end
 
 function TokenString:formatBubble(keepTags)

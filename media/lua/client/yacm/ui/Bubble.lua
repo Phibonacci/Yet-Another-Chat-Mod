@@ -2,7 +2,7 @@ require('yacm/parser/StringBuilder')
 Bubble = ISUIElement:derive("ISPanel")
 
 function Bubble:initialise()
-    ISUIElement.initialise(self);
+    ISUIElement.initialise(self)
     self:addToUIManager()
 end
 
@@ -44,15 +44,15 @@ function CalculateBubblePosition(player, width, height, verbose)
 end
 
 function Bubble:prerender()
-    local x, y = CalculateBubblePosition(getPlayer(), self:getWidth(), self:getHeight(), false)
+    if self.dead then
+        return
+    end
+    local time = Calendar.getInstance():getTimeInMillis()
+    local elapsedTime = time - self.startTime
+    local delta = time - self.previousTime
+    local x, y = CalculateBubblePosition(self.player, self:getWidth(), self:getHeight(), false)
     self:setX(x)
     self:setY(y)
-    -- if self.background then
-    --     self:drawRectStatic(0, 0, self.width, self.height, self.backgroundColor.a, self.backgroundColor.r,
-    --         self.backgroundColor.g, self.backgroundColor.b);
-    --     self:drawRectBorderStatic(0, 0, self.width, self.height, self.borderColor.a, self.borderColor.r,
-    --         self.borderColor.g, self.borderColor.b);
-    -- end
     local bubbleTop = getTexture("media/ui/yacm/bubble/bubble-top.png")
     local bubbleTopLeft = getTexture("media/ui/yacm/bubble/bubble-top-left.png")
     local bubbleTopRight = getTexture("media/ui/yacm/bubble/bubble-top-right.png")
@@ -65,7 +65,17 @@ function Bubble:prerender()
     local bubbleArrow = getTexture("media/ui/yacm/bubble/bubble-arrow.png")
 
     local scale = 1
-    local alpha = 0.8
+    local alpha
+    if self.timer - elapsedTime > 1000 then
+        alpha = 1
+    elseif self.timer - elapsedTime > 0 then
+        local fadingTime = elapsedTime - (self.timer - 1000)
+        alpha = (1000 - fadingTime) / 1000
+    else
+        self.dead = true
+        self:delete()
+        return
+    end
     local leftX = 0
     local leftW = math.floor(10 * 1 / scale)
     local rightW = math.floor(10 * 1 / scale)
@@ -90,42 +100,37 @@ function Bubble:prerender()
     self:drawTextureScaled(bubbleBot, centerX, botY, centerW, botH, alpha)
     self:drawTexture(bubbleBotRight, rightX, botY, alpha)
 
-    local arrowW = math.floor(7 * 1 / scale)
-    local arrowH = math.floor(9 * 1 / scale)
     self:drawTexture(bubbleArrow, centerX + centerW / 2 + 5, botY + 3 * botH / 4, alpha)
 
     ISRichTextPanel.render(self)
+    self.previousTime = time
 end
 
 function Bubble:render()
-    -- if self.background then
-    --     self:drawRectStatic(0, 0, self.width, self.height, self.backgroundColor.a, self.backgroundColor.r,
-    --         self.backgroundColor.g, self.backgroundColor.b);
-    --     self:drawRectBorderStatic(0, 0, self.width, self.height, self.borderColor.a, self.borderColor.r,
-    --         self.borderColor.g, self.borderColor.b);
-    -- end
 end
 
-function Bubble:new(player, text, length)
-    local width = math.min(length * 6.5, 158) + 41
-    print('bubble length: ' .. length)
-    print('bubble width: ' .. width)
-    print('bubble text: ' .. text)
+function Bubble:new(player, text, length, timer)
+    local width = math.min(length * 6.24, 162) + 40
     local height = 0
     local x, y = CalculateBubblePosition(player, width, height, true)
     Bubble.__index = self
     setmetatable(Bubble, { __index = ISRichTextPanel })
     local o = ISRichTextPanel:new(x, y, width, height)
     setmetatable(o, Bubble)
-    o.background = true;
+    o.player = player
+    o.text = BuildFontSizeString('medium') .. text
+    o.timer = timer * 1000
+    o.background = true
     o.backgroundColor = { r = 0, g = 0, b = 0, a = 0.5 }
     o.borderColor = { r = 0.4, g = 0.4, b = 0.4, a = 1 }
-    o.anchorLeft = true;
-    o.anchorRight = false;
-    o.anchorTop = true;
-    o.anchorBottom = false;
-    o.moveWithMouse = false;
-    o.text = BuildFontSizeString('medium') .. text
+    o.anchorLeft = true
+    o.anchorRight = false
+    o.anchorTop = true
+    o.anchorBottom = false
+    o.moveWithMouse = false
+    o.startTime = Calendar.getInstance():getTimeInMillis()
+    o.previousTime = o.startTime
+    o.dead = false
     return o
 end
 

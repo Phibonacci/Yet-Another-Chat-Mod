@@ -97,7 +97,7 @@ function ISChat:onCommandEntered()
                 -- removing the command and trailing space '/command '
                 command = string.sub(command, #commandName + 1)
             end
-            if #commandName == #command or IsOnlySpacesOrEmpty(command) then
+            if IsOnlySpacesOrEmpty(command) then
                 return
             end
             if not ProcessChatCommand(stream, command) then
@@ -171,7 +171,7 @@ end
 
 function BuildMessageFromPacket(packet)
     local messageColor = BuildColorFromMessageType(packet.type)
-    local message = ParseYacmMessage(packet.message, messageColor)
+    local message = ParseYacmMessage(packet.message, messageColor, 20)
     local radioPrefix = ''
     if packet.type == 'radio' then
         radioPrefix = '(' .. string.format('%.1fMHz', packet.frequency / 1000) .. '), '
@@ -182,7 +182,7 @@ function BuildMessageFromPacket(packet)
         BuildBracketColorString({ 150, 150, 150 }) ..
         BuildVerbString(packet.type) ..
         radioPrefix .. messageColorString .. '"' .. message.body .. messageColorString .. '"'
-    return formatedMessage, message.body, message.length
+    return formatedMessage, message
 end
 
 function BuildChatMessage(fontSize, showTimestamp, rawMessage, time)
@@ -198,17 +198,29 @@ function CreateBubble(author, message, length)
     if ISChat.instance.bubble then
         ISChat.instance.bubble:delete()
     end
-    ISChat.instance.bubble = Bubble:new(getPlayer(), message, length)
+    local onlineUsers = getOnlinePlayers()
+    local authorObj = nil
+    for i = 0, onlineUsers:size() - 1 do
+        local user = onlineUsers:get(i)
+        if user:getUsername() == author then
+            authorObj = onlineUsers:get(i)
+            break
+        end
+    end
+    if authorObj == nil then
+        return
+    end
+    ISChat.instance.bubble = Bubble:new(authorObj, message, length, 10)
     ISChat.instance.bubble:initialise()
     ISChat.instance.bubble:paginate()
 end
 
 function ISChat.addCustomLineInChat(packet)
-    local message, rawMessage, rawLength = BuildMessageFromPacket(packet)
+    local formattedMessage, message = BuildMessageFromPacket(packet)
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
-    CreateBubble(packet.author, rawMessage, rawLength)
+    CreateBubble(packet.author, message['bubble'], message['length'])
     local time = Calendar.getInstance():getTimeInMillis()
-    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, message, time)
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
 
     if not ISChat.instance.chatText then
         ISChat.instance.chatText = ISChat.instance.defaultTab
@@ -219,7 +231,7 @@ function ISChat.addCustomLineInChat(packet)
     table.insert(chatText.chatTextRawLines,
         {
             time = time,
-            line = message,
+            line = formattedMessage,
         })
     if chatText.tabTitle ~= ISChat.instance.chatText.tabTitle then
         local alreadyExist = false
