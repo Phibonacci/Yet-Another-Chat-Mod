@@ -1,7 +1,11 @@
 local YacmClientRecvCommands = {}
 
-YacmClientRecvCommands['RangeMessage'] = function(args)
-    ISChat.addCustomLineInChat(args)
+YacmClientRecvCommands['ChatMessage'] = function(args)
+    ISChat.onMessagePacket(args)
+end
+
+YacmClientRecvCommands['Typing'] = function(args)
+    ISChat.onTypingPacket(args['author'], args['type'])
 end
 
 YacmClientRecvCommands['ServerPrint'] = function(args)

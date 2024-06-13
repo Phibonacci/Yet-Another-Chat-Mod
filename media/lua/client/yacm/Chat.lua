@@ -1,20 +1,29 @@
 require('yacm/parser/Parser')
 require('yacm/parser/StringBuilder')
 local Bubble = require('yacm/ui/Bubble')
+local TypingDots = require('yacm/ui/TypingDots')
 local YacmClientSendCommands = require('yacm/network/SendYacmClient.lua')
 
 ISChat.allChatStreams = {}
-ISChat.allChatStreams[1] = { name = 'whisper', command = '/whisper ', shortCommand = '/w ', tabID = 1, range = 30.0, zombieRange = 15.0 }
-ISChat.allChatStreams[2] = { name = 'low', command = '/low ', shortCommand = '/l ', tabID = 1, range = 30.0, zombieRange = 15.0 }
-ISChat.allChatStreams[3] = { name = 'say', command = '/say ', shortCommand = '/s ', tabID = 1, range = 30.0, zombieRange = 15.0 }
-ISChat.allChatStreams[4] = { name = 'yell', command = '/yell ', shortCommand = '/y ', tabID = 1, range = 60.0, zombieRange = 60.0 }
-ISChat.allChatStreams[5] = { name = 'pm', command = '/pm ', shortCommand = '/p ', tabID = 1, range = 30.0, zombieRange = 15.0 }
-ISChat.allChatStreams[6] = { name = 'faction', command = '/faction ', shortCommand = '/f ', tabID = 1, range = nil, zombieRange = nil }
-ISChat.allChatStreams[7] = { name = 'safehouse', command = '/safehouse ', shortCommand = '/sh ', tabID = 1, range = nil, zombieRange = nil }
-ISChat.allChatStreams[8] = { name = 'general', command = '/all ', shortCommand = nil, tabID = 1, range = nil, zombieRange = nil }
-ISChat.allChatStreams[9] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 2, range = nil, zombieRange = nil }
+ISChat.allChatStreams[1] = { name = 'whisper', command = '/whisper ', shortCommand = '/w ', tabID = 1 }
+ISChat.allChatStreams[2] = { name = 'low', command = '/low ', shortCommand = '/l ', tabID = 1 }
+ISChat.allChatStreams[3] = { name = 'say', command = '/say ', shortCommand = '/s ', tabID = 1 }
+ISChat.allChatStreams[4] = { name = 'yell', command = '/yell ', shortCommand = '/y ', tabID = 1 }
+ISChat.allChatStreams[5] = { name = 'pm', command = '/pm ', shortCommand = '/p ', tabID = 1 }
+ISChat.allChatStreams[6] = { name = 'faction', command = '/faction ', shortCommand = '/f ', tabID = 1 }
+ISChat.allChatStreams[7] = { name = 'safehouse', command = '/safehouse ', shortCommand = '/sh ', tabID = 1 }
+ISChat.allChatStreams[8] = { name = 'general', command = '/all ', shortCommand = '/g', tabID = 1 }
+ISChat.allChatStreams[9] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 2 }
+
+local function IsOnlySpacesOrEmpty(command)
+    local commandWithoutSpaces = command:gsub('%s+', '')
+    return #commandWithoutSpaces == 0
+end
 
 local function GetCommandFromMessage(command)
+    if IsOnlySpacesOrEmpty(command) then
+        return nil
+    end
     for _, stream in ipairs(ISChat.allChatStreams) do
         if luautils.stringStarts(command, stream.command) then
             return stream, stream.command
@@ -34,47 +43,36 @@ local function ProcessChatCommand(stream, command)
     if yacmCommand == nil then
         return false
     end
-    --local commandWithHeader = header .. command
     if stream.name == 'yell' then
-        processSayMessage(yacmCommand.bubble)
-        YacmClientSendCommands.sendRangeMessage(getPlayer():getUsername(), command, 'yell')
+        YacmClientSendCommands.sendChatMessage(command, 'yell')
     elseif stream.name == 'say' then
-        processSayMessage(yacmCommand.bubble)
-        YacmClientSendCommands.sendRangeMessage(getPlayer():getUsername(), command, 'say')
+        YacmClientSendCommands.sendChatMessage(command, 'say')
     elseif stream.name == 'low' then
-        processSayMessage(yacmCommand.bubble)
-        YacmClientSendCommands.sendRangeMessage(getPlayer():getUsername(), command, 'low')
+        YacmClientSendCommands.sendChatMessage(command, 'low')
     elseif stream.name == 'whisper' then
-        processSayMessage(yacmCommand.bubble)
-        YacmClientSendCommands.sendRangeMessage(getPlayer():getUsername(), command, 'whisper')
+        YacmClientSendCommands.sendChatMessage(command, 'whisper')
     elseif stream.name == 'pm' then
         local targetStart, targetEnd = command:find('^%s*"%a+%s?%a+"')
         if targetStart == nil then
             targetStart, targetEnd = command:find('^%s*%a+')
         end
-        if targetStart == nil or targetEnd + 2 >= #command or command[targetEnd + 1] ~= ' ' then
+        if targetStart == nil or targetEnd + 1 >= #command or command:sub(targetEnd + 1, targetEnd + 1) ~= ' ' then
             return false
         end
         local target = command:sub(targetStart, targetEnd)
-        local whisperMessage = ParseYacmMessage(command:sub(targetEnd + 2))['bubble']
-        processSayMessage(target .. ' ' .. whisperMessage)
-        YacmClientSendCommands.sendWhisperMessage(whisperMessage)
-        ISChat.instance.chatText.lastChatCommand = ISChat.instance.chatText.lastChatCommand .. username .. ' '
+        local pmBody = command:sub(targetEnd + 2)
+        YacmClientSendCommands.sendPrivateMessage(pmBody, target)
+        ISChat.instance.chatText.lastChatCommand = ISChat.instance.chatText.lastChatCommand .. target .. ' '
     elseif stream.name == 'faction' then
-        proceedFactionMessage(yacmCommand.bubble)
+        YacmClientSendCommands.sendChatMessage(command, 'faction')
     elseif stream.name == 'safehouse' then
-        processSafehouseMessage(yacmCommand.bubble)
+        YacmClientSendCommands.sendChatMessage(command, 'safehouse')
     elseif stream.name == 'admin' then
-        processAdminChatMessage(yacmCommand.bubble)
+        YacmClientSendCommands.sendChatMessage(command, 'admin')
     elseif stream.name == 'general' then
-        processGeneralMessage(yacmCommand.bubble)
+        YacmClientSendCommands.sendChatMessage(command, 'general')
     end
     return true
-end
-
-local function IsOnlySpacesOrEmpty(command)
-    local commandWithoutSpaces = command:gsub('%s+', '')
-    return #commandWithoutSpaces == 0
 end
 
 function ISChat:onCommandEntered()
@@ -93,7 +91,7 @@ function ISChat:onCommandEntered()
             showWrongChatTabMessage(chat.currentTabID - 1, stream.tabID - 1, commandName)
         else
             chat.chatText.lastChatCommand = commandName
-            if #commandName > 0 and #command > #commandName then
+            if #commandName > 0 and #command >= #commandName then
                 -- removing the command and trailing space '/command '
                 command = string.sub(command, #commandName + 1)
             end
@@ -145,6 +143,11 @@ local MessageTypeToColor = {
     ['say'] = { 255, 255, 255 },
     ['yell'] = { 230, 150, 150 },
     ['radio'] = { 144, 122, 176 },
+    ['pm'] = { 255, 149, 211 },
+    ['faction'] = { 100, 255, 66 },
+    ['safehouse'] = { 220, 255, 80 },
+    ['general'] = { 109, 111, 170 },
+    ['admin'] = { 230, 130, 111 },
 }
 
 function BuildColorFromMessageType(type)
@@ -159,7 +162,12 @@ local MessageTypeToVerb = {
     ['low'] = ' says quietly, ',
     ['say'] = ' says, ',
     ['yell'] = ' yells, ',
-    ['radio'] = ' over the radio ',
+    ['radio'] = ' over the radio, ',
+    ['pm'] = ' (private): ',
+    ['faction'] = ' (faction): ',
+    ['safehouse'] = ' (Safe House): ',
+    ['general'] = ' (General): ',
+    ['admin'] = ' (Admin): ',
 }
 
 function BuildVerbString(type)
@@ -167,6 +175,21 @@ function BuildVerbString(type)
         error('unknown message type "' .. type .. '"')
     end
     return MessageTypeToVerb[type]
+end
+
+local NoQuoteTypes = {
+    ['general'] = true,
+    ['safehouse'] = true,
+    ['faction'] = true,
+    ['admin'] = true,
+    ['pm'] = true,
+}
+
+function BuildQuote(type)
+    if NoQuoteTypes[type] == true then
+        return ''
+    end
+    return '"'
 end
 
 function BuildMessageFromPacket(packet)
@@ -177,11 +200,12 @@ function BuildMessageFromPacket(packet)
         radioPrefix = '(' .. string.format('%.1fMHz', packet.frequency / 1000) .. '), '
     end
     local messageColorString = BuildBracketColorString(messageColor)
+    local quote = BuildQuote(packet.type)
     local formatedMessage = BuildBracketColorString({ 109, 93, 199 }) ..
         packet.author ..
         BuildBracketColorString({ 150, 150, 150 }) ..
         BuildVerbString(packet.type) ..
-        radioPrefix .. messageColorString .. '"' .. message.body .. messageColorString .. '"'
+        radioPrefix .. messageColorString .. quote .. message.body .. messageColorString .. quote
     return formatedMessage, message
 end
 
@@ -195,8 +219,10 @@ function BuildChatMessage(fontSize, showTimestamp, rawMessage, time)
 end
 
 function CreateBubble(author, message, length)
-    if ISChat.instance.bubble then
-        ISChat.instance.bubble:delete()
+    ISChat.instance.bubble = ISChat.instance.bubble or {}
+    ISChat.instance.typingDots = ISChat.instance.typingDots or {}
+    if ISChat.instance.bubble[author] ~= nil then
+        ISChat.instance.bubble[author]:delete()
     end
     local onlineUsers = getOnlinePlayers()
     local authorObj = nil
@@ -210,12 +236,36 @@ function CreateBubble(author, message, length)
     if authorObj == nil then
         return
     end
-    ISChat.instance.bubble = Bubble:new(authorObj, message, length, 10)
-    ISChat.instance.bubble:initialise()
-    ISChat.instance.bubble:paginate()
+    local bubble = Bubble:new(authorObj, message, length, 10)
+    ISChat.instance.bubble[author] = bubble
+    if ISChat.instance.typingDots[author] ~= nil then
+        ISChat.instance.typingDots[author]:delete()
+        ISChat.instance.typingDots[author] = nil
+    end
 end
 
-function ISChat.addCustomLineInChat(packet)
+function ISChat.onTypingPacket(author, type)
+    ISChat.instance.typingDots = ISChat.instance.typingDots or {}
+    local onlineUsers = getOnlinePlayers()
+    local authorObj = nil
+    for i = 0, onlineUsers:size() - 1 do
+        local user = onlineUsers:get(i)
+        if user:getUsername() == author then
+            authorObj = onlineUsers:get(i)
+            break
+        end
+    end
+    if authorObj == nil then
+        return
+    end
+    if ISChat.instance.typingDots[author] then
+        ISChat.instance.typingDots[author]:refresh()
+    else
+        ISChat.instance.typingDots[author] = TypingDots:new(authorObj, 1000)
+    end
+end
+
+function ISChat.onMessagePacket(packet)
     local formattedMessage, message = BuildMessageFromPacket(packet)
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
     CreateBubble(packet.author, message['bubble'], message['length'])
@@ -281,7 +331,7 @@ ISChat.addLineInChat = function(message, tabID)
     if message:getRadioChannel() ~= -1 then
         local messageWithoutColorPrefix = message:getText():gsub('*%d+,%d+,%d+*', '')
         message:setText(messageWithoutColorPrefix)
-        ISChat.addCustomLineInChat({
+        ISChat.onMessagePacket({
             author = message:getAuthor(),
             message = messageWithoutColorPrefix,
             type = 'radio',
@@ -358,5 +408,69 @@ ISChat.addLineInChat = function(message, tabID)
     chatText:paginate()
     if scrolledToBottom then
         chatText:setYScroll(-10000)
+    end
+end
+
+function ISChat:render()
+    if ISChat.instance.bubble then
+        local indexToDelete = {}
+        for index, bubble in pairs(ISChat.instance.bubble) do
+            if bubble.dead then
+                bubble:delete()
+                table.insert(indexToDelete, index)
+            else
+                bubble:render()
+            end
+        end
+        for _, index in pairs(indexToDelete) do
+            ISChat.instance.bubble[index] = nil
+        end
+    end
+
+    if ISChat.instance.typingDots then
+        local indexToDelete = {}
+        for index, typingDots in pairs(ISChat.instance.typingDots) do
+            if typingDots.dead then
+                typingDots:delete()
+                table.insert(indexToDelete, index)
+            else
+                typingDots:render()
+            end
+        end
+        for _, index in pairs(indexToDelete) do
+            ISChat.instance.typingDots[index] = nil
+        end
+    end
+    ISCollapsableWindow.render(self)
+end
+
+function ISChat.onTextChange()
+    local t = ISChat.instance.textEntry
+    local internalText = t:getInternalText()
+    if ISChat.instance.chatText.lastChatCommand ~= nil then
+        for _, chat in ipairs(ISChat.instance.chatText.chatStreams) do
+            local prefix
+            if chat.command and luautils.stringStarts(internalText, chat.command) then
+                prefix = chat.command
+            elseif chat.shortCommand and luautils.stringStarts(internalText, chat.shortCommand) then
+                prefix = chat.shortCommand
+            end
+            if prefix then
+                if string.sub(t:getText(), prefix:len() + 1, t:getText():len()):len() <= 5
+                    and luautils.stringStarts(internalText, "/")
+                    and luautils.stringEnds(internalText, "/") then
+                    t:setText("/")
+                    return
+                end
+            end
+        end
+        if t:getText():len() <= 5 and luautils.stringEnds(internalText, "/") then
+            t:setText("/")
+            return
+        end
+    end
+    local stream = GetCommandFromMessage(internalText)
+    if stream ~= nil then
+        YacmClientSendCommands.sendTyping(getPlayer():getUsername(), stream['name'])
     end
 end

@@ -1,56 +1,25 @@
 require('yacm/parser/StringBuilder')
-Bubble = ISUIElement:derive("ISPanel")
+local coordinates = require('yacm/utils/coordinates')
+
+local Bubble = ISUIElement:derive("ISPanel")
 
 function Bubble:initialise()
     ISUIElement.initialise(self)
-    self:addToUIManager()
+    -- self:addToUIManager()
 end
 
 function Bubble:delete()
     self:removeFromUIManager()
 end
 
-function CalculateBubblePosition(player, width, height, verbose)
-    if verbose then
-        print('offsetX=>')
-        print(player:getOffSetXUI())
-        print('CameraOffX=>')
-        print(getCameraOffX())
-        print('IsoUtils.XToScreen')
-        print(IsoUtils.XToScreen(player:getX(), player:getY(), player:getZ(), player:getPlayerNum()))
-        print('isoToScreenX=>')
-        print(isoToScreenX(player:getPlayerNum(), player:getX(), player:getY(), player:getZ()))
-    end
-    local x, y = ISCoordConversion.ToScreen(player:getX(), player:getY(), player:getZ(), player:getPlayerNum())
-    local zoom = getCore():getZoom(player:getPlayerNum())
-    if verbose then
-        print('zoom: ' .. zoom)
-        print('x: ' .. x)
-        print('y: ' .. y)
-        print('width: ' .. width)
-        print('height: ' .. height)
-    end
-    x = x / zoom - width / 2
-    y = y / zoom - height
-
-    local bodyHeight = 120 / zoom
-
-    y = y - bodyHeight - 10
-    if verbose then
-        print('x/zoom: ' .. x)
-        print('y/zoom: ' .. y)
-    end
-    return x, y
-end
-
-function Bubble:prerender()
+function Bubble:render()
     if self.dead then
         return
     end
     local time = Calendar.getInstance():getTimeInMillis()
     local elapsedTime = time - self.startTime
     local delta = time - self.previousTime
-    local x, y = CalculateBubblePosition(self.player, self:getWidth(), self:getHeight(), false)
+    local x, y = coordinates.CenterTopOfPlayer(self.player, self:getWidth(), self:getHeight(), false)
     self:setX(x)
     self:setY(y)
     local bubbleTop = getTexture("media/ui/yacm/bubble/bubble-top.png")
@@ -106,13 +75,13 @@ function Bubble:prerender()
     self.previousTime = time
 end
 
-function Bubble:render()
+function Bubble:prerender()
 end
 
 function Bubble:new(player, text, length, timer)
     local width = math.min(length * 6.24, 162) + 40
     local height = 0
-    local x, y = CalculateBubblePosition(player, width, height, true)
+    local x, y = coordinates.CenterTopOfPlayer(player, width, height, true)
     Bubble.__index = self
     setmetatable(Bubble, { __index = ISRichTextPanel })
     local o = ISRichTextPanel:new(x, y, width, height)
@@ -131,6 +100,8 @@ function Bubble:new(player, text, length, timer)
     o.startTime = Calendar.getInstance():getTimeInMillis()
     o.previousTime = o.startTime
     o.dead = false
+    o:initialise()
+    o:paginate()
     return o
 end
 

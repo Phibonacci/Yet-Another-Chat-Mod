@@ -1,5 +1,78 @@
 VERSION = 1,
 
+option YetAnotherChatMod.WhisperEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_WhisperEnabled,
+}
+option YetAnotherChatMod.LowEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_LowEnabled,
+}
+option YetAnotherChatMod.SayEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_SayEnabled,
+}
+option YetAnotherChatMod.YellEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_YellEnabled,
+}
+option YetAnotherChatMod.PrivateMessageEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_PrivateMessageEnabled,
+}
+option YetAnotherChatMod.FactionMessageEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_FactionMessageEnabled,
+}
+option YetAnotherChatMod.SafeHouseMessageEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_SafeHouseMessageEnabled,
+}
+option YetAnotherChatMod.GeneralEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_GeneralEnabled,
+}
+option YetAnotherChatMod.AdminEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_AdminEnabled,
+}
+
 option YetAnotherChatMod.WhisperRange
 {
 	type = integer,
@@ -39,4 +112,46 @@ option YetAnotherChatMod.YellRange
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_YellRange,
+}
+
+
+option YetAnotherChatMod.WhisperZombieRange
+{
+	type = integer,
+	min = 1,
+	max = 10000,
+	default = 3,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_WhisperZombieRange,
+}
+option YetAnotherChatMod.LowZombieRange
+{
+	type = integer,
+	min = 1,
+	max = 10000,
+	default = 10,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_LowZombieRange,
+}
+option YetAnotherChatMod.SayZombieRange
+{
+	type = integer,
+	min = 1,
+	max = 10000,
+	default = 60,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_SayZombieRange,
+}
+option YetAnotherChatMod.YellZombieRange
+{
+	type = integer,
+	min = 1,
+	max = 10000,
+	default = 120,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_YellZombieRange,
 }
