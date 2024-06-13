@@ -114,6 +114,7 @@ local MessageTypeSettings = {
         ['range'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.AdminMessageEnabled,
         ['check'] = function(author, player, args)
+            ServerPrint(player, 'CHECK access: ' .. player:getAccessLevel())
             return player:getAccessLevel() == 'Admin'
         end,
     },

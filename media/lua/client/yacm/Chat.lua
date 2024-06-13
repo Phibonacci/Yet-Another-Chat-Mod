@@ -68,6 +68,7 @@ local function ProcessChatCommand(stream, command)
     elseif stream.name == 'safehouse' then
         YacmClientSendCommands.sendChatMessage(command, 'safehouse')
     elseif stream.name == 'admin' then
+        print('sending adming message')
         YacmClientSendCommands.sendChatMessage(command, 'admin')
     elseif stream.name == 'general' then
         YacmClientSendCommands.sendChatMessage(command, 'general')
@@ -277,6 +278,13 @@ function ISChat.onMessagePacket(packet)
         ISChat.instance:onActivateView()
     end
     local chatText = ISChat.instance.tabs[1]
+    if packet.type == 'admin' then
+        if ISChat.instance.tabs[2] ~= nil then
+            chatText = ISChat.instance.tabs[2]
+        else
+            return
+        end
+    end
     chatText.chatTextRawLines = chatText.chatTextRawLines or {}
     table.insert(chatText.chatTextRawLines,
         {
