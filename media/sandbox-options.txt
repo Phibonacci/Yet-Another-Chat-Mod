@@ -56,21 +56,21 @@ option YetAnotherChatMod.SafeHouseMessageEnabled
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_SafeHouseMessageEnabled,
 }
-option YetAnotherChatMod.GeneralEnabled
+option YetAnotherChatMod.GeneralMessageEnabled
 {
 	type = boolean,
 	default = true,
 
 	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_GeneralEnabled,
+	translation = YetAnotherChatMod_GeneralMessageEnabled,
 }
-option YetAnotherChatMod.AdminEnabled
+option YetAnotherChatMod.AdminMessageEnabled
 {
 	type = boolean,
 	default = true,
 
 	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_AdminEnabled,
+	translation = YetAnotherChatMod_AdminMessageEnabled,
 }
 
 option YetAnotherChatMod.WhisperRange
