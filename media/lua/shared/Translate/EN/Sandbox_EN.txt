@@ -1,0 +1,23 @@
+Sandbox_EN = {
+    Sandbox_YetAnotherChatMod_WhisperEnabled               = "Enable /whisper chat",
+    Sandbox_YetAnotherChatMod_LowEnabled                   = "Enable /low chat",
+    Sandbox_YetAnotherChatMod_SayEnabled                   = "Enable /say chat",
+    Sandbox_YetAnotherChatMod_YellEnabled                  = "Enable /yell chat",
+    Sandbox_YetAnotherChatMod_PrivateMessageEnabled        = "Enable /pm (private message) chat",
+    Sandbox_YetAnotherChatMod_FactionMessageEnabled        = "Enable /faction chat",
+    Sandbox_YetAnotherChatMod_SafeHouseMessageEnabled      = "Enable /safehouse chat",
+    Sandbox_YetAnotherChatMod_GeneralMessageEnabled        = "Enable /general chat",
+    Sandbox_YetAnotherChatMod_AdminMessageEnabled          = "Enable /admin chat",
+    Sandbox_YetAnotherChatMod_OutOfCharacterMessageEnabled = "Enable /ooc (Out Of Character) chat",
+
+    Sandbox_YetAnotherChatMod_WhisperRange                 = "/whisper chat range",
+    Sandbox_YetAnotherChatMod_LowRange                     = "/low chat range",
+    Sandbox_YetAnotherChatMod_SayRange                     = "/say chat range",
+    Sandbox_YetAnotherChatMod_YellRange                    = "/yell chat range",
+    Sandbox_YetAnotherChatMod_OutOfCharacterMessageRange   = "/ooc (Out Of Character) chat range",
+
+    Sandbox_YetAnotherChatMod_WhisperZombieRange           = "/whisper chat rombie range",
+    Sandbox_YetAnotherChatMod_LowZombieRange               = "/low chat rombie range",
+    Sandbox_YetAnotherChatMod_SayZombieRange               = "/say chat rombie range",
+    Sandbox_YetAnotherChatMod_YellZombieRange              = "/yell chat rombie range",
+}

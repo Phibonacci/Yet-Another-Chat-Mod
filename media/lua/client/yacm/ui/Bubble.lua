@@ -45,6 +45,7 @@ function Bubble:render()
         self:delete()
         return
     end
+
     local leftX = 0
     local leftW = math.floor(10 * 1 / scale)
     local rightW = math.floor(10 * 1 / scale)
