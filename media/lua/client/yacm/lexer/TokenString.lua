@@ -16,7 +16,7 @@ function TokenString:getLength()
     return #self.message
 end
 
-function TokenString:formatCustom(wrapWords)
+function TokenString:formatCustom(wrapWords, _, _, lengthLeft)
     if wrapWords == nil or wrapWords <= 0 then
         return self.message
     end
@@ -36,7 +36,12 @@ function TokenString:formatCustom(wrapWords)
         end
         newMessage = newMessage .. c
     end
-    return newMessage
+    if lengthLeft - #newMessage < 0 then
+        newMessage = newMessage:sub(1, lengthLeft)
+        newMessage = newMessage .. '...'
+    end
+    lengthLeft = lengthLeft - #newMessage
+    return newMessage, lengthLeft
 end
 
 function TokenString:formatBubble(keepTags)

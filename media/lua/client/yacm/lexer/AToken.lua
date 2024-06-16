@@ -19,10 +19,11 @@ function AToken:getLength()
     return length
 end
 
-function AToken:formatCustom(wrapWords, keepTags, rgbCall)
+function AToken:formatCustom(wrapWords, keepTags, rgbCall, lengthLeft)
     local colorObj = self:getColor()
     local color = rgbCall(colorObj)
     local newMessage = ''
+    local stop = false
     if keepTags and self.getTagSize() > 0 then
         newMessage = color .. self.getTag()
     end
@@ -30,12 +31,17 @@ function AToken:formatCustom(wrapWords, keepTags, rgbCall)
         if child.getName() == 'string' then
             newMessage = newMessage .. color
         end
-        newMessage = newMessage .. child:formatCustom(wrapWords, keepTags, rgbCall)
+        local subMessage, subLengthLeft = child:formatCustom(wrapWords, keepTags, rgbCall, lengthLeft)
+        lengthLeft = subLengthLeft
+        newMessage = newMessage .. subMessage
+        if lengthLeft ~= nil and lengthLeft <= 0 then
+            return newMessage, lengthLeft
+        end
     end
     if keepTags and self.getTagSize() > 0 then
         newMessage = newMessage .. self.getTag()
     end
-    return newMessage
+    return newMessage, lengthLeft
 end
 
 -- format for the old bubbles
@@ -43,8 +49,8 @@ function AToken:formatBubble(keepTags, wrapWords)
     return self:formatCustom(wrapWords, keepTags, BuildAsteriskColorString)
 end
 
-function AToken:format(keepTags, wrapWords)
-    return self:formatCustom(wrapWords, keepTags, BuildBracketColorString)
+function AToken:format(keepTags, wrapWords, maxBubbleLength)
+    return self:formatCustom(wrapWords, keepTags, BuildBracketColorString, maxBubbleLength)
 end
 
 function AToken:getColor()

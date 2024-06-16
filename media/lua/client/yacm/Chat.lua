@@ -312,7 +312,7 @@ end
 
 function BuildMessageFromPacket(packet)
     local messageColor = BuildColorFromMessageType(packet.type)
-    local message = ParseYacmMessage(packet.message, messageColor, 20)
+    local message = ParseYacmMessage(packet.message, messageColor, 20, 200)
     local radioPrefix = ''
     if packet.type == 'radio' then
         radioPrefix = '(' .. string.format('%.1fMHz', packet.frequency / 1000) .. '), '
