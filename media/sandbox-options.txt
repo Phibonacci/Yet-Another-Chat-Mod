@@ -72,6 +72,14 @@ option YetAnotherChatMod.AdminMessageEnabled
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_AdminMessageEnabled,
 }
+option YetAnotherChatMod.OutOfCharacterMessageEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_OutOfCharacterMessageEnabled,
+}
 
 option YetAnotherChatMod.WhisperRange
 {
@@ -113,7 +121,16 @@ option YetAnotherChatMod.YellRange
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_YellRange,
 }
+option YetAnotherChatMod.OutOfCharacterMessageRange
+{
+	type = integer,
+	min = 1,
+	max = 10000,
+	default = 120,
 
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_OutOfCharacterMessageRange,
+}
 
 option YetAnotherChatMod.WhisperZombieRange
 {

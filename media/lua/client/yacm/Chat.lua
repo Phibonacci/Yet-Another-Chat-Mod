@@ -4,16 +4,25 @@ local Bubble = require('yacm/ui/Bubble')
 local TypingDots = require('yacm/ui/TypingDots')
 local YacmClientSendCommands = require('yacm/network/SendYacmClient.lua')
 
-ISChat.allChatStreams = {}
-ISChat.allChatStreams[1] = { name = 'whisper', command = '/whisper ', shortCommand = '/w ', tabID = 1 }
-ISChat.allChatStreams[2] = { name = 'low', command = '/low ', shortCommand = '/l ', tabID = 1 }
-ISChat.allChatStreams[3] = { name = 'say', command = '/say ', shortCommand = '/s ', tabID = 1 }
-ISChat.allChatStreams[4] = { name = 'yell', command = '/yell ', shortCommand = '/y ', tabID = 1 }
-ISChat.allChatStreams[5] = { name = 'pm', command = '/pm ', shortCommand = '/p ', tabID = 1 }
-ISChat.allChatStreams[6] = { name = 'faction', command = '/faction ', shortCommand = '/f ', tabID = 1 }
-ISChat.allChatStreams[7] = { name = 'safehouse', command = '/safehouse ', shortCommand = '/sh ', tabID = 1 }
-ISChat.allChatStreams[8] = { name = 'general', command = '/all ', shortCommand = '/g', tabID = 1 }
-ISChat.allChatStreams[9] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 2 }
+
+ISChat.allChatStreams     = {}
+ISChat.allChatStreams[1]  = { name = 'say', command = '/say ', shortCommand = '/s ', tabID = 1 }
+ISChat.allChatStreams[2]  = { name = 'whisper', command = '/whisper ', shortCommand = '/w ', tabID = 1 }
+ISChat.allChatStreams[3]  = { name = 'low', command = '/low ', shortCommand = '/l ', tabID = 1 }
+ISChat.allChatStreams[4]  = { name = 'yell', command = '/yell ', shortCommand = '/y ', tabID = 1 }
+ISChat.allChatStreams[5]  = { name = 'pm', command = '/pm ', shortCommand = '/p ', tabID = 1 }
+ISChat.allChatStreams[6]  = { name = 'faction', command = '/faction ', shortCommand = '/f ', tabID = 1 }
+ISChat.allChatStreams[7]  = { name = 'safehouse', command = '/safehouse ', shortCommand = '/sh ', tabID = 1 }
+ISChat.allChatStreams[8]  = { name = 'general', command = '/all ', shortCommand = '/g', tabID = 1 }
+ISChat.allChatStreams[9]  = { name = 'ooc', command = '/ooc ', shortCommand = '/o ', tabID = 2 }
+ISChat.allChatStreams[10] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 3 }
+
+
+ISChat.defaultTabStream    = {}
+ISChat.defaultTabStream[1] = ISChat.allChatStreams[1]
+ISChat.defaultTabStream[2] = ISChat.allChatStreams[9]
+ISChat.defaultTabStream[3] = ISChat.allChatStreams[10]
+
 
 local function IsOnlySpacesOrEmpty(command)
     local commandWithoutSpaces = command:gsub('%s+', '')
@@ -37,6 +46,102 @@ local function GetCommandFromMessage(command)
     end
     return nil
 end
+
+
+local function AddTab(tabTitle, tabID)
+    local chat = ISChat.instance
+    local newTab = chat:createTab()
+    newTab.parent = chat
+    newTab.tabTitle = tabTitle
+    newTab.tabID = tabID
+    newTab.streamID = 1
+    newTab.chatStreams = {}
+    for _, stream in ipairs(ISChat.allChatStreams) do
+        if stream.tabID == tabID then
+            table.insert(newTab.chatStreams, stream)
+        end
+    end
+    newTab.lastChatCommand = newTab.chatStreams[newTab.streamID].command
+    newTab:setUIName("chat text panel with title '" .. tabTitle .. "'")
+    local pos = chat:calcTabPos()
+    local size = chat:calcTabSize()
+    newTab:setY(pos.y)
+    newTab:setHeight(size.height)
+    newTab:setWidth(size.width)
+    if chat.tabCnt == 0 then
+        chat:addChild(newTab)
+        chat.chatText = newTab
+        chat.chatText:setVisible(true)
+        chat.currentTabID = tabID
+    end
+    if chat.tabCnt == 1 then
+        chat.panel:setVisible(true)
+        chat.chatText:setY(pos.y)
+        chat.chatText:setHeight(size.height)
+        chat.chatText:setWidth(size.width)
+        chat:removeChild(chat.chatText)
+        chat.panel:addView(chat.chatText.tabTitle, chat.chatText)
+    end
+
+    if chat.tabCnt >= 1 then
+        chat.panel:addView(tabTitle, newTab)
+        chat.minimumWidth = chat.panel:getWidthOfAllTabs() + 2 * chat.inset
+    end
+    chat.tabs[tabID] = newTab
+    chat.tabCnt = chat.tabCnt + 1
+end
+
+local function InitTabs()
+    AddTab('General', 1)
+    AddTab('OCC', 2)
+end
+
+Events.OnChatWindowInit.Remove(ISChat.initChat)
+
+ISChat.initChat = function()
+    local instance = ISChat.instance
+    if instance.tabCnt == 1 then
+        instance.chatText:setVisible(false)
+        instance:removeChild(instance.chatText)
+        instance.chatText = nil
+    elseif instance.tabCnt > 1 then
+        instance.panel:setVisible(false)
+        for tabId, tab in pairs(instance.tabs) do
+            instance.panel:removeView(tab)
+        end
+    end
+    instance.tabCnt = 0
+    instance.tabs = {}
+    instance.currentTabID = 0
+    InitTabs()
+end
+
+Events.OnGameStart.Remove(ISChat.createChat)
+
+ISChat.createChat = function()
+    if not isClient() then
+        return
+    end
+    ISChat.chat = ISChat:new(15, getCore():getScreenHeight() - 400, 500, 200)
+    ISChat.chat:initialise()
+    ISChat.chat:addToUIManager()
+    ISChat.chat:setVisible(true)
+    ISChat.chat:bringToTop()
+    ISLayoutManager.RegisterWindow('chat', ISChat, ISChat.chat)
+
+    ISChat.instance:setVisible(true)
+
+    Events.OnAddMessage.Add(ISChat.addLineInChat)
+    Events.OnMouseDown.Add(ISChat.unfocusEvent)
+    Events.OnKeyPressed.Add(ISChat.onToggleChatBox)
+    Events.OnKeyKeepPressed.Add(ISChat.onKeyKeepPressed)
+    Events.OnTabAdded.Add(ISChat.onTabAdded)
+    Events.OnSetDefaultTab.Add(ISChat.onSetDefaultTab)
+    Events.OnTabRemoved.Add(ISChat.onTabRemoved)
+    Events.SwitchChatStream.Add(ISChat.onSwitchStream)
+end
+
+Events.OnGameStart.Add(ISChat.createChat)
 
 local function ProcessChatCommand(stream, command)
     local yacmCommand = ParseYacmMessage(command)
@@ -67,11 +172,12 @@ local function ProcessChatCommand(stream, command)
         YacmClientSendCommands.sendChatMessage(command, 'faction')
     elseif stream.name == 'safehouse' then
         YacmClientSendCommands.sendChatMessage(command, 'safehouse')
-    elseif stream.name == 'admin' then
-        print('sending adming message')
-        YacmClientSendCommands.sendChatMessage(command, 'admin')
     elseif stream.name == 'general' then
         YacmClientSendCommands.sendChatMessage(command, 'general')
+    elseif stream.name == 'admin' then
+        YacmClientSendCommands.sendChatMessage(command, 'admin')
+    elseif stream.name == 'ooc' then
+        YacmClientSendCommands.sendChatMessage(command, 'ooc')
     end
     return true
 end
@@ -115,7 +221,7 @@ end
 
 function ISChat:updateChatPrefixSettings()
     updateChatSettings(self.chatFont, self.showTimestamp, self.showTitle)
-    for tabNumber, chatText in ipairs(self.tabs) do
+    for tabNumber, chatText in pairs(self.tabs) do
         chatText.text = ""
         local newText = ""
         chatText.chatTextLines = {}
@@ -149,6 +255,7 @@ local MessageTypeToColor = {
     ['safehouse'] = { 220, 255, 80 },
     ['general'] = { 109, 111, 170 },
     ['admin'] = { 230, 130, 111 },
+    ['ooc'] = { 146, 255, 148 },
 }
 
 function BuildColorFromMessageType(type)
@@ -169,6 +276,7 @@ local MessageTypeToVerb = {
     ['safehouse'] = ' (Safe House): ',
     ['general'] = ' (General): ',
     ['admin'] = ' (Admin): ',
+    ['ooc'] = ' (OOC): ',
 }
 
 function BuildVerbString(type)
@@ -266,25 +374,33 @@ function ISChat.onTypingPacket(author, type)
     end
 end
 
+local function GetStreamFromType(type)
+    for _, stream in ipairs(ISChat.allChatStreams) do
+        if type == stream['name'] then
+            return stream
+        end
+    end
+    return nil
+end
+
 function ISChat.onMessagePacket(packet)
     local formattedMessage, message = BuildMessageFromPacket(packet)
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
     CreateBubble(packet.author, message['bubble'], message['length'])
     local time = Calendar.getInstance():getTimeInMillis()
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
+    local stream = GetStreamFromType(packet.type)
+    if stream == nil then
+        print('error: onMessagePacket: stream not found')
+        return
+    end
 
     if not ISChat.instance.chatText then
         ISChat.instance.chatText = ISChat.instance.defaultTab
         ISChat.instance:onActivateView()
     end
-    local chatText = ISChat.instance.tabs[1]
-    if packet.type == 'admin' then
-        if ISChat.instance.tabs[2] ~= nil then
-            chatText = ISChat.instance.tabs[2]
-        else
-            return
-        end
-    end
+    local chatText = ISChat.instance.tabs[stream['tabID']]
+
     chatText.chatTextRawLines = chatText.chatTextRawLines or {}
     table.insert(chatText.chatTextRawLines,
         {
@@ -293,7 +409,7 @@ function ISChat.onMessagePacket(packet)
         })
     if chatText.tabTitle ~= ISChat.instance.chatText.tabTitle then
         local alreadyExist = false
-        for _, blinkedTab in ipairs(ISChat.instance.panel.blinkTabs) do
+        for _, blinkedTab in pairs(ISChat.instance.panel.blinkTabs) do
             if blinkedTab == chatText.tabTitle then
                 alreadyExist = true
                 break
@@ -358,18 +474,19 @@ ISChat.addLineInChat = function(message, tabID)
     else
         return
     end
-    -- I'm pretty sure this "user" is not a global but an old variable that will always be nil
-    if user and ISChat.instance.mutedUsers[user] then return end
+
     if not ISChat.instance.chatText then
         ISChat.instance.chatText = ISChat.instance.defaultTab
         ISChat.instance:onActivateView()
     end
     local chatText
-    for i, tab in ipairs(ISChat.instance.tabs) do
-        if tab and tab.tabID == tabID then
-            chatText = tab
-            break
-        end
+    if tabID + 1 == 1 then
+        chatText = ISChat.instance.tabs[tabID + 1]
+    elseif tabID + 1 == 2 then
+        chatText = ISChat.instance.tabs[tabID + 1]
+    else
+        print('error: addLineInChat: unknown id ' .. tabID)
+        return
     end
     if chatText.tabTitle ~= ISChat.instance.chatText.tabTitle then
         local alreadyExist = false
@@ -482,3 +599,143 @@ function ISChat.onTextChange()
         YacmClientSendCommands.sendTyping(getPlayer():getUsername(), stream['name'])
     end
 end
+
+function ISChat:onActivateView()
+    if self.tabCnt > 1 then
+        self.chatText = self.panel.activeView.view
+    end
+    for i, blinkedTab in ipairs(self.panel.blinkTabs) do
+        if self.chatText.tabTitle and self.chatText.tabTitle == blinkedTab then
+            table.remove(self.panel.blinkTabs, i)
+            break
+        end
+    end
+end
+
+function ISChat:createTab()
+    local chatY = self:titleBarHeight() + self.btnHeight + 2 * self.inset
+    local chatHeight = self.textEntry:getY() - chatY
+    local chatText = ISRichTextPanel:new(0, chatY, self:getWidth(), chatHeight)
+    chatText.maxLines = 500
+    chatText:initialise()
+    chatText.background = false
+    chatText:setAnchorBottom(true)
+    chatText:setAnchorRight(true)
+    chatText:setAnchorTop(true)
+    chatText:setAnchorLeft(true)
+    chatText.log = {}
+    chatText.logIndex = 0
+    chatText.marginTop = 2
+    chatText.marginBottom = 0
+    chatText.onRightMouseUp = nil
+    chatText.render = ISChat.render_chatText
+    chatText.autosetheight = false
+    chatText:addScrollBars()
+    chatText.vscroll:setVisible(false)
+    chatText.vscroll.background = false
+    chatText:ignoreHeightChange()
+    chatText:setVisible(false)
+    chatText.chatTextLines = {}
+    chatText.chatMessages = {}
+    chatText.onRightMouseUp = ISChat.onRightMouseUp
+    chatText.onRightMouseDown = ISChat.onRightMouseDown
+    chatText.onMouseUp = ISChat.onMouseUp
+    chatText.onMouseDown = ISChat.onMouseDown
+    return chatText
+end
+
+function ISChat:render_chatText()
+    self:setStencilRect(0, 0, self.width, self.height)
+    ISRichTextPanel.render(self)
+    self:clearStencilRect()
+end
+
+ISChat.onTabAdded = function(tabTitle, tabID)
+    -- callback from the Java
+    -- 0 is General
+    -- 1 is Admin
+    if tabID == 1 then
+        AddTab('Admin', 3)
+    end
+end
+
+ISChat.onTabRemoved = function(tabTitle, tabID)
+    -- todo detect admin tab removed
+end
+
+ISChat.onSetDefaultTab = function(defaultTabTitle)
+end
+
+local function GetNextTabId(currentTabId)
+    local firstId = nil
+    local found = false
+    for tabId, _ in pairs(ISChat.instance.tabs) do
+        if firstId == nil then
+            firstId = tabId
+        end
+        if currentTabId == tabId then
+            found = true
+        elseif found == true then
+            return tabId
+        end
+    end
+    return firstId
+end
+
+ISChat.onToggleChatBox = function(key)
+    if ISChat.instance == nil then return; end
+    if key == getCore():getKey("Toggle chat") or key == getCore():getKey("Alt toggle chat") then
+        ISChat.instance:focus()
+    end
+    local chat = ISChat.instance;
+    if key == getCore():getKey("Switch chat stream") then
+        local nextTabId = GetNextTabId(chat.currentTabID)
+        if nextTabId == nil then
+            print('error: onToggleChatBox: next tab ID not found')
+            return
+        end
+        chat.currentTabID = nextTabId
+        chat.panel:activateView(chat.tabs[chat.currentTabID].tabTitle)
+        ISChat.instance:onActivateView()
+    end
+end
+
+local function GetTabFromOrder(tabIndex)
+    local index = 1
+    for tabId, tab in pairs(ISChat.instance.tabs) do
+        if tabIndex == index then
+            return tabId
+        end
+        index = index + 1
+    end
+    return nil
+end
+
+ISChat.ISTabPanelOnMouseDown = function(target, x, y)
+    if target:getMouseY() >= 0 and target:getMouseY() < target.tabHeight then
+        if target:getScrollButtonAtX(x) == "left" then
+            target:onMouseWheel(-1)
+            return true
+        end
+        if target:getScrollButtonAtX(x) == "right" then
+            target:onMouseWheel(1)
+            return true
+        end
+        local tabIndex = target:getTabIndexAtX(target:getMouseX())
+        local tabId = GetTabFromOrder(tabIndex)
+        if tabId ~= nil then
+            ISChat.instance.currentTabID = tabId
+        end
+        if tabIndex >= 1 and tabIndex <= #target.viewList and ISTabPanel.xMouse == -1 and ISTabPanel.yMouse == -1 then -- if we clicked on a tab, the first time we set up the x,y of the mouse, so next time we can see if the player moved the mouse (moved the tab)
+            ISTabPanel.xMouse = target:getMouseX();
+            ISTabPanel.yMouse = target:getMouseY();
+            target.draggingTab = tabIndex - 1;
+            local clickedTab = target.viewList[target.draggingTab + 1];
+            target:activateView(clickedTab.name)
+            return true
+        end
+    end
+    return false
+end
+
+Events.OnChatWindowInit.Add(ISChat.initChat)
