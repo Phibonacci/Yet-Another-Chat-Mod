@@ -1,4 +1,6 @@
 Sandbox_EN = {
+    Sandbox_YetAnotherChatMod                              = "Yet Another Chat Mod"
+
     Sandbox_YetAnotherChatMod_WhisperEnabled               = "Enable /whisper chat",
     Sandbox_YetAnotherChatMod_LowEnabled                   = "Enable /low chat",
     Sandbox_YetAnotherChatMod_SayEnabled                   = "Enable /say chat",

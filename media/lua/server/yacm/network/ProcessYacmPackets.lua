@@ -46,42 +46,52 @@ local MessageHasAccessByType = {
 local MessageTypeSettings = {
     ['whisper'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.WhisperRange,
+        ['zombieRange'] = SandboxVars.YetAnotherChatMod.WhisperZombieRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.WhisperEnabled,
     },
     ['low'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.LowRange,
+        ['zombieRange'] = SandboxVars.YetAnotherChatMod.LowZombieRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.LowEnabled,
     },
     ['say'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.SayRange,
+        ['zombieRange'] = SandboxVars.YetAnotherChatMod.SayZombieRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.SayEnabled,
     },
     ['yell'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.YellRange,
+        ['zombieRange'] = SandboxVars.YetAnotherChatMod.YellZombieRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.YellEnabled,
     },
     ['pm'] = {
         ['range'] = -1,
+        ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.PrivateMessageEnabled,
     },
     ['faction'] = {
         ['range'] = -1,
+        ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.FactionMessageEnabled,
     },
     ['safehouse'] = {
         ['range'] = -1,
+        ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.SafeHouseMessageEnabled,
     },
     ['general'] = {
         ['range'] = -1,
+        ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.GeneralMessageEnabled,
     },
     ['admin'] = {
         ['range'] = -1,
+        ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.AdminMessageEnabled,
     },
     ['ooc'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.OutOfCharacterMessageRange,
+        ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.OutOfCharacterMessageEnabled,
     },
 }

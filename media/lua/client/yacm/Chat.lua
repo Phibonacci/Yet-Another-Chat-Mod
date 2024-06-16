@@ -176,6 +176,15 @@ local function ProcessChatCommand(stream, command)
     elseif stream.name == 'ooc' then
         YacmClientSendCommands.sendChatMessage(command, 'ooc')
     end
+    if ISChat.instance.messageTypeSettings ~= nil
+        and ISChat.instance.messageTypeSettings[stream.name] ~= nil
+        and ISChat.instance.messageTypeSettings[stream.name]['zombieRange'] ~= nil
+        and ISChat.instance.messageTypeSettings[stream.name]['zombieRange'] ~= -1
+    then
+        local zombieRange = ISChat.instance.messageTypeSettings[stream.name]['zombieRange']
+        local square = getPlayer():getSquare()
+        addSound(getPlayer(), square:getX(), square:getY(), square:getZ(), zombieRange, zombieRange)
+    end
     return true
 end
 
