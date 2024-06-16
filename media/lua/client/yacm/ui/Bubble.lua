@@ -18,7 +18,6 @@ function Bubble:render()
     end
     local time = Calendar.getInstance():getTimeInMillis()
     local elapsedTime = time - self.startTime
-    local delta = time - self.previousTime
     local x, y = coordinates.CenterTopOfPlayer(self.player, self:getWidth(), self:getHeight(), false)
     self:setX(x)
     self:setY(y)
@@ -70,7 +69,12 @@ function Bubble:render()
     self:drawTextureScaled(bubbleBot, centerX, botY, centerW, botH, alpha)
     self:drawTexture(bubbleBotRight, rightX, botY, alpha)
 
-    self:drawTexture(bubbleArrow, centerX + centerW / 2 + 5, botY + 3 * botH / 4, alpha)
+    if x > 0 and y > 0
+        and x + self:getWidth() < getCore():getScreenWidth()
+        and y + self:getHeight() < getCore():getScreenHeight()
+    then
+        self:drawTexture(bubbleArrow, centerX + centerW / 2 + 5, botY + 3 * botH / 4, alpha)
+    end
 
     ISRichTextPanel.render(self)
     self.previousTime = time
