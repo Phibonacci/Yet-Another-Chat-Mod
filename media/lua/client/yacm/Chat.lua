@@ -385,18 +385,7 @@ local function GetStreamFromType(type)
     return nil
 end
 
-function ISChat.onMessagePacket(packet)
-    local formattedMessage, message = BuildMessageFromPacket(packet)
-    ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
-    CreateBubble(packet.author, message['bubble'], message['length'])
-    local time = Calendar.getInstance():getTimeInMillis()
-    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
-    local stream = GetStreamFromType(packet.type)
-    if stream == nil then
-        print('error: onMessagePacket: stream not found')
-        return
-    end
-
+local function AddMessageToTab(stream, time, formattedMessage, line)
     if not ISChat.instance.chatText then
         ISChat.instance.chatText = ISChat.instance.defaultTab
         ISChat.instance:onActivateView()
@@ -448,6 +437,37 @@ function ISChat.onMessagePacket(packet)
     if scrolledToBottom then
         chatText:setYScroll(-10000)
     end
+end
+
+function ISChat.onMessagePacket(packet)
+    local formattedMessage, message = BuildMessageFromPacket(packet)
+    ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
+    CreateBubble(packet.author, message['bubble'], message['length'])
+    local time = Calendar.getInstance():getTimeInMillis()
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
+    local stream = GetStreamFromType(packet.type)
+    if stream == nil then
+        print('error: onMessagePacket: stream not found')
+        return
+    end
+    AddMessageToTab(stream, time, formattedMessage, line)
+end
+
+function ISChat.onChatErrorPacket(type, message)
+    local time = Calendar.getInstance():getTimeInMillis()
+    local formattedMessage = BuildBracketColorString({ 255, 50, 50 }) ..
+        'error: ' .. BuildBracketColorString({ 255, 60, 60 }) .. message
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
+    local stream
+    if type == nil then
+        stream = ISChat.allChatStreams[1]
+    else
+        stream = GetStreamFromType(type)
+        if stream == nil then
+            stream = ISChat.allChatStreams[1]
+        end
+    end
+    AddMessageToTab(stream, time, formattedMessage, line)
 end
 
 -- TODO: try to clean this mess copied from the base game

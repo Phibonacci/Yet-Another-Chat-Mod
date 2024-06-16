@@ -6,6 +6,10 @@ local function ServerPrint(player, message)
     SendYacmServerCommand(player, 'ServerPrint', { message = message })
 end
 
+local function SendErrorMessage(player, type, message)
+    SendYacmServerCommand(player, 'ChatError', { message = message, type = type })
+end
+
 local function PlayersDistance(source, target)
     return source:DistTo(target:getX(), target:getY())
 end
@@ -108,71 +112,60 @@ end
 
 local ProcessYacmPackets = {}
 
-ProcessYacmPackets['ChatMessage'] = function(player, args)
+local function ProcessYacmPacket(player, args, packetType, sendError)
     if args.type == nil then
+        error('error: YACM: Received a message from "' .. player:getUsername() .. '" with no type')
         return
     end
     if args.type == "faction" then
         if Faction.getPlayerFaction(player) == nil then
+            if sendError then
+                SendErrorMessage(player, args.type, 'you are not part of a faction.')
+            end
             return
         end
     elseif args.type == 'safehouse' then
         if SafeHouse.hasSafehouse(player) == nil then
+            if sendError then
+                SendErrorMessage(player, args.type, 'you are not part of a safe house.')
+            end
             return
         end
     elseif args.type == 'pm' then
         if args.target == nil or GetConnectedPlayer(args.target) == nil then
+            if args.target ~= nil then
+                if sendError then
+                    SendErrorMessage(player, args.type, 'unknown player "' .. args.target .. '".')
+                end
+            else
+                error('error: YACM: Received a private message from "' .. player:getUsername() .. '" without a contact.')
+            end
             return
         end
     end
     local range = GetRangeForMessageType(args.type)
     if range == nil then
+        error('error: YACM: No range for message type "' .. args.type .. '".')
         return
     end
     local connectedPlayers = getOnlinePlayers()
     for i = 0, connectedPlayers:size() - 1 do
         local connectedPlayer = connectedPlayers:get(i)
-        local allowed = IsAllowed(player, connectedPlayer, args) and 'true' or 'false'
         if (connectedPlayer:getOnlineID() == player:getOnlineID()
                 or range == -1 or PlayersDistance(player, connectedPlayer) < range)
             and IsAllowed(player, connectedPlayer, args)
         then
-            SendYacmServerCommand(connectedPlayer, 'ChatMessage', args)
+            SendYacmServerCommand(connectedPlayer, packetType, args)
         end
     end
 end
 
+ProcessYacmPackets['ChatMessage'] = function(player, args)
+    ProcessYacmPacket(player, args, 'ChatMessage', true)
+end
+
 ProcessYacmPackets['Typing'] = function(player, args)
-    if args.type == nil then
-        return
-    end
-    if args.type == "faction" then
-        if Faction.getPlayerFaction(player) == nil then
-            return
-        end
-    elseif args.type == 'safehouse' then
-        if SafeHouse.hasSafehouse(player) == nil then
-            return
-        end
-    elseif args.type == 'pm' then
-        if args.target == nil or GetConnectedPlayer(args.target) == nil then
-            return
-        end
-    end
-    local range = GetRangeForMessageType(args.type)
-    if range == nil then
-        return
-    end
-    local connectedPlayers = getOnlinePlayers()
-    for i = 0, connectedPlayers:size() - 1 do
-        local connectedPlayer = connectedPlayers:get(i)
-        if (connectedPlayer:getOnlineID() == player:getOnlineID()
-                or range == -1 or PlayersDistance(player, connectedPlayer) < range)
-            and IsAllowed(player, connectedPlayer, args)
-        then
-            SendYacmServerCommand(connectedPlayer, 'Typing', args)
-        end
-    end
+    ProcessYacmPacket(player, args, 'Typing', false)
 end
 
 local function OnClientCommand(module, command, player, args)

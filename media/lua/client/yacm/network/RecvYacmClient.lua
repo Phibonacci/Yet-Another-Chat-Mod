@@ -8,6 +8,10 @@ YacmClientRecvCommands['Typing'] = function(args)
     ISChat.onTypingPacket(args['author'], args['type'])
 end
 
+YacmClientRecvCommands['ChatError'] = function(args)
+    ISChat.onChatErrorPacket(args['type'], args['message'])
+end
+
 YacmClientRecvCommands['ServerPrint'] = function(args)
     print('Server: ' .. args.message)
 end
