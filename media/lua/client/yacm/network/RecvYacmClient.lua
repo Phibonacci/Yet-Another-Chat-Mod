@@ -16,6 +16,11 @@ YacmClientRecvCommands['ServerPrint'] = function(args)
     print('Server: ' .. args.message)
 end
 
+YacmClientRecvCommands['SendSandboxVars'] = function(args)
+    print('RECEIVED SendSandboxVars')
+    ISChat.onRecvSandboxVars(args)
+end
+
 function OnServerCommand(module, command, args)
     if module == 'YACM' and YacmClientRecvCommands[command] then
         YacmClientRecvCommands[command](args)

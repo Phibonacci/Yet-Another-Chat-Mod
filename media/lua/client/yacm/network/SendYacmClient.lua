@@ -31,4 +31,9 @@ function YacmClientSendCommands.sendTyping(author, type)
     })
 end
 
+function YacmClientSendCommands.sendAskSandboxVars()
+    if not isClient() then return end
+    SendYacmClientCommand('AskSandboxVars', {})
+end
+
 return YacmClientSendCommands

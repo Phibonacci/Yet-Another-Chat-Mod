@@ -1,7 +1,8 @@
 require('yacm/parser/Parser')
 require('yacm/parser/StringBuilder')
-local Bubble = require('yacm/ui/Bubble')
-local TypingDots = require('yacm/ui/TypingDots')
+
+local Bubble                 = require('yacm/ui/Bubble')
+local TypingDots             = require('yacm/ui/TypingDots')
 local YacmClientSendCommands = require('yacm/network/SendYacmClient.lua')
 
 
@@ -10,18 +11,19 @@ ISChat.allChatStreams[1]  = { name = 'say', command = '/say ', shortCommand = '/
 ISChat.allChatStreams[2]  = { name = 'whisper', command = '/whisper ', shortCommand = '/w ', tabID = 1 }
 ISChat.allChatStreams[3]  = { name = 'low', command = '/low ', shortCommand = '/l ', tabID = 1 }
 ISChat.allChatStreams[4]  = { name = 'yell', command = '/yell ', shortCommand = '/y ', tabID = 1 }
-ISChat.allChatStreams[5]  = { name = 'pm', command = '/pm ', shortCommand = '/p ', tabID = 1 }
-ISChat.allChatStreams[6]  = { name = 'faction', command = '/faction ', shortCommand = '/f ', tabID = 1 }
-ISChat.allChatStreams[7]  = { name = 'safehouse', command = '/safehouse ', shortCommand = '/sh ', tabID = 1 }
-ISChat.allChatStreams[8]  = { name = 'general', command = '/all ', shortCommand = '/g', tabID = 1 }
-ISChat.allChatStreams[9]  = { name = 'ooc', command = '/ooc ', shortCommand = '/o ', tabID = 2 }
-ISChat.allChatStreams[10] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 3 }
+ISChat.allChatStreams[5]  = { name = 'faction', command = '/faction ', shortCommand = '/f ', tabID = 1 }
+ISChat.allChatStreams[6]  = { name = 'safehouse', command = '/safehouse ', shortCommand = '/sh ', tabID = 1 }
+ISChat.allChatStreams[7]  = { name = 'general', command = '/all ', shortCommand = '/g', tabID = 1 }
+ISChat.allChatStreams[8]  = { name = 'ooc', command = '/ooc ', shortCommand = '/o ', tabID = 2 }
+ISChat.allChatStreams[9]  = { name = 'pm', command = '/pm ', shortCommand = '/p ', tabID = 3 }
+ISChat.allChatStreams[10] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 4 }
 
 
 ISChat.defaultTabStream    = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1]
-ISChat.defaultTabStream[2] = ISChat.allChatStreams[9]
-ISChat.defaultTabStream[3] = ISChat.allChatStreams[10]
+ISChat.defaultTabStream[2] = ISChat.allChatStreams[8]
+ISChat.defaultTabStream[3] = ISChat.allChatStreams[9]
+ISChat.defaultTabStream[4] = ISChat.allChatStreams[10]
 
 
 local function IsOnlySpacesOrEmpty(command)
@@ -91,11 +93,6 @@ local function AddTab(tabTitle, tabID)
     chat.tabCnt = chat.tabCnt + 1
 end
 
-local function InitTabs()
-    AddTab('General', 1)
-    AddTab('OCC', 2)
-end
-
 Events.OnChatWindowInit.Remove(ISChat.initChat)
 
 ISChat.initChat = function()
@@ -113,7 +110,7 @@ ISChat.initChat = function()
     instance.tabCnt = 0
     instance.tabs = {}
     instance.currentTabID = 0
-    InitTabs()
+    AddTab('General', 1)
 end
 
 Events.OnGameStart.Remove(ISChat.createChat)
@@ -273,12 +270,12 @@ local MessageTypeToVerb = {
     ['say'] = ' says, ',
     ['yell'] = ' yells, ',
     ['radio'] = ' over the radio, ',
-    ['pm'] = ' (private): ',
+    ['pm'] = ': ',
     ['faction'] = ' (faction): ',
     ['safehouse'] = ' (Safe House): ',
     ['general'] = ' (General): ',
-    ['admin'] = ' (Admin): ',
-    ['ooc'] = ' (OOC): ',
+    ['admin'] = ': ',
+    ['ooc'] = ': ',
 }
 
 function BuildVerbString(type)
@@ -676,8 +673,8 @@ ISChat.onTabAdded = function(tabTitle, tabID)
     -- callback from the Java
     -- 0 is General
     -- 1 is Admin
-    if tabID == 1 then
-        AddTab('Admin', 3)
+    if tabID == 1 and ISChat.instance.messageTypeSettings ~= nil then
+        AddTab('Admin', 4)
     end
 end
 
@@ -690,11 +687,39 @@ local function GetFirstTab()
     end
 end
 
+local lastAskedDataTime = Calendar.getInstance():getTimeInMillis() - 2000
+local function AskServerData()
+    local delta = Calendar.getInstance():getTimeInMillis() - lastAskedDataTime
+    if delta < 2000 then
+        return
+    end
+    lastAskedDataTime = Calendar.getInstance():getTimeInMillis()
+
+    YacmClientSendCommands.sendAskSandboxVars()
+end
+
+ISChat.onRecvSandboxVars = function(messageTypeSettings)
+    if ISChat.instance.messageTypeSettings ~= nil then
+        return
+    end
+    Events.OnPostRender.Remove(AskServerData)
+    ISChat.instance.messageTypeSettings = messageTypeSettings
+    if messageTypeSettings['ooc']['enabled'] == true then
+        AddTab('Out Of Character', 2)
+    end
+    if messageTypeSettings['pm']['enabled'] == true then
+        AddTab('Private Message', 3)
+    end
+    if getPlayer():getAccessLevel() == 'Admin' then
+        AddTab('Admin', 4)
+    end
+end
+
 ISChat.onTabRemoved = function(tabTitle, tabID)
     if tabID ~= 1 then -- Admin tab is 1 in the Java code
         return
     end
-    tabID = 3 -- Admin tab is 3 in our table
+    tabID = 4 -- Admin tab is 3 in our table
     local foundTab
     for tabId, tab in pairs(ISChat.instance.tabs) do
         if tabID == tab.tabID then
@@ -811,3 +836,4 @@ ISChat.ISTabPanelOnMouseDown = function(target, x, y)
 end
 
 Events.OnChatWindowInit.Add(ISChat.initChat)
+Events.OnPostRender.Add(AskServerData)

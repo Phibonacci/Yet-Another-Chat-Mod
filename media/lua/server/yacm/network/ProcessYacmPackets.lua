@@ -14,70 +14,75 @@ local function PlayersDistance(source, target)
     return source:DistTo(target:getX(), target:getY())
 end
 
+local MessageHasAccessByType = {
+    ['whisper']   = function(author, player, args) return true end,
+    ['low']       = function(author, player, args) return true end,
+
+    ['say']       = function(author, player, args) return true end,
+
+    ['yell']      = function(author, player, args) return true end,
+    ['pm']        = function(author, player, args)
+        return args.target ~= nil and args.author ~= nil and
+            (player:getUsername() == args.target or player:getUsername() == args.author)
+    end,
+    ['faction']   = function(author, player, args)
+        local playerFaction = Faction.getPlayerFaction(player)
+        local authorFaction = Faction.getPlayerFaction(author)
+        return playerFaction ~= nil and authorFaction ~= nil and playerFaction:getName() == authorFaction:getName()
+    end,
+    ['safehouse'] = function(author, player, args)
+        local playerSafeHouse = SafeHouse.hasSafehouse(player)
+        local authorSafeHouse = SafeHouse.hasSafehouse(author)
+        return playerSafeHouse ~= nil and authorSafeHouse ~= nil and
+            playerSafeHouse:getTitle() == authorSafeHouse:getTitle()
+    end,
+    ['general']   = function(author, player, args) return true end,
+    ['admin']     = function(author, player, args)
+        return player:getAccessLevel() == 'Admin'
+    end,
+    ['ooc']       = function(author, player, args) return true end,
+}
+
 local MessageTypeSettings = {
     ['whisper'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.WhisperRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.WhisperEnabled,
-        ['check'] = function(author, player, args) return true end,
     },
     ['low'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.LowRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.LowEnabled,
-        ['check'] = function(author, player, args) return true end,
     },
     ['say'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.SayRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.SayEnabled,
-        ['check'] = function(author, player, args) return true end,
     },
     ['yell'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.YellRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.YellEnabled,
-        ['check'] = function(author, player, args) return true end,
     },
     ['pm'] = {
         ['range'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.PrivateMessageEnabled,
-        ['check'] = function(author, player, args)
-            return args.target ~= nil and args.author ~= nil and
-                (player:getUsername() == args.target or player:getUsername() == args.author)
-        end,
     },
     ['faction'] = {
         ['range'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.FactionMessageEnabled,
-        ['check'] = function(author, player, args)
-            local playerFaction = Faction.getPlayerFaction(player)
-            local authorFaction = Faction.getPlayerFaction(author)
-            return playerFaction ~= nil and authorFaction ~= nil and playerFaction:getName() == authorFaction:getName()
-        end,
     },
     ['safehouse'] = {
         ['range'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.SafeHouseMessageEnabled,
-        ['check'] = function(author, player, args)
-            local playerSafeHouse = SafeHouse.hasSafehouse(player)
-            local authorSafeHouse = SafeHouse.hasSafehouse(author)
-            return playerSafeHouse ~= nil and authorSafeHouse ~= nil and
-                playerSafeHouse:getTitle() == authorSafeHouse:getTitle()
-        end,
     },
     ['general'] = {
         ['range'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.GeneralMessageEnabled,
-        ['check'] = function(author, player, args) return true end,
     },
     ['admin'] = {
         ['range'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.AdminMessageEnabled,
-        ['check'] = function(author, player, args)
-            return player:getAccessLevel() == 'Admin'
-        end,
     },
     ['ooc'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.OutOfCharacterMessageRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.OutOfCharacterMessageEnabled,
-        ['check'] = function(author, player, args) return true end,
     },
 }
 
@@ -104,10 +109,11 @@ end
 local function IsAllowed(author, player, args)
     if args.type == nil or MessageTypeSettings[args.type] == nil
         or MessageTypeSettings[args.type]['enabled'] ~= true
+        or MessageHasAccessByType[args.type] == nil
     then
         return false
     end
-    return MessageTypeSettings[args.type]['check'](author, player, args)
+    return MessageHasAccessByType[args.type](author, player, args)
 end
 
 local ProcessYacmPackets = {}
@@ -168,7 +174,13 @@ ProcessYacmPackets['Typing'] = function(player, args)
     ProcessYacmPacket(player, args, 'Typing', false)
 end
 
+ProcessYacmPackets['AskSandboxVars'] = function(player, args)
+    print('RECEIVED AskSandboxVars')
+    SendYacmServerCommand(player, 'SendSandboxVars', MessageTypeSettings)
+end
+
 local function OnClientCommand(module, command, player, args)
+    print('PACKET RECEIVED: ' .. module .. ' ' .. command)
     if module == 'YACM' and ProcessYacmPackets[command] then
         ProcessYacmPackets[command](player, args)
     end
