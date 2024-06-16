@@ -195,7 +195,9 @@ function ISChat:onCommandEntered()
     if stream then -- chat message
         if chat.currentTabID ~= stream.tabID then
             -- from one-based to zero-based
-            showWrongChatTabMessage(chat.currentTabID - 1, stream.tabID - 1, commandName)
+            print('user error: tried to send command ' ..
+                stream['name'] .. ' from TabID ' .. chat.currentTabID ..
+                ' but TabID ' .. stream.tabID .. ' was expected')
         else
             chat.chatText.lastChatCommand = commandName
             if #commandName > 0 and #command >= #commandName then
@@ -659,8 +661,57 @@ ISChat.onTabAdded = function(tabTitle, tabID)
     end
 end
 
+local function GetFirstTab()
+    if ISChat.instance.tabs == nil then
+        return nil
+    end
+    for tabId, tab in pairs(ISChat.instance.tabs) do
+        return tabId, tab
+    end
+end
+
 ISChat.onTabRemoved = function(tabTitle, tabID)
-    -- todo detect admin tab removed
+    if tabID ~= 1 then -- Admin tab is 1 in the Java code
+        return
+    end
+    tabID = 3 -- Admin tab is 3 in our table
+    local foundTab
+    for tabId, tab in pairs(ISChat.instance.tabs) do
+        if tabID == tab.tabID then
+            foundTab = tab
+            table.remove(ISChat.instance.tabs, tabId)
+            break
+        end
+    end
+    if ISChat.instance.tabCnt > 1 then
+        for i, blinkedTab in ipairs(ISChat.instance.panel.blinkTabs) do
+            if tabTitle == blinkedTab then
+                table.remove(ISChat.instance.panel.blinkTabs, i)
+                break
+            end
+        end
+        ISChat.instance.panel:removeView(foundTab)
+        ISChat.instance.minimumWidth = ISChat.instance.panel:getWidthOfAllTabs() + 2 * ISChat.instance.inset;
+    end
+    ISChat.instance.tabCnt = ISChat.instance.tabCnt - 1
+    local firstTabId, firstTab = GetFirstTab()
+    if firstTabId == nil then
+        return
+    end
+    if ISChat.instance.currentTabID == tabID then
+        ISChat.instance.currentTabID = firstTabId
+        local chat = ISChat.instance
+        chat.panel:activateView(chat.tabs[chat.currentTabID].tabTitle)
+    end
+    if ISChat.instance.tabCnt == 1 then
+        local lastTab = firstTab
+        ISChat.instance.panel:setVisible(false)
+        ISChat.instance.panel:removeView(lastTab)
+        ISChat.instance.chatText = lastTab
+        ISChat.instance:addChild(ISChat.instance.chatText)
+        ISChat.instance.chatText:setVisible(true)
+    end
+    ISChat.instance:onActivateView();
 end
 
 ISChat.onSetDefaultTab = function(defaultTabTitle)
@@ -726,7 +777,8 @@ ISChat.ISTabPanelOnMouseDown = function(target, x, y)
         if tabId ~= nil then
             ISChat.instance.currentTabID = tabId
         end
-        if tabIndex >= 1 and tabIndex <= #target.viewList and ISTabPanel.xMouse == -1 and ISTabPanel.yMouse == -1 then -- if we clicked on a tab, the first time we set up the x,y of the mouse, so next time we can see if the player moved the mouse (moved the tab)
+        -- if we clicked on a tab, the first time we set up the x,y of the mouse, so next time we can see if the player moved the mouse (moved the tab)
+        if tabIndex >= 1 and tabIndex <= #target.viewList and ISTabPanel.xMouse == -1 and ISTabPanel.yMouse == -1 then
             ISTabPanel.xMouse = target:getMouseX();
             ISTabPanel.yMouse = target:getMouseY();
             target.draggingTab = tabIndex - 1;
