@@ -26,7 +26,6 @@ function TypingDots:render()
         texture = typingDots3
     end
     local x, y = coordinates.CenterTopOfPlayer(self.player, 20, 6)
-    print(x .. ', ' .. y)
     self:setX(x)
     self:setY(y - 6)
     self:drawTexture(texture, 0, 0, 1)

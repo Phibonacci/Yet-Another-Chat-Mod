@@ -30,7 +30,6 @@ local function ListTags(message)
         for _, tag in pairs(tags) do
             local tagObj = GetTag(message, index, tag)
             if tagObj ~= nil then
-                print('tag found "' .. tagObj.tag .. '" at ' .. tagObj.first .. ', ' .. tagObj.last)
                 table.insert(list, tagObj)
                 index = tagObj.last + 1
                 found = true
