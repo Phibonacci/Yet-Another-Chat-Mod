@@ -291,6 +291,7 @@ local NoQuoteTypes = {
     ['faction'] = true,
     ['admin'] = true,
     ['pm'] = true,
+    ['ooc'] = true,
 }
 
 function BuildQuote(type)
