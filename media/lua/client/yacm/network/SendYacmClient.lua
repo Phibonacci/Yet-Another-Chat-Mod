@@ -4,30 +4,33 @@ function SendYacmClientCommand(commandName, args)
     sendClientCommand('YACM', commandName, args)
 end
 
-function YacmClientSendCommands.sendChatMessage(message, type)
+function YacmClientSendCommands.sendChatMessage(message, playerColor, type)
     if not isClient() then return end
     SendYacmClientCommand('ChatMessage', {
         author = getPlayer():getUsername(),
         message = message,
         type = type,
+        color = playerColor,
     })
 end
 
-function YacmClientSendCommands.sendPrivateMessage(message, target)
+function YacmClientSendCommands.sendPrivateMessage(message, playerColor, target)
     if not isClient() then return end
     SendYacmClientCommand('ChatMessage', {
         author = getPlayer():getUsername(),
         message = message,
         type = 'pm',
         target = target,
+        color = playerColor,
     })
 end
 
-function YacmClientSendCommands.sendTyping(author, type)
+function YacmClientSendCommands.sendTyping(author, playerColor, type)
     if not isClient() then return end
     SendYacmClientCommand('Typing', {
         author = author,
-        type = type
+        type = type,
+        color = playerColor,
     })
 end
 

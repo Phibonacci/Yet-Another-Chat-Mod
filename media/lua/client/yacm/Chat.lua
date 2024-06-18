@@ -19,6 +19,9 @@ ISChat.allChatStreams[9]  = { name = 'pm', command = '/pm ', shortCommand = '/p 
 ISChat.allChatStreams[10] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 4 }
 
 
+ISChat.yacmCommand         = {}
+ISChat.yacmCommand[1]      = { name = 'color', command = '/color', shortCommand = nil }
+
 ISChat.defaultTabStream    = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1]
 ISChat.defaultTabStream[2] = ISChat.allChatStreams[8]
@@ -32,6 +35,10 @@ local function IsOnlySpacesOrEmpty(command)
 end
 
 local function GetCommandFromMessage(command)
+    if not luautils.stringStarts(command, '/') then
+        local defaultStream = ISChat.defaultTabStream[ISChat.instance.currentTabID]
+        return defaultStream, ''
+    end
     if IsOnlySpacesOrEmpty(command) then
         return nil
     end
@@ -42,13 +49,25 @@ local function GetCommandFromMessage(command)
             return stream, stream.shortCommand
         end
     end
-    if not luautils.stringStarts(command, '/') then
-        local defaultStream = ISChat.defaultTabStream[ISChat.instance.currentTabID]
-        return defaultStream, ''
-    end
     return nil
 end
 
+local function GetYacmCommandFromMessage(command)
+    if not luautils.stringStarts(command, '/') then
+        return nil
+    end
+    if IsOnlySpacesOrEmpty(command) then
+        return nil
+    end
+    for _, stream in ipairs(ISChat.yacmCommand) do
+        if luautils.stringStarts(command, stream.command) then
+            return stream, stream.command
+        elseif stream.shortCommand and luautils.stringStarts(command, stream.shortCommand) then
+            return stream, stream.shortCommand
+        end
+    end
+    return nil
+end
 
 local function AddTab(tabTitle, tabID)
     local chat = ISChat.instance
@@ -95,6 +114,28 @@ end
 
 Events.OnChatWindowInit.Remove(ISChat.initChat)
 
+local function GetRandomInt(min, max)
+    return math.floor(ZombRandFloat(min, max))
+end
+
+local function GenerateRandomColor()
+    return { 255 - GetRandomInt(1, 255), 255 - GetRandomInt(1, 255), 255 - GetRandomInt(1, 255), }
+end
+
+local function SetPlayerColor(color)
+    ISChat.instance.yacmModData['playerColor'] = color
+    ModData.add('yacm', ISChat.instance.yacmModData)
+end
+
+local function InitGlobalModData()
+    local yacmModData = ModData.getOrCreate("yacm")
+    if yacmModData['playerColor'] == nil then
+        yacmModData['playerColor'] = GenerateRandomColor()
+        ModData.add('yacm', yacmModData)
+    end
+    ISChat.instance.yacmModData = yacmModData
+end
+
 ISChat.initChat = function()
     local instance = ISChat.instance
     if instance.tabCnt == 1 then
@@ -110,6 +151,7 @@ ISChat.initChat = function()
     instance.tabCnt = 0
     instance.tabs = {}
     instance.currentTabID = 0
+    InitGlobalModData()
     AddTab('General', 1)
 end
 
@@ -142,17 +184,18 @@ Events.OnGameStart.Add(ISChat.createChat)
 
 local function ProcessChatCommand(stream, command)
     local yacmCommand = ParseYacmMessage(command)
+    local playerColor = ISChat.instance.yacmModData['playerColor']
     if yacmCommand == nil then
         return false
     end
     if stream.name == 'yell' then
-        YacmClientSendCommands.sendChatMessage(command, 'yell')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'yell')
     elseif stream.name == 'say' then
-        YacmClientSendCommands.sendChatMessage(command, 'say')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'say')
     elseif stream.name == 'low' then
-        YacmClientSendCommands.sendChatMessage(command, 'low')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'low')
     elseif stream.name == 'whisper' then
-        YacmClientSendCommands.sendChatMessage(command, 'whisper')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'whisper')
     elseif stream.name == 'pm' then
         local targetStart, targetEnd = command:find('^%s*"%a+%s?%a+"')
         if targetStart == nil then
@@ -163,18 +206,20 @@ local function ProcessChatCommand(stream, command)
         end
         local target = command:sub(targetStart, targetEnd)
         local pmBody = command:sub(targetEnd + 2)
-        YacmClientSendCommands.sendPrivateMessage(pmBody, target)
+        YacmClientSendCommands.sendPrivateMessage(pmBody, playerColor, target)
         ISChat.instance.chatText.lastChatCommand = ISChat.instance.chatText.lastChatCommand .. target .. ' '
     elseif stream.name == 'faction' then
-        YacmClientSendCommands.sendChatMessage(command, 'faction')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'faction')
     elseif stream.name == 'safehouse' then
-        YacmClientSendCommands.sendChatMessage(command, 'safehouse')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'safehouse')
     elseif stream.name == 'general' then
-        YacmClientSendCommands.sendChatMessage(command, 'general')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'general')
     elseif stream.name == 'admin' then
-        YacmClientSendCommands.sendChatMessage(command, 'admin')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'admin')
     elseif stream.name == 'ooc' then
-        YacmClientSendCommands.sendChatMessage(command, 'ooc')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'ooc')
+    else
+        return false
     end
     if ISChat.instance.messageTypeSettings ~= nil
         and ISChat.instance.messageTypeSettings[stream.name] ~= nil
@@ -188,6 +233,56 @@ local function ProcessChatCommand(stream, command)
     return true
 end
 
+local function RemoveLeadingSpaces(text)
+    local trailingCount = 0
+    for index = 1, #text do
+        if text:byte(index) ~= 32 then -- 32 is ASCII code for space ' '
+            break
+        end
+        trailingCount = trailingCount + 1
+    end
+    return text:sub(trailingCount)
+end
+
+local function GetArgumentsFromMessage(yacmCommand, message)
+    if #message < #yacmCommand['command'] + 2 then -- command + space + chars
+        return nil
+    end
+    local arguments = message:sub(#yacmCommand['command'] + 2)
+    arguments = RemoveLeadingSpaces(arguments)
+    if #arguments == 0 then
+        return nil
+    end
+    return arguments
+end
+
+local function GetRGBFromString(arguments)
+    for r, g, b in arguments:gmatch('(%d+), *(%d+), *(%d+)') do
+        if r == nil or g == nil or b == nil then
+            return nil
+        end
+        return { tonumber(r), tonumber(g), tonumber(b) }
+    end
+end
+
+local function ProcessColorCommand(arguments)
+    local color = GetRGBFromString(arguments)
+    if color == nil then
+        return false
+    end
+    SetPlayerColor(color)
+end
+
+local function ProcessYacmCommand(yacmCommand, message)
+    local arguments = GetArgumentsFromMessage(yacmCommand, message)
+    if yacmCommand['name'] == 'color' then
+        if arguments == nil or ProcessColorCommand(arguments) == false then
+            ISChat.sendErrorToCurrentTab('color command expects the format: /color 255, 255, 255')
+            return false
+        end
+    end
+end
+
 function ISChat:onCommandEntered()
     local command = ISChat.instance.textEntry:getText()
     local chat = ISChat.instance
@@ -198,6 +293,7 @@ function ISChat:onCommandEntered()
     end
 
     local stream, commandName = GetCommandFromMessage(command)
+    local yacmCommand = GetYacmCommandFromMessage(command)
     if stream then -- chat message
         if chat.currentTabID ~= stream.tabID then
             -- from one-based to zero-based
@@ -218,6 +314,8 @@ function ISChat:onCommandEntered()
             end
             chat:logChatCommand(command)
         end
+    elseif yacmCommand ~= nil then
+        ProcessYacmCommand(yacmCommand, command)
     elseif luautils.stringStarts(command, '/') then -- server command
         SendCommandToServer(command)
         chat:logChatCommand(command)
@@ -319,7 +417,7 @@ function BuildMessageFromPacket(packet)
     end
     local messageColorString = BuildBracketColorString(messageColor)
     local quote = BuildQuote(packet.type)
-    local formatedMessage = BuildBracketColorString({ 109, 93, 199 }) ..
+    local formatedMessage = BuildBracketColorString(packet['color']) ..
         packet.author ..
         BuildBracketColorString({ 150, 150, 150 }) ..
         BuildVerbString(packet.type) ..
@@ -392,12 +490,12 @@ local function GetStreamFromType(type)
     return nil
 end
 
-local function AddMessageToTab(stream, time, formattedMessage, line)
+local function AddMessageToTab(tabID, time, formattedMessage, line)
     if not ISChat.instance.chatText then
         ISChat.instance.chatText = ISChat.instance.defaultTab
         ISChat.instance:onActivateView()
     end
-    local chatText = ISChat.instance.tabs[stream['tabID']]
+    local chatText = ISChat.instance.tabs[tabID]
 
     chatText.chatTextRawLines = chatText.chatTextRawLines or {}
     table.insert(chatText.chatTextRawLines,
@@ -457,7 +555,16 @@ function ISChat.onMessagePacket(packet)
         print('error: onMessagePacket: stream not found')
         return
     end
-    AddMessageToTab(stream, time, formattedMessage, line)
+    AddMessageToTab(stream['tabID'], time, formattedMessage, line)
+end
+
+function ISChat.sendErrorToCurrentTab(message)
+    local time = Calendar.getInstance():getTimeInMillis()
+    local formattedMessage = BuildBracketColorString({ 255, 40, 40 }) ..
+        'error: ' .. BuildBracketColorString({ 255, 70, 70 }) .. message
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
+    local tabID = ISChat.defaultTabStream[ISChat.instance.currentTabID]['tabID']
+    AddMessageToTab(tabID, time, formattedMessage, line)
 end
 
 function ISChat.onChatErrorPacket(type, message)
@@ -467,14 +574,14 @@ function ISChat.onChatErrorPacket(type, message)
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
     local stream
     if type == nil then
-        stream = ISChat.allChatStreams[1]
+        stream = ISChat.defaultTabStream[ISChat.instance.currentTabID]
     else
         stream = GetStreamFromType(type)
         if stream == nil then
-            stream = ISChat.allChatStreams[1]
+            stream = ISChat.defaultTabStream[ISChat.instance.currentTabID]
         end
     end
-    AddMessageToTab(stream, time, formattedMessage, line)
+    AddMessageToTab(stream['tabID'], time, formattedMessage, line)
 end
 
 -- TODO: try to clean this mess copied from the base game

@@ -17,7 +17,6 @@ YacmClientRecvCommands['ServerPrint'] = function(args)
 end
 
 YacmClientRecvCommands['SendSandboxVars'] = function(args)
-    print('RECEIVED SendSandboxVars')
     ISChat.onRecvSandboxVars(args)
 end
 
