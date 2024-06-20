@@ -23,7 +23,7 @@ local MessageHasAccessByType = {
     ['yell']      = function(author, player, args) return true end,
     ['pm']        = function(author, player, args)
         return args.target ~= nil and args.author ~= nil and
-            (player:getUsername() == args.target or player:getUsername() == args.author)
+            (player:getUsername():lower() == args.target:lower() or player:getUsername():lower() == args.author:lower())
     end,
     ['faction']   = function(author, player, args)
         local playerFaction = Faction.getPlayerFaction(player)
@@ -136,7 +136,7 @@ local function GetConnectedPlayer(username)
     local connectedPlayers = getOnlinePlayers()
     for i = 0, connectedPlayers:size() - 1 do
         local connectedPlayer = connectedPlayers:get(i)
-        if connectedPlayer:getUsername() == username then
+        if connectedPlayer:getUsername():lower() == username:lower() then
             return connectedPlayer
         end
     end
