@@ -572,6 +572,9 @@ end
 
 function ISChat.onMessagePacket(packet)
     local formattedMessage, message = BuildMessageFromPacket(packet)
+    if packet.type == 'pm' and packet.target:lower() == getPlayer():getUsername():lower() then
+        ISChat.instance.lastPrivateMessageAuthor = packet.author
+    end
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
     CreateBubble(packet.author, message['bubble'], message['rawMessage'])
     local time = Calendar.getInstance():getTimeInMillis()
@@ -779,6 +782,10 @@ function ISChat.onTextChange()
             ISChat.instance.lastStream = nil
             return
         end
+    end
+    if internalText == '/r' and ISChat.instance.lastPrivateMessageAuthor ~= nil then
+        t:setText('/pm ' .. ISChat.instance.lastPrivateMessageAuthor .. ' ')
+        return
     end
     local stream = GetCommandFromMessage(internalText)
     if stream ~= nil then
