@@ -31,10 +31,6 @@ function TypingDots:render()
     self:drawTexture(texture, 0, 0, 1)
 end
 
-function TypingDots:delete()
-    self:removeFromUIManager()
-end
-
 function TypingDots:refresh()
     self.startingTime = Calendar.getInstance():getTimeInMillis()
 end
@@ -51,10 +47,9 @@ function TypingDots:new(player, timer)
     o.lastStepTime = time
     o.stepTime = 250
     o.step = 1
-    o.timer = timer
+    o.timer = timer * 1000
     o.dead = false
     o:instantiate()
-    -- o:addToUIManager()
     return o
 end
 

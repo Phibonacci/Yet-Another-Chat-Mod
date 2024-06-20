@@ -25,12 +25,11 @@ function YacmClientSendCommands.sendPrivateMessage(message, playerColor, target)
     })
 end
 
-function YacmClientSendCommands.sendTyping(author, playerColor, type)
+function YacmClientSendCommands.sendTyping(author, type)
     if not isClient() then return end
     SendYacmClientCommand('Typing', {
         author = author,
         type = type,
-        color = playerColor,
     })
 end
 

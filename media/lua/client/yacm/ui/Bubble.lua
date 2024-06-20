@@ -1,16 +1,7 @@
 require('yacm/parser/StringBuilder')
 local coordinates = require('yacm/utils/coordinates')
 
-local Bubble = ISUIElement:derive("ISPanel")
-
-function Bubble:initialise()
-    ISUIElement.initialise(self)
-    -- self:addToUIManager()
-end
-
-function Bubble:delete()
-    self:removeFromUIManager()
-end
+local Bubble = ISUIElement:derive("Bubble")
 
 function Bubble:render()
     if self.dead then
@@ -41,7 +32,6 @@ function Bubble:render()
         alpha = (1000 - fadingTime) / 1000
     else
         self.dead = true
-        self:delete()
         return
     end
 
@@ -105,7 +95,7 @@ function Bubble:new(player, text, length, timer)
     o.startTime = Calendar.getInstance():getTimeInMillis()
     o.previousTime = o.startTime
     o.dead = false
-    o:initialise()
+    ISUIElement.initialise(o)
     o:paginate()
     return o
 end

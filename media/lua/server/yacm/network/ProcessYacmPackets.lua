@@ -11,7 +11,7 @@ local function SendErrorMessage(player, type, message)
 end
 
 local function PlayersDistance(source, target)
-    return source:DistTo(target:getX(), target:getY())
+    return math.floor(source:DistTo(target:getX(), target:getY()) + 0.5)
 end
 
 local MessageHasAccessByType = {
@@ -43,56 +43,83 @@ local MessageHasAccessByType = {
     ['ooc']       = function(author, player, args) return true end,
 }
 
+function GetColorSandbox(name)
+    local colorString = SandboxVars.YetAnotherChatMod[name .. 'Color']
+    local defaultColor = { 255, 0, 255 }
+    local regex = '#[abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d]'
+    if #colorString ~= 7
+        or colorString:match(regex) == nil
+    then
+        print('error: invalid string for Sandbox Variable: "' .. name .. '"')
+        return defaultColor
+    end
+    return {
+        tonumber(colorString:sub(2, 3), 16),
+        tonumber(colorString:sub(4, 5), 16),
+        tonumber(colorString:sub(6, 7), 16),
+    }
+end
+
 local MessageTypeSettings = {
     ['whisper'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.WhisperRange,
         ['zombieRange'] = SandboxVars.YetAnotherChatMod.WhisperZombieRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.WhisperEnabled,
+        ['color'] = GetColorSandbox('Whisper'),
     },
     ['low'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.LowRange,
         ['zombieRange'] = SandboxVars.YetAnotherChatMod.LowZombieRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.LowEnabled,
+        ['color'] = GetColorSandbox('Low'),
     },
     ['say'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.SayRange,
         ['zombieRange'] = SandboxVars.YetAnotherChatMod.SayZombieRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.SayEnabled,
+        ['color'] = GetColorSandbox('Say'),
     },
     ['yell'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.YellRange,
         ['zombieRange'] = SandboxVars.YetAnotherChatMod.YellZombieRange,
         ['enabled'] = SandboxVars.YetAnotherChatMod.YellEnabled,
+        ['color'] = GetColorSandbox('Yell'),
     },
     ['pm'] = {
         ['range'] = -1,
         ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.PrivateMessageEnabled,
+        ['color'] = GetColorSandbox('PrivateMessage'),
     },
     ['faction'] = {
         ['range'] = -1,
         ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.FactionMessageEnabled,
+        ['color'] = GetColorSandbox('FactionMessage'),
     },
     ['safehouse'] = {
         ['range'] = -1,
         ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.SafeHouseMessageEnabled,
+        ['color'] = GetColorSandbox('SafeHouseMessage'),
     },
     ['general'] = {
         ['range'] = -1,
         ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.GeneralMessageEnabled,
+        ['color'] = GetColorSandbox('GeneralMessage'),
     },
     ['admin'] = {
         ['range'] = -1,
         ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.AdminMessageEnabled,
+        ['color'] = GetColorSandbox('AdminMessage'),
     },
     ['ooc'] = {
         ['range'] = SandboxVars.YetAnotherChatMod.OutOfCharacterMessageRange,
         ['zombieRange'] = -1,
         ['enabled'] = SandboxVars.YetAnotherChatMod.OutOfCharacterMessageEnabled,
+        ['color'] = GetColorSandbox('OutOfCharacterMessage'),
     },
 }
 
@@ -185,12 +212,10 @@ ProcessYacmPackets['Typing'] = function(player, args)
 end
 
 ProcessYacmPackets['AskSandboxVars'] = function(player, args)
-    print('RECEIVED AskSandboxVars')
     SendYacmServerCommand(player, 'SendSandboxVars', MessageTypeSettings)
 end
 
 local function OnClientCommand(module, command, player, args)
-    print('PACKET RECEIVED: ' .. module .. ' ' .. command)
     if module == 'YACM' and ProcessYacmPackets[command] then
         ProcessYacmPackets[command](player, args)
     end

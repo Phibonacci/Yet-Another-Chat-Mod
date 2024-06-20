@@ -2,6 +2,7 @@ require('yacm/parser/Parser')
 require('yacm/parser/StringBuilder')
 
 local Bubble                 = require('yacm/ui/Bubble')
+local RangeIndicator         = require('yacm/ui/RangeIndicator')
 local TypingDots             = require('yacm/ui/TypingDots')
 local YacmClientSendCommands = require('yacm/network/SendYacmClient.lua')
 
@@ -19,8 +20,10 @@ ISChat.allChatStreams[9]  = { name = 'pm', command = '/pm ', shortCommand = '/p 
 ISChat.allChatStreams[10] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 4 }
 
 
-ISChat.yacmCommand         = {}
-ISChat.yacmCommand[1]      = { name = 'color', command = '/color', shortCommand = nil }
+ISChat.yacmCommand    = {}
+ISChat.yacmCommand[1] = { name = 'color', command = '/color', shortCommand = nil }
+ISChat.yacmCommand[2] = { name = 'range', command = '/range', shortCommand = nil }
+
 
 ISChat.defaultTabStream    = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1]
@@ -365,7 +368,12 @@ local MessageTypeToColor = {
 }
 
 function BuildColorFromMessageType(type)
-    if MessageTypeToColor[type] == nil then
+    if ISChat.instance.messageTypeSettings ~= nil
+        and ISChat.instance.messageTypeSettings[type]
+        and ISChat.instance.messageTypeSettings[type]['color']
+    then
+        return ISChat.instance.messageTypeSettings[type]['color']
+    elseif MessageTypeToColor[type] == nil then
         error('unknown message type "' .. type .. '"')
     end
     return MessageTypeToColor[type]
@@ -437,9 +445,6 @@ end
 function CreateBubble(author, message, length)
     ISChat.instance.bubble = ISChat.instance.bubble or {}
     ISChat.instance.typingDots = ISChat.instance.typingDots or {}
-    if ISChat.instance.bubble[author] ~= nil then
-        ISChat.instance.bubble[author]:delete()
-    end
     local onlineUsers = getOnlinePlayers()
     local authorObj = nil
     for i = 0, onlineUsers:size() - 1 do
@@ -454,8 +459,8 @@ function CreateBubble(author, message, length)
     end
     local bubble = Bubble:new(authorObj, message, length, 10)
     ISChat.instance.bubble[author] = bubble
+    -- the player is not typing anymore if his bubble appears
     if ISChat.instance.typingDots[author] ~= nil then
-        ISChat.instance.typingDots[author]:delete()
         ISChat.instance.typingDots[author] = nil
     end
 end
@@ -477,7 +482,7 @@ function ISChat.onTypingPacket(author, type)
     if ISChat.instance.typingDots[author] then
         ISChat.instance.typingDots[author]:refresh()
     else
-        ISChat.instance.typingDots[author] = TypingDots:new(authorObj, 1000)
+        ISChat.instance.typingDots[author] = TypingDots:new(authorObj, 1)
     end
 end
 
@@ -673,11 +678,14 @@ ISChat.addLineInChat = function(message, tabID)
 end
 
 function ISChat:render()
+    if ISChat.instance.rangeIndicator ~= nil then
+        ISChat.instance.rangeIndicator:render()
+    end
+
     if ISChat.instance.bubble then
         local indexToDelete = {}
         for index, bubble in pairs(ISChat.instance.bubble) do
             if bubble.dead then
-                bubble:delete()
                 table.insert(indexToDelete, index)
             else
                 bubble:render()
@@ -692,7 +700,6 @@ function ISChat:render()
         local indexToDelete = {}
         for index, typingDots in pairs(ISChat.instance.typingDots) do
             if typingDots.dead then
-                typingDots:delete()
                 table.insert(indexToDelete, index)
             else
                 typingDots:render()
@@ -721,19 +728,33 @@ function ISChat.onTextChange()
                     and luautils.stringStarts(internalText, "/")
                     and luautils.stringEnds(internalText, "/") then
                     t:setText("/")
+                    ISChat.instance.rangeIndicator = nil
+                    ISChat.instance.lastStream = nil
                     return
                 end
             end
         end
         if t:getText():len() <= 5 and luautils.stringEnds(internalText, "/") then
             t:setText("/")
+            ISChat.instance.rangeIndicator = nil
+            ISChat.instance.lastStream = nil
             return
         end
     end
     local stream = GetCommandFromMessage(internalText)
-    if stream ~= nil then
+    if stream ~= nil and ISChat.instance.lastStream ~= stream then
+        if ISChat.instance.messageTypeSettings ~= nil
+            and ISChat.instance.messageTypeSettings[stream.name]['range'] ~= nil
+            and ISChat.instance.messageTypeSettings[stream.name]['range'] ~= -1
+            and ISChat.instance.messageTypeSettings[stream.name]['color'] ~= nil
+        then
+            local range = ISChat.instance.messageTypeSettings[stream.name]['range']
+            ISChat.instance.rangeIndicator = RangeIndicator:new(range,
+                ISChat.instance.messageTypeSettings[stream.name]['color'])
+        end
         YacmClientSendCommands.sendTyping(getPlayer():getUsername(), stream['name'])
     end
+    ISChat.instance.lastStream = stream
 end
 
 function ISChat:onActivateView()
