@@ -679,7 +679,10 @@ ISChat.addLineInChat = function(message, tabID)
 end
 
 function ISChat:render()
-    if ISChat.instance.rangeIndicator ~= nil and ISChat.instance.rangeIndicatorState == true then
+    if ISChat.instance.rangeIndicator ~= nil
+        and ISChat.instance.rangeIndicatorState == true
+        and ISChat.focused == true
+    then
         ISChat.instance.rangeIndicator:render()
     end
 
@@ -713,6 +716,18 @@ function ISChat:render()
     ISCollapsableWindow.render(self)
 end
 
+local function UpdateRangeIndicator(stream)
+    if ISChat.instance.messageTypeSettings ~= nil
+        and ISChat.instance.messageTypeSettings[stream.name]['range'] ~= nil
+        and ISChat.instance.messageTypeSettings[stream.name]['range'] ~= -1
+        and ISChat.instance.messageTypeSettings[stream.name]['color'] ~= nil
+    then
+        local range = ISChat.instance.messageTypeSettings[stream.name]['range']
+        ISChat.instance.rangeIndicator = RangeIndicator:new(range,
+            ISChat.instance.messageTypeSettings[stream.name]['color'])
+    end
+end
+
 function ISChat.onTextChange()
     local t = ISChat.instance.textEntry
     local internalText = t:getInternalText()
@@ -743,17 +758,13 @@ function ISChat.onTextChange()
         end
     end
     local stream = GetCommandFromMessage(internalText)
-    if stream ~= nil and ISChat.instance.lastStream ~= stream then
-        if ISChat.instance.messageTypeSettings ~= nil
-            and ISChat.instance.messageTypeSettings[stream.name]['range'] ~= nil
-            and ISChat.instance.messageTypeSettings[stream.name]['range'] ~= -1
-            and ISChat.instance.messageTypeSettings[stream.name]['color'] ~= nil
-        then
-            local range = ISChat.instance.messageTypeSettings[stream.name]['range']
-            ISChat.instance.rangeIndicator = RangeIndicator:new(range,
-                ISChat.instance.messageTypeSettings[stream.name]['color'])
+    if stream ~= nil then
+        if ISChat.instance.lastStream ~= stream then
+            UpdateRangeIndicator(stream)
         end
         YacmClientSendCommands.sendTyping(getPlayer():getUsername(), stream['name'])
+    else
+        ISChat.instance.rangeIndicator = nil
     end
     ISChat.instance.lastStream = stream
 end
@@ -852,6 +863,7 @@ ISChat.onRecvSandboxVars = function(messageTypeSettings)
     if getPlayer():getAccessLevel() == 'Admin' then
         AddTab('Admin', 4)
     end
+    UpdateRangeIndicator(ISChat.defaultTabStream[ISChat.instance.currentTabID])
 end
 
 ISChat.onTabRemoved = function(tabTitle, tabID)
@@ -976,6 +988,11 @@ end
 
 local function OnRangeButtonClick()
     ISChat.instance.rangeIndicatorState = not ISChat.instance.rangeIndicatorState
+    if ISChat.instance.rangeIndicatorState == true then
+        ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-on.png"))
+    else
+        ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-off.png"))
+    end
 end
 
 function ISChat:createChildren()
@@ -1053,7 +1070,7 @@ function ISChat:createChildren()
     self.rangeButton.borderColor.a = 0.0
     self.rangeButton.backgroundColor.a = 0
     self.rangeButton.backgroundColorMouseOver.a = 0
-    self.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye.png"))
+    self.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-off.png"))
     self.rangeButton:setUIName(ISChat.rangeButtonName)
     self:addChild(self.rangeButton)
     self.rangeButton:setVisible(true)
@@ -1127,6 +1144,31 @@ function ISChat:createChildren()
     self:unfocus()
 
     self.mutedUsers = {}
+end
+
+function ISChat:focus()
+    self:setVisible(true)
+    ISChat.focused = true
+    self.textEntry:setEditable(true)
+    self.textEntry:focus()
+    self.textEntry:ignoreFirstInput()
+    self.textEntry:setText(self.chatText.lastChatCommand)
+    local stream = GetCommandFromMessage(self.chatText.lastChatCommand)
+    if stream ~= nil then
+        UpdateRangeIndicator(stream)
+    end
+    self.fade:reset()
+    self.fade:update() --reset fraction to start value
+end
+
+function ISChat:unfocus()
+    self.textEntry:unfocus()
+    self.textEntry:setText("")
+    if ISChat.focused then
+        self.fade:reset() -- to begin fade. unfocus called when element was unfocused also.
+    end
+    ISChat.focused = false
+    self.textEntry:setEditable(false)
 end
 
 Events.OnChatWindowInit.Add(ISChat.initChat)
