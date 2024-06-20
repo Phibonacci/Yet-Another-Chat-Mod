@@ -2,6 +2,8 @@ local coordinates = require('yacm/utils/coordinates')
 
 local RangeIndicator = ISUIElement:derive("RangeIndicator")
 
+-- draw a square at the center and parts of losanges on the borders to avoid
+-- drawing too many losanges and hurt the performances
 function RangeIndicator:render()
     if self.range > 60 then
         return

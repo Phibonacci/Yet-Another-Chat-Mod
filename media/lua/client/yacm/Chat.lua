@@ -154,6 +154,7 @@ ISChat.initChat = function()
     instance.tabCnt = 0
     instance.tabs = {}
     instance.currentTabID = 0
+    instance.rangeIndicatorState = false
     InitGlobalModData()
     AddTab('General', 1)
 end
@@ -678,7 +679,7 @@ ISChat.addLineInChat = function(message, tabID)
 end
 
 function ISChat:render()
-    if ISChat.instance.rangeIndicator ~= nil then
+    if ISChat.instance.rangeIndicator ~= nil and ISChat.instance.rangeIndicatorState == true then
         ISChat.instance.rangeIndicator:render()
     end
 
@@ -874,7 +875,7 @@ ISChat.onTabRemoved = function(tabTitle, tabID)
             end
         end
         ISChat.instance.panel:removeView(foundTab)
-        ISChat.instance.minimumWidth = ISChat.instance.panel:getWidthOfAllTabs() + 2 * ISChat.instance.inset;
+        ISChat.instance.minimumWidth = ISChat.instance.panel:getWidthOfAllTabs() + 2 * ISChat.instance.inset
     end
     ISChat.instance.tabCnt = ISChat.instance.tabCnt - 1
     local firstTabId, firstTab = GetFirstTab()
@@ -894,7 +895,7 @@ ISChat.onTabRemoved = function(tabTitle, tabID)
         ISChat.instance:addChild(ISChat.instance.chatText)
         ISChat.instance.chatText:setVisible(true)
     end
-    ISChat.instance:onActivateView();
+    ISChat.instance:onActivateView()
 end
 
 ISChat.onSetDefaultTab = function(defaultTabTitle)
@@ -917,11 +918,11 @@ local function GetNextTabId(currentTabId)
 end
 
 ISChat.onToggleChatBox = function(key)
-    if ISChat.instance == nil then return; end
+    if ISChat.instance == nil then return end
     if key == getCore():getKey("Toggle chat") or key == getCore():getKey("Alt toggle chat") then
         ISChat.instance:focus()
     end
-    local chat = ISChat.instance;
+    local chat = ISChat.instance
     if key == getCore():getKey("Switch chat stream") then
         local nextTabId = GetNextTabId(chat.currentTabID)
         if nextTabId == nil then
@@ -962,15 +963,170 @@ ISChat.ISTabPanelOnMouseDown = function(target, x, y)
         end
         -- if we clicked on a tab, the first time we set up the x,y of the mouse, so next time we can see if the player moved the mouse (moved the tab)
         if tabIndex >= 1 and tabIndex <= #target.viewList and ISTabPanel.xMouse == -1 and ISTabPanel.yMouse == -1 then
-            ISTabPanel.xMouse = target:getMouseX();
-            ISTabPanel.yMouse = target:getMouseY();
-            target.draggingTab = tabIndex - 1;
-            local clickedTab = target.viewList[target.draggingTab + 1];
+            ISTabPanel.xMouse = target:getMouseX()
+            ISTabPanel.yMouse = target:getMouseY()
+            target.draggingTab = tabIndex - 1
+            local clickedTab = target.viewList[target.draggingTab + 1]
             target:activateView(clickedTab.name)
             return true
         end
     end
     return false
+end
+
+local function OnRangeButtonClick()
+    ISChat.instance.rangeIndicatorState = not ISChat.instance.rangeIndicatorState
+end
+
+function ISChat:createChildren()
+    --window stuff
+    -- Do corner x + y widget
+    local rh = self:resizeWidgetHeight()
+    local resizeWidget = ISResizeWidget:new(self.width - rh, self.height - rh, rh, rh, self)
+    resizeWidget:initialise()
+    resizeWidget.onMouseDown = ISChat.onMouseDown
+    resizeWidget.onMouseUp = ISChat.onMouseUp
+    resizeWidget:setVisible(self.resizable)
+    resizeWidget:bringToTop()
+    resizeWidget:setUIName(ISChat.xyResizeWidgetName)
+    self:addChild(resizeWidget)
+    self.resizeWidget = resizeWidget
+
+    -- Do bottom y widget
+    local resizeWidget2 = ISResizeWidget:new(0, self.height - rh, self.width - rh, rh, self, true)
+    resizeWidget2.anchorLeft = true
+    resizeWidget2.anchorRight = true
+    resizeWidget2:initialise()
+    resizeWidget2.onMouseDown = ISChat.onMouseDown
+    resizeWidget2.onMouseUp = ISChat.onMouseUp
+    resizeWidget2:setVisible(self.resizable)
+    resizeWidget2:setUIName(ISChat.yResizeWidgetName)
+    self:addChild(resizeWidget2)
+    self.resizeWidget2 = resizeWidget2
+
+    -- close button
+    local th = self:titleBarHeight()
+    self.closeButton = ISButton:new(3, 0, th, th, "", self, self.close)
+    self.closeButton:initialise()
+    self.closeButton.borderColor.a = 0.0
+    self.closeButton.backgroundColor.a = 0
+    self.closeButton.backgroundColorMouseOver.a = 0
+    self.closeButton:setImage(self.closeButtonTexture)
+    self.closeButton:setUIName(ISChat.closeButtonName)
+    self:addChild(self.closeButton)
+
+    -- lock button
+    self.lockButton = ISButton:new(self.width - 19, 0, th, th, "", self, ISChat.pin)
+    self.lockButton.anchorRight = true
+    self.lockButton.anchorLeft = false
+    self.lockButton:initialise()
+    self.lockButton.borderColor.a = 0.0
+    self.lockButton.backgroundColor.a = 0
+    self.lockButton.backgroundColorMouseOver.a = 0
+    if self.locked then
+        self.lockButton:setImage(self.chatLockedButtonTexture)
+    else
+        self.lockButton:setImage(self.chatUnLockedButtonTexture)
+    end
+    self.lockButton:setUIName(ISChat.lockButtonName)
+    self:addChild(self.lockButton)
+    self.lockButton:setVisible(true)
+
+    --gear button
+    self.gearButton = ISButton:new(self.lockButton:getX() - th / 2 - th, 1, th, th, "", self, ISChat.onGearButtonClick)
+    self.gearButton.anchorRight = true
+    self.gearButton.anchorLeft = false
+    self.gearButton:initialise()
+    self.gearButton.borderColor.a = 0.0
+    self.gearButton.backgroundColor.a = 0
+    self.gearButton.backgroundColorMouseOver.a = 0
+    self.gearButton:setImage(getTexture("media/ui/Panel_Icon_Gear.png"))
+    self.gearButton:setUIName(ISChat.gearButtonName)
+    self:addChild(self.gearButton)
+    self.gearButton:setVisible(true)
+
+    --range button
+    self.rangeButton = ISButton:new(self.gearButton:getX() - th / 2 - th, 1, th, th, "", self, OnRangeButtonClick)
+    self.rangeButton.anchorRight = true
+    self.rangeButton.anchorLeft = false
+    self.rangeButton:initialise()
+    self.rangeButton.borderColor.a = 0.0
+    self.rangeButton.backgroundColor.a = 0
+    self.rangeButton.backgroundColorMouseOver.a = 0
+    self.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye.png"))
+    self.rangeButton:setUIName(ISChat.rangeButtonName)
+    self:addChild(self.rangeButton)
+    self.rangeButton:setVisible(true)
+
+    --general stuff
+    self.minimumHeight = 90
+    self.minimumWidth = 200
+    self:setResizable(true)
+    self:setDrawFrame(true)
+    self:addToUIManager()
+
+    self.tabs = {}
+    self.tabCnt = 0
+    self.btnHeight = 25
+    self.currentTabID = 0
+    self.inset = 2
+    self.fontHgt = getTextManager():getFontFromEnum(UIFont.Medium):getLineHeight()
+
+    --text entry stuff
+    local inset, EdgeSize, fontHgt = self.inset, 5, self.fontHgt
+
+    -- EdgeSize must match UITextBox2.EdgeSize
+    local height = EdgeSize * 2 + fontHgt
+    self.textEntry = ISTextEntryBox:new("", inset, self:getHeight() - 8 - inset - height, self:getWidth() - inset * 2,
+        height)
+    self.textEntry.font = UIFont.Medium
+    self.textEntry:initialise()
+    self.textEntry:instantiate()
+    self.textEntry.backgroundColor = { r = 0, g = 0, b = 0, a = 0.5 }
+    self.textEntry.borderColor = { r = 1, g = 1, b = 1, a = 0.0 }
+    self.textEntry:setHasFrame(true)
+    self.textEntry:setAnchorTop(false)
+    self.textEntry:setAnchorBottom(true)
+    self.textEntry:setAnchorRight(true)
+    self.textEntry.onCommandEntered = ISChat.onCommandEntered
+    self.textEntry.onTextChange = ISChat.onTextChange
+    self.textEntry.onPressDown = ISChat.onPressDown
+    self.textEntry.onPressUp = ISChat.onPressUp
+    self.textEntry.onOtherKey = ISChat.onOtherKey
+    self.textEntry.onClick = ISChat.onMouseDown
+    self.textEntry:setUIName(ISChat.textEntryName) -- need to be right this. If it will empty or another then focus will lost on click in chat
+    self.textEntry:setHasFrame(true)
+    self:addChild(self.textEntry)
+    ISChat.maxTextEntryOpaque = self.textEntry:getFrameAlpha()
+
+    --tab panel stuff
+    local panelHeight = self.textEntry:getY() - self:titleBarHeight() - self.inset
+    self.panel = ISTabPanel:new(0, self:titleBarHeight(), self.width - inset, panelHeight)
+    self.panel:initialise()
+    self.panel.borderColor = { r = 0, g = 0, b = 0, a = 0 }
+    self.panel.onActivateView = ISChat.onActivateView
+    self.panel.target = self
+    self.panel:setAnchorTop(true)
+    self.panel:setAnchorLeft(true)
+    self.panel:setAnchorRight(true)
+    self.panel:setAnchorBottom(true)
+    self.panel:setEqualTabWidth(false)
+    self.panel:setVisible(false)
+    self.panel.onRightMouseUp = ISChat.onRightMouseUp
+    self.panel.onRightMouseDown = ISChat.onRightMouseDown
+    self.panel.onMouseUp = ISChat.onMouseUp
+    self.panel.onMouseDown = ISChat.ISTabPanelOnMouseDown
+    self.panel:setUIName(ISChat.tabPanelName)
+    self:addChild(self.panel)
+
+    self:bringToTop()
+    self.textEntry:bringToTop()
+    self.minimumWidth = self.panel:getWidthOfAllTabs() + 2 * inset
+    self.minimumHeight = self.textEntry:getHeight() + self:titleBarHeight() + 2 * inset + self.panel.tabHeight +
+        fontHgt * 4
+    self:unfocus()
+
+    self.mutedUsers = {}
 end
 
 Events.OnChatWindowInit.Add(ISChat.initChat)
