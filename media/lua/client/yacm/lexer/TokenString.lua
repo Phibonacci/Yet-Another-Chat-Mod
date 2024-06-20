@@ -18,7 +18,7 @@ end
 
 function TokenString:formatCustom(wrapWords, _, _, lengthLeft)
     if wrapWords == nil or wrapWords <= 0 then
-        return self.message
+        return self.message, self.message, nil
     end
     local newMessage = ''
     local wordSize = 0
@@ -41,7 +41,7 @@ function TokenString:formatCustom(wrapWords, _, _, lengthLeft)
         newMessage = newMessage .. '...'
     end
     lengthLeft = lengthLeft - #newMessage
-    return newMessage, lengthLeft
+    return newMessage, newMessage, lengthLeft
 end
 
 function TokenString:formatBubble(keepTags)

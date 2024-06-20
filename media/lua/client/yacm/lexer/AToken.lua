@@ -24,6 +24,7 @@ function AToken:formatCustom(wrapWords, keepTags, rgbCall, lengthLeft)
     local color = rgbCall(colorObj)
     local newMessage = ''
     local stop = false
+    local rawMessage = ''
     if keepTags and self.getTagSize() > 0 then
         newMessage = color .. self.getTag()
     end
@@ -31,17 +32,18 @@ function AToken:formatCustom(wrapWords, keepTags, rgbCall, lengthLeft)
         if child.getName() == 'string' then
             newMessage = newMessage .. color
         end
-        local subMessage, subLengthLeft = child:formatCustom(wrapWords, keepTags, rgbCall, lengthLeft)
+        local subMessage, subRawMessage, subLengthLeft = child:formatCustom(wrapWords, keepTags, rgbCall, lengthLeft)
         lengthLeft = subLengthLeft
         newMessage = newMessage .. subMessage
+        rawMessage = rawMessage .. subRawMessage
         if lengthLeft ~= nil and lengthLeft <= 0 then
-            return newMessage, lengthLeft
+            return newMessage, rawMessage, lengthLeft
         end
     end
     if keepTags and self.getTagSize() > 0 then
         newMessage = newMessage .. self.getTag()
     end
-    return newMessage, lengthLeft
+    return newMessage, rawMessage, lengthLeft
 end
 
 -- format for the old bubbles

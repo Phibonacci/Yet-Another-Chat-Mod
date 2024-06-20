@@ -73,10 +73,12 @@ end
 function Bubble:prerender()
 end
 
-function Bubble:new(player, text, length, timer)
-    local width = math.min(length * 6.24, 162) + 40
+function Bubble:new(player, text, rawText, timer)
+    local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
+    print('textX: ' .. textLength)
+    local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
-    local x, y = coordinates.CenterTopOfPlayer(player, width, height, true)
+    local x, y = coordinates.CenterTopOfPlayer(player, width, height)
     Bubble.__index = self
     setmetatable(Bubble, { __index = ISRichTextPanel })
     local o = ISRichTextPanel:new(x, y, width, height)

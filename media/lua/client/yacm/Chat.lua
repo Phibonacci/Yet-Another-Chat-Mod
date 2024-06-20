@@ -443,7 +443,7 @@ function BuildChatMessage(fontSize, showTimestamp, rawMessage, time)
     return line
 end
 
-function CreateBubble(author, message, length)
+function CreateBubble(author, message, rawMessage)
     ISChat.instance.bubble = ISChat.instance.bubble or {}
     ISChat.instance.typingDots = ISChat.instance.typingDots or {}
     local onlineUsers = getOnlinePlayers()
@@ -458,7 +458,7 @@ function CreateBubble(author, message, length)
     if authorObj == nil then
         return
     end
-    local bubble = Bubble:new(authorObj, message, length, 10)
+    local bubble = Bubble:new(authorObj, message, rawMessage, 10)
     ISChat.instance.bubble[author] = bubble
     -- the player is not typing anymore if his bubble appears
     if ISChat.instance.typingDots[author] ~= nil then
@@ -553,7 +553,7 @@ end
 function ISChat.onMessagePacket(packet)
     local formattedMessage, message = BuildMessageFromPacket(packet)
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
-    CreateBubble(packet.author, message['bubble'], message['length'])
+    CreateBubble(packet.author, message['bubble'], message['rawMessage'])
     local time = Calendar.getInstance():getTimeInMillis()
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
     local stream = GetStreamFromType(packet.type)
