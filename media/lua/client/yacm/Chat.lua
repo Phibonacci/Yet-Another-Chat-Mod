@@ -754,35 +754,23 @@ local function UpdateRangeIndicator(stream)
     end
 end
 
+function IsOnlyCommand(text)
+    return text:match('/%a* *') == text
+end
+
 function ISChat.onTextChange()
     local t = ISChat.instance.textEntry
     local internalText = t:getInternalText()
-    if ISChat.instance.chatText.lastChatCommand ~= nil then
-        for _, chat in ipairs(ISChat.instance.chatText.chatStreams) do
-            local prefix
-            if chat.command and luautils.stringStarts(internalText, chat.command) then
-                prefix = chat.command
-            elseif chat.shortCommand and luautils.stringStarts(internalText, chat.shortCommand) then
-                prefix = chat.shortCommand
-            end
-            if prefix then
-                if string.sub(t:getText(), prefix:len() + 1, t:getText():len()):len() <= 5
-                    and luautils.stringStarts(internalText, "/")
-                    and luautils.stringEnds(internalText, "/") then
-                    t:setText("/")
-                    ISChat.instance.rangeIndicator = nil
-                    ISChat.instance.lastStream = nil
-                    return
-                end
-            end
-        end
-        if t:getText():len() <= 5 and luautils.stringEnds(internalText, "/") then
-            t:setText("/")
-            ISChat.instance.rangeIndicator = nil
-            ISChat.instance.lastStream = nil
-            return
-        end
+    if #internalText > 1
+        and IsOnlyCommand(internalText:sub(1, #internalText - 1))
+        and internalText:sub(#internalText) == '/'
+    then
+        t:setText("/")
+        ISChat.instance.rangeIndicator = nil
+        ISChat.instance.lastStream = nil
+        return
     end
+
     if internalText == '/r' and ISChat.instance.lastPrivateMessageAuthor ~= nil then
         t:setText('/pm ' .. ISChat.instance.lastPrivateMessageAuthor .. ' ')
         return
