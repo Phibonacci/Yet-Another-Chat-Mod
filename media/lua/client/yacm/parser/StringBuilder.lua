@@ -19,7 +19,7 @@ end
 
 function BuildTimePrefixString(time)
     local formatedTime = GetCurrentFormatedTime(time)
-    return BuildBracketColorString({ 130, 130, 130 }) .. '[' .. formatedTime .. ']'
+    return BuildBracketColorString({ 130, 130, 130 }) .. '[' .. formatedTime .. '] '
 end
 
 function BuildFontSizeString(size)

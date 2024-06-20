@@ -329,6 +329,19 @@ function ISChat:onCommandEntered()
     ISChat.instance.timerTextEntry = 20
 end
 
+local function BuildChannelPrefixString(channel)
+    if channel == nil then
+        return ''
+    end
+    local color
+    if ISChat.instance.messageTypeSettings ~= nil then
+        color = ISChat.instance.messageTypeSettings[channel]['color']
+    else
+        color = { 255, 255, 255 }
+    end
+    return BuildBracketColorString(color) .. '[' .. channel .. '] '
+end
+
 function ISChat:updateChatPrefixSettings()
     updateChatSettings(self.chatFont, self.showTimestamp, self.showTitle)
     for tabNumber, chatText in pairs(self.tabs) do
@@ -339,8 +352,11 @@ function ISChat:updateChatPrefixSettings()
         for i, msg in ipairs(chatText.chatTextRawLines) do
             self.chatFont = self.chatFont or 'medium'
             local line = BuildFontSizeString(self.chatFont)
-            if ISChat.instance.showTimestamp then
+            if self.showTimestamp then
                 line = line .. BuildTimePrefixString(msg.time)
+            end
+            if self.showTitle then
+                line = line .. BuildChannelPrefixString(msg.channel)
             end
             line = line .. msg.line .. BuildNewLine()
             table.insert(chatText.chatTextLines, line)
@@ -434,10 +450,13 @@ function BuildMessageFromPacket(packet)
     return formatedMessage, message
 end
 
-function BuildChatMessage(fontSize, showTimestamp, rawMessage, time)
+function BuildChatMessage(fontSize, showTimestamp, showTitle, rawMessage, time, channel)
     local line = BuildFontSizeString(fontSize)
     if showTimestamp then
         line = line .. BuildTimePrefixString(time)
+    end
+    if showTitle and channel ~= nil then
+        line = line .. BuildChannelPrefixString(channel)
     end
     line = line .. rawMessage
     return line
@@ -496,7 +515,7 @@ local function GetStreamFromType(type)
     return nil
 end
 
-local function AddMessageToTab(tabID, time, formattedMessage, line)
+local function AddMessageToTab(tabID, time, formattedMessage, line, channel)
     if not ISChat.instance.chatText then
         ISChat.instance.chatText = ISChat.instance.defaultTab
         ISChat.instance:onActivateView()
@@ -508,6 +527,7 @@ local function AddMessageToTab(tabID, time, formattedMessage, line)
         {
             time = time,
             line = formattedMessage,
+            channel = channel,
         })
     if chatText.tabTitle ~= ISChat.instance.chatText.tabTitle then
         local alreadyExist = false
@@ -555,29 +575,32 @@ function ISChat.onMessagePacket(packet)
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
     CreateBubble(packet.author, message['bubble'], message['rawMessage'])
     local time = Calendar.getInstance():getTimeInMillis()
-    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
+        formattedMessage, time, packet.type)
     local stream = GetStreamFromType(packet.type)
     if stream == nil then
         print('error: onMessagePacket: stream not found')
         return
     end
-    AddMessageToTab(stream['tabID'], time, formattedMessage, line)
+    AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
 end
 
 function ISChat.sendErrorToCurrentTab(message)
     local time = Calendar.getInstance():getTimeInMillis()
     local formattedMessage = BuildBracketColorString({ 255, 40, 40 }) ..
         'error: ' .. BuildBracketColorString({ 255, 70, 70 }) .. message
-    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, false,
+        formattedMessage, time, nil)
     local tabID = ISChat.defaultTabStream[ISChat.instance.currentTabID]['tabID']
-    AddMessageToTab(tabID, time, formattedMessage, line)
+    AddMessageToTab(tabID, time, formattedMessage, line, nil)
 end
 
 function ISChat.onChatErrorPacket(type, message)
     local time = Calendar.getInstance():getTimeInMillis()
     local formattedMessage = BuildBracketColorString({ 255, 50, 50 }) ..
         'error: ' .. BuildBracketColorString({ 255, 60, 60 }) .. message
-    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, formattedMessage, time)
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
+        formattedMessage, time, type)
     local stream
     if type == nil then
         stream = ISChat.defaultTabStream[ISChat.instance.currentTabID]
