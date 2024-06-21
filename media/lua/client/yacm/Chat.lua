@@ -1,3 +1,5 @@
+local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/Version')
+
 require('yacm/parser/Parser')
 require('yacm/parser/StringBuilder')
 
@@ -1004,6 +1006,10 @@ ISChat.ISTabPanelOnMouseDown = function(target, x, y)
     return false
 end
 
+local function OnInfoButtonClick()
+
+end
+
 local function OnRangeButtonClick()
     ISChat.instance.rangeIndicatorState = not ISChat.instance.rangeIndicatorState
     if ISChat.instance.rangeIndicatorState == true then
@@ -1045,7 +1051,7 @@ function ISChat:createChildren()
     self.closeButton:initialise()
     self.closeButton.borderColor.a = 0.0
     self.closeButton.backgroundColor.a = 0
-    self.closeButton.backgroundColorMouseOver.a = 0
+    self.closeButton.backgroundColorMouseOver.a = 0.5
     self.closeButton:setImage(self.closeButtonTexture)
     self.closeButton:setUIName(ISChat.closeButtonName)
     self:addChild(self.closeButton)
@@ -1057,7 +1063,7 @@ function ISChat:createChildren()
     self.lockButton:initialise()
     self.lockButton.borderColor.a = 0.0
     self.lockButton.backgroundColor.a = 0
-    self.lockButton.backgroundColorMouseOver.a = 0
+    self.lockButton.backgroundColorMouseOver.a = 0.5
     if self.locked then
         self.lockButton:setImage(self.chatLockedButtonTexture)
     else
@@ -1074,20 +1080,37 @@ function ISChat:createChildren()
     self.gearButton:initialise()
     self.gearButton.borderColor.a = 0.0
     self.gearButton.backgroundColor.a = 0
-    self.gearButton.backgroundColorMouseOver.a = 0
+    self.gearButton.backgroundColorMouseOver.a = 0.5
     self.gearButton:setImage(getTexture("media/ui/Panel_Icon_Gear.png"))
     self.gearButton:setUIName(ISChat.gearButtonName)
     self:addChild(self.gearButton)
     self.gearButton:setVisible(true)
 
+    --info button
+    ISChat.infoButtonName = "chat info button"
+    self.infoButton = ISButton:new(self.gearButton:getX() - th / 2 - th, 1, th, th, "", self, ISCollapsableWindow.onInfo)
+    self.infoButton.anchorRight = true
+    self.infoButton.anchorLeft = false
+    self.infoButton:initialise()
+    self.infoButton.borderColor.a = 0.0
+    self.infoButton.backgroundColor.a = 0
+    self.infoButton.backgroundColorMouseOver.a = 0.5
+    self.infoButton:setImage(getTexture("media/ui/Panel_info_button.png"))
+    self.infoButton:setUIName(ISChat.infoButtonName)
+    self:addChild(self.infoButton)
+    self.infoButton:setVisible(true)
+    self:setInfo(getText("SurvivalGuide_YetAnotherChatMod", YET_ANOTHER_CHAT_MOD_VERSION))
+
+
     --range button
-    self.rangeButton = ISButton:new(self.gearButton:getX() - th / 2 - th, 1, th, th, "", self, OnRangeButtonClick)
+    ISChat.rangeButtonName = "chat range button"
+    self.rangeButton = ISButton:new(self.infoButton:getX() - th / 2 - th, 1, th, th, "", self, OnRangeButtonClick)
     self.rangeButton.anchorRight = true
     self.rangeButton.anchorLeft = false
     self.rangeButton:initialise()
     self.rangeButton.borderColor.a = 0.0
     self.rangeButton.backgroundColor.a = 0
-    self.rangeButton.backgroundColorMouseOver.a = 0
+    self.rangeButton.backgroundColorMouseOver.a = 0.5
     self.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-off.png"))
     self.rangeButton:setUIName(ISChat.rangeButtonName)
     self:addChild(self.rangeButton)
