@@ -2,6 +2,12 @@ local AToken = require('yacm/lexer/AToken')
 
 local TokenItalic = {}
 
+TokenItalic.color = {
+    93,
+    255,
+    60
+}
+
 function TokenItalic:new(message, childs)
     TokenItalic.__index = self
     setmetatable(TokenItalic, { __index = AToken })
@@ -11,11 +17,16 @@ function TokenItalic:new(message, childs)
 end
 
 function TokenItalic:getColor()
-    return {
-        93,
-        255,
-        60
-    }
+    if YacmServerSettings ~= nil then
+        print('ITALIC IS SET')
+        print(YacmServerSettings['markdown']['italic']['color'][1])
+        print(YacmServerSettings['markdown']['italic']['color'][2])
+        print(YacmServerSettings['markdown']['italic']['color'][3])
+        return YacmServerSettings['markdown']['italic']['color']
+    else
+        print('ITALIC IS NILL')
+        return TokenItalic.color
+    end
 end
 
 function TokenItalic.getName()

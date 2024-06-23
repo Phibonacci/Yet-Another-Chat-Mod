@@ -1,6 +1,9 @@
 Sandbox_EN = {
     Sandbox_YetAnotherChatMod                              = "Yet Another Chat Mod"
 
+    Sandbox_YetAnotherChatMod_MarkdownOneAsteriskColor      = "Markdown one asterisk color"
+    Sandbox_YetAnotherChatMod_MarkdownTwoAsterisksColor     = "Markdown two asterisks color"
+
     Sandbox_YetAnotherChatMod_WhisperEnabled               = "Enable /whisper chat",
     Sandbox_YetAnotherChatMod_LowEnabled                   = "Enable /low chat",
     Sandbox_YetAnotherChatMod_SayEnabled                   = "Enable /say chat",
@@ -11,6 +14,17 @@ Sandbox_EN = {
     Sandbox_YetAnotherChatMod_GeneralMessageEnabled        = "Enable /general chat",
     Sandbox_YetAnotherChatMod_AdminMessageEnabled          = "Enable /admin chat",
     Sandbox_YetAnotherChatMod_OutOfCharacterMessageEnabled = "Enable /ooc (Out Of Character) chat",
+
+    Sandbox_YetAnotherChatMod_WhisperColor                 = "Set /whisper color",
+    Sandbox_YetAnotherChatMod_LowColor                     = "Set /low color",
+    Sandbox_YetAnotherChatMod_SayColor                     = "Set /say color",
+    Sandbox_YetAnotherChatMod_YellColor                    = "Set /yell color",
+    Sandbox_YetAnotherChatMod_PrivateMessageColor          = "Set /pm (private message) color",
+    Sandbox_YetAnotherChatMod_FactionMessageColor          = "Set /faction color",
+    Sandbox_YetAnotherChatMod_SafeHouseMessageColor        = "Set /safehouse color",
+    Sandbox_YetAnotherChatMod_GeneralMessageColor          = "Set /general color",
+    Sandbox_YetAnotherChatMod_AdminMessageColor            = "Set /admin color",
+    Sandbox_YetAnotherChatMod_OutOfCharacterMessageColor   = "Set /ooc (Out Of Character) color",
 
     Sandbox_YetAnotherChatMod_WhisperRange                 = "/whisper chat range",
     Sandbox_YetAnotherChatMod_LowRange                     = "/low chat range",

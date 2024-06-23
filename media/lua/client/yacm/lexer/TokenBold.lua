@@ -2,6 +2,12 @@ local AToken = require('yacm/lexer/AToken')
 
 local TokenBold = {}
 
+TokenBold.color = {
+    255,
+    28,
+    77
+}
+
 function TokenBold:new(message, childs)
     TokenBold.__index = self
     setmetatable(TokenBold, { __index = AToken })
@@ -11,11 +17,11 @@ function TokenBold:new(message, childs)
 end
 
 function TokenBold:getColor()
-    return {
-        255,
-        28,
-        77
-    }
+    if YacmServerSettings ~= nil then
+        return YacmServerSettings['markdown']['bold']['color']
+    else
+        return TokenBold.color
+    end
 end
 
 function TokenBold.getName()

@@ -1,5 +1,22 @@
 VERSION = 1,
 
+option YetAnotherChatMod.MarkdownOneAsteriskColor
+{
+	type = string,
+	default = #5DFF3C,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_MarkdownOneAsteriskColor
+}
+option YetAnotherChatMod.MarkdownTwoAsterisksColor
+{
+	type = string,
+	default = #FF1C4D,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_MarkdownTwoAsterisksColor,
+}
+
 option YetAnotherChatMod.WhisperEnabled
 {
 	type = boolean,

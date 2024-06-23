@@ -3,6 +3,9 @@ local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/Version')
 require('yacm/parser/Parser')
 require('yacm/parser/StringBuilder')
 
+local TokenItalic            = require('yacm/lexer/TokenItalic')
+local TokenBold              = require('yacm/lexer/TokenBold')
+
 local Bubble                 = require('yacm/ui/Bubble')
 local RangeIndicator         = require('yacm/ui/RangeIndicator')
 local TypingDots             = require('yacm/ui/TypingDots')
@@ -227,12 +230,12 @@ local function ProcessChatCommand(stream, command)
     else
         return false
     end
-    if ISChat.instance.messageTypeSettings ~= nil
-        and ISChat.instance.messageTypeSettings[stream.name] ~= nil
-        and ISChat.instance.messageTypeSettings[stream.name]['zombieRange'] ~= nil
-        and ISChat.instance.messageTypeSettings[stream.name]['zombieRange'] ~= -1
+    if YacmServerSettings ~= nil
+        and YacmServerSettings[stream.name] ~= nil
+        and YacmServerSettings[stream.name]['zombieRange'] ~= nil
+        and YacmServerSettings[stream.name]['zombieRange'] ~= -1
     then
-        local zombieRange = ISChat.instance.messageTypeSettings[stream.name]['zombieRange']
+        local zombieRange = YacmServerSettings[stream.name]['zombieRange']
         local square = getPlayer():getSquare()
         addSound(getPlayer(), square:getX(), square:getY(), square:getZ(), zombieRange, zombieRange)
     end
@@ -336,8 +339,8 @@ local function BuildChannelPrefixString(channel)
         return ''
     end
     local color
-    if ISChat.instance.messageTypeSettings ~= nil then
-        color = ISChat.instance.messageTypeSettings[channel]['color']
+    if YacmServerSettings ~= nil then
+        color = YacmServerSettings[channel]['color']
     else
         color = { 255, 255, 255 }
     end
@@ -387,11 +390,11 @@ local MessageTypeToColor = {
 }
 
 function BuildColorFromMessageType(type)
-    if ISChat.instance.messageTypeSettings ~= nil
-        and ISChat.instance.messageTypeSettings[type]
-        and ISChat.instance.messageTypeSettings[type]['color']
+    if YacmServerSettings ~= nil
+        and YacmServerSettings[type]
+        and YacmServerSettings[type]['color']
     then
-        return ISChat.instance.messageTypeSettings[type]['color']
+        return YacmServerSettings[type]['color']
     elseif MessageTypeToColor[type] == nil then
         error('unknown message type "' .. type .. '"')
     end
@@ -745,14 +748,14 @@ function ISChat:render()
 end
 
 local function UpdateRangeIndicator(stream)
-    if ISChat.instance.messageTypeSettings ~= nil
-        and ISChat.instance.messageTypeSettings[stream.name]['range'] ~= nil
-        and ISChat.instance.messageTypeSettings[stream.name]['range'] ~= -1
-        and ISChat.instance.messageTypeSettings[stream.name]['color'] ~= nil
+    if YacmServerSettings ~= nil
+        and YacmServerSettings[stream.name]['range'] ~= nil
+        and YacmServerSettings[stream.name]['range'] ~= -1
+        and YacmServerSettings[stream.name]['color'] ~= nil
     then
-        local range = ISChat.instance.messageTypeSettings[stream.name]['range']
+        local range = YacmServerSettings[stream.name]['range']
         ISChat.instance.rangeIndicator = RangeIndicator:new(range,
-            ISChat.instance.messageTypeSettings[stream.name]['color'])
+            YacmServerSettings[stream.name]['color'])
     end
 end
 
@@ -843,7 +846,7 @@ ISChat.onTabAdded = function(tabTitle, tabID)
     -- callback from the Java
     -- 0 is General
     -- 1 is Admin
-    if tabID == 1 and ISChat.instance.messageTypeSettings ~= nil then
+    if tabID == 1 and YacmServerSettings ~= nil then
         AddTab('Admin', 4)
     end
 end
@@ -869,11 +872,12 @@ local function AskServerData()
 end
 
 ISChat.onRecvSandboxVars = function(messageTypeSettings)
-    if ISChat.instance.messageTypeSettings ~= nil then
+    if YacmServerSettings ~= nil then
         return
     end
     Events.OnPostRender.Remove(AskServerData)
-    ISChat.instance.messageTypeSettings = messageTypeSettings
+    print('SET YacmServerSettings')
+    YacmServerSettings = messageTypeSettings
     if messageTypeSettings['ooc']['enabled'] == true then
         AddTab('Out Of Character', 2)
     end
@@ -1004,10 +1008,6 @@ ISChat.ISTabPanelOnMouseDown = function(target, x, y)
         end
     end
     return false
-end
-
-local function OnInfoButtonClick()
-
 end
 
 local function OnRangeButtonClick()
