@@ -14,5 +14,5 @@ SurvivalGuide_EN {
                                             " /ooc or /o to speak out of character <BR>" ..
                                             " /pm username or /p username to send a private message (/r to answer) <BR>" ..
                                             " /admin or /a to speak in admin channel <BR>" ..
-                                            " /color r,g,b with r,g,b a number from 0 to 255 to update player color",
+                                            " /color r,g,b with r,g,b a number from 0 to 255 or /color #FFFFFF to update player color",
 }

@@ -11,6 +11,8 @@ local RangeIndicator         = require('yacm/ui/RangeIndicator')
 local TypingDots             = require('yacm/ui/TypingDots')
 local YacmClientSendCommands = require('yacm/network/SendYacmClient.lua')
 
+local utils                  = require('yacm/utils')
+
 
 ISChat.allChatStreams     = {}
 ISChat.allChatStreams[1]  = { name = 'say', command = '/say ', shortCommand = '/s ', tabID = 1 }
@@ -275,7 +277,7 @@ local function GetRGBFromString(arguments)
 end
 
 local function ProcessColorCommand(arguments)
-    local color = GetRGBFromString(arguments)
+    local color = GetRGBFromString(arguments) or utils.hexaToRGB(arguments)
     if color == nil then
         return false
     end

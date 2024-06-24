@@ -1,3 +1,5 @@
+local utils = require('yacm/utils')
+
 local function SendYacmServerCommand(player, commandName, args)
     sendServerCommand(player, 'YACM', commandName, args)
 end
@@ -46,18 +48,12 @@ local MessageHasAccessByType = {
 function GetColorSandbox(name)
     local colorString = SandboxVars.YetAnotherChatMod[name .. 'Color']
     local defaultColor = { 255, 0, 255 }
-    local regex = '#[abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d]'
-    if colorString == nil or #colorString ~= 7
-        or colorString:match(regex) == nil
-    then
+    local rgb = utils.hexaToRGB(colorString)
+    if rgb == nil then
         print('error: invalid string for Sandbox Variable: "' .. name .. '"')
         return defaultColor
     end
-    return {
-        tonumber(colorString:sub(2, 3), 16),
-        tonumber(colorString:sub(4, 5), 16),
-        tonumber(colorString:sub(6, 7), 16),
-    }
+    return rgb
 end
 
 local MessageTypeSettings
