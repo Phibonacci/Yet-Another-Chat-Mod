@@ -3,9 +3,6 @@ local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/Version')
 require('yacm/parser/Parser')
 require('yacm/parser/StringBuilder')
 
-local TokenItalic            = require('yacm/lexer/TokenItalic')
-local TokenBold              = require('yacm/lexer/TokenBold')
-
 local Bubble                 = require('yacm/ui/Bubble')
 local RangeIndicator         = require('yacm/ui/RangeIndicator')
 local TypingDots             = require('yacm/ui/TypingDots')
