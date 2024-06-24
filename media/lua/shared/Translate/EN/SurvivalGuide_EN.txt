@@ -1,18 +1,18 @@
 SurvivalGuide_EN {
-    SurvivalGuide_YetAnotherChatMod =    " <H1> YET ANOTHER CHAT MOD <BR>" ..
-                                            " <TEXT> <SIZE:small>" ..
-                                            " <CENTRE> %1 <BR>" ..
-                                            " <TEXT> <SIZE:medium>" ..
-                                            " <IMAGE:media/ui/yacm/icons/eye-on.png> Show the range of the current channel (120 range max) <BR>" ..
-                                            " /whisper or /w to whisper <BR>" ..
-                                            " /low or /l to talk quietly <BR>" ..
-                                            " /say or /s to speak at normal volume <BR>" ..
-                                            " /yell or /y to scream <BR>" ..
-                                            " /faction or /f to speak to faction channel <BR>" ..
-                                            " /safehouse or /sh to speak to safehouse channel <BR>" ..
-                                            " /general or /g to speak to general channel <BR>" ..
-                                            " /ooc or /o to speak out of character <BR>" ..
-                                            " /pm username or /p username to send a private message (/r to answer) <BR>" ..
-                                            " /admin or /a to speak in admin channel <BR>" ..
-                                            " /color r,g,b with r,g,b a number from 0 to 255 or /color #FFFFFF to update player color",
+    SurvivalGuide_YetAnotherChatMod           = " <H1> YET ANOTHER CHAT MOD <BR>" ..
+                                                " <TEXT> <SIZE:small>" ..
+                                                " <CENTRE> %1 <BR>" ..
+                                                " <TEXT> <SIZE:medium>" ..
+                                                " <IMAGE:media/ui/yacm/icons/eye-on.png> Show the range of the current channel (120 range max) <BR>",
+    SurvivalGuide_YetAnotherChatMod_Whisper   = " /whisper or /w to whisper <BR>",
+    SurvivalGuide_YetAnotherChatMod_Low       = " /low or /l to talk quietly <BR>",
+    SurvivalGuide_YetAnotherChatMod_Say       = " /say or /s to speak at normal volume <BR>",
+    SurvivalGuide_YetAnotherChatMod_Yell      = " /yell or /y to scream <BR>",
+    SurvivalGuide_YetAnotherChatMod_Faction   = " /faction or /f to speak to faction channel <BR>",
+    SurvivalGuide_YetAnotherChatMod_SafeHouse = " /safehouse or /sh to speak to safehouse channel <BR>",
+    SurvivalGuide_YetAnotherChatMod_General   = " /general or /g to speak to general channel <BR>",
+    SurvivalGuide_YetAnotherChatMod_Ooc       = " /ooc or /o to speak out of character <BR>",
+    SurvivalGuide_YetAnotherChatMod_Pm        = " /pm username or /p username to send a private message (/r to answer) <BR>",
+    SurvivalGuide_YetAnotherChatMod_Admin     = " /admin or /a to speak in admin channel <BR>",
+    SurvivalGuide_YetAnotherChatMod_Color     = " /color r,g,b with r,g,b a number from 0 to 255 or /color #FFFFFF to update player color",
 }

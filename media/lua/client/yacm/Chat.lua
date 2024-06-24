@@ -79,6 +79,49 @@ local function GetYacmCommandFromMessage(command)
     return nil
 end
 
+local function UpdateTabStreams(newTab, tabID)
+    newTab.chatStreams = {}
+    for _, stream in pairs(ISChat.allChatStreams) do
+        local name = stream['name']
+        if stream['tabID'] == tabID and YacmServerSettings and YacmServerSettings[name] and YacmServerSettings[name]['enabled'] then
+            table.insert(newTab.chatStreams, stream)
+        end
+    end
+    if #newTab.chatStreams >= 1 then
+        ISChat.defaultTabStream[tabID] = newTab.chatStreams[1]
+        newTab.lastChatCommand = newTab.chatStreams[1].command
+    end
+end
+
+ISChat.onSwitchStream = function()
+    if ISChat.focused then
+        local t = ISChat.instance.textEntry;
+        local internalText = t:getInternalText();
+        local data = luautils.split(internalText, " ")
+        local onlineUsers = getOnlinePlayers()
+        for i = 0, onlineUsers:size() - 1 do
+            local username = onlineUsers:get(i):getUsername()
+            if #data > 1 and string.match(string.lower(username), string.lower(data[#data])) then
+                local txt = ""
+                for i = 1, #data - 1 do
+                    txt = txt .. data[i] .. " "
+                end
+                txt = txt .. username
+                ISChat.instance.textEntry:setText(txt);
+                return
+            end
+        end
+
+        local curTxtPanel = ISChat.instance.chatText
+        if curTxtPanel == nil then
+            return
+        end
+        local chatStreams = curTxtPanel.chatStreams
+        curTxtPanel.streamID = curTxtPanel.streamID % #chatStreams + 1
+        ISChat.instance.textEntry:setText(chatStreams[curTxtPanel.streamID].command)
+    end
+end
+
 local function AddTab(tabTitle, tabID)
     local chat = ISChat.instance
     local newTab = chat:createTab()
@@ -86,13 +129,7 @@ local function AddTab(tabTitle, tabID)
     newTab.tabTitle = tabTitle
     newTab.tabID = tabID
     newTab.streamID = 1
-    newTab.chatStreams = {}
-    for _, stream in ipairs(ISChat.allChatStreams) do
-        if stream.tabID == tabID then
-            table.insert(newTab.chatStreams, stream)
-        end
-    end
-    newTab.lastChatCommand = newTab.chatStreams[newTab.streamID].command
+    UpdateTabStreams(newTab, tabID)
     newTab:setUIName("chat text panel with title '" .. tabTitle .. "'")
     local pos = chat:calcTabPos()
     local size = chat:calcTabSize()
@@ -194,6 +231,9 @@ end
 Events.OnGameStart.Add(ISChat.createChat)
 
 local function ProcessChatCommand(stream, command)
+    if YacmServerSettings and YacmServerSettings[stream.name] == false then
+        return false
+    end
     local yacmCommand = ParseYacmMessage(command)
     local playerColor = ISChat.instance.yacmModData['playerColor']
     if yacmCommand == nil then
@@ -312,7 +352,6 @@ function ISChat:onCommandEntered()
                 stream['name'] .. ' from TabID ' .. chat.currentTabID ..
                 ' but TabID ' .. stream.tabID .. ' was expected')
         else
-            chat.chatText.lastChatCommand = commandName
             if #commandName > 0 and #command >= #commandName then
                 -- removing the command and trailing space '/command '
                 command = string.sub(command, #commandName + 1)
@@ -323,6 +362,7 @@ function ISChat:onCommandEntered()
             if not ProcessChatCommand(stream, command) then
                 return
             end
+            chat.chatText.lastChatCommand = commandName
             chat:logChatCommand(command)
         end
     elseif yacmCommand ~= nil then
@@ -862,7 +902,8 @@ ISChat.onTabAdded = function(tabTitle, tabID)
     -- callback from the Java
     -- 0 is General
     -- 1 is Admin
-    if tabID == 1 and YacmServerSettings ~= nil then
+    if tabID == 1 and YacmServerSettings ~= nil and YacmServerSettings['admin']['enabled']
+        and ISChat.instance.tabs[4] == nil then
         AddTab('Admin', 4)
     end
 end
@@ -887,37 +928,62 @@ local function AskServerData()
     YacmClientSendCommands.sendAskSandboxVars()
 end
 
-ISChat.onRecvSandboxVars = function(messageTypeSettings)
-    if YacmServerSettings ~= nil then
-        return
+local function UpdateInfoWindow()
+    local info = getText('SurvivalGuide_YetAnotherChatMod', YET_ANOTHER_CHAT_MOD_VERSION)
+    if YacmServerSettings['whisper']['enabled'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_Whisper')
     end
-    Events.OnPostRender.Remove(AskServerData)
-    print('SET YacmServerSettings')
-    YacmServerSettings = messageTypeSettings
-    if messageTypeSettings['ooc']['enabled'] == true then
-        AddTab('Out Of Character', 2)
+    if YacmServerSettings['low']['enabled'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_Low')
     end
-    if messageTypeSettings['pm']['enabled'] == true then
-        AddTab('Private Message', 3)
+    if YacmServerSettings['say']['enabled'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_Say')
     end
-    if getPlayer():getAccessLevel() == 'Admin' then
-        AddTab('Admin', 4)
+    if YacmServerSettings['yell']['enabled'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_Yell')
     end
-    UpdateRangeIndicator(ISChat.defaultTabStream[ISChat.instance.currentTabID])
+    if YacmServerSettings['pm']['enabled'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_Pm')
+    end
+    if YacmServerSettings['faction']['enabled'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_Faction')
+    end
+    if YacmServerSettings['safehouse']['enabled'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_SafeHouse')
+    end
+    if YacmServerSettings['general']['enabled'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_General')
+    end
+    if YacmServerSettings['admin']['enabled'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_Admin')
+    end
+    if YacmServerSettings['ooc']['enabled'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_Ooc')
+    end
+    info = info .. getText('SurvivalGuide_YetAnotherChatMod_Color')
+    ISChat.instance:setInfo(info)
 end
 
-ISChat.onTabRemoved = function(tabTitle, tabID)
-    if tabID ~= 1 then -- Admin tab is 1 in the Java code
-        return
+local function HasAtLeastOneChanelEnabled(tabId)
+    if YacmServerSettings == nil then
+        return false
     end
-    tabID = 4 -- Admin tab is 3 in our table
-    local foundTab
-    for tabId, tab in pairs(ISChat.instance.tabs) do
-        if tabID == tab.tabID then
-            foundTab = tab
-            table.remove(ISChat.instance.tabs, tabId)
-            break
+    for _, stream in pairs(ISChat.allChatStreams) do
+        local name = stream['name']
+        if stream['tabID'] == tabId and YacmServerSettings[name] and YacmServerSettings[name]['enabled'] then
+            return true
         end
+    end
+    return false
+end
+
+local function RemoveTab(tabTitle, tabID)
+    local foundTab
+    if ISChat.instance.tabs[tabID] ~= nil then
+        foundTab = ISChat.instance.tabs[tabID]
+        ISChat.instance.tabs[tabID] = nil
+    else
+        return
     end
     if ISChat.instance.tabCnt > 1 then
         for i, blinkedTab in ipairs(ISChat.instance.panel.blinkTabs) do
@@ -948,6 +1014,38 @@ ISChat.onTabRemoved = function(tabTitle, tabID)
         ISChat.instance.chatText:setVisible(true)
     end
     ISChat.instance:onActivateView()
+end
+
+ISChat.onRecvSandboxVars = function(messageTypeSettings)
+    if YacmServerSettings ~= nil then
+        return
+    end
+    Events.OnPostRender.Remove(AskServerData)
+    YacmServerSettings = messageTypeSettings
+    if HasAtLeastOneChanelEnabled(2) == true then
+        AddTab('Out Of Character', 2)
+    end
+    if HasAtLeastOneChanelEnabled(3) == true then
+        AddTab('Private Message', 3)
+    end
+    if getPlayer():getAccessLevel() == 'Admin' and messageTypeSettings['admin']['enabled'] then
+        AddTab('Admin', 4)
+    end
+    if ISChat.instance.tabCnt > 1 and not HasAtLeastOneChanelEnabled(1) then
+        RemoveTab('General', 1)
+    else
+        UpdateTabStreams(ISChat.instance.tabs[1], 1)
+    end
+
+    UpdateRangeIndicator(ISChat.defaultTabStream[ISChat.instance.currentTabID])
+    UpdateInfoWindow()
+end
+
+ISChat.onTabRemoved = function(tabTitle, tabID)
+    if tabID ~= 1 then -- Admin tab is 1 in the Java code
+        return
+    end
+    RemoveTab(4) -- Admin tab is 3 in our table
 end
 
 ISChat.onSetDefaultTab = function(defaultTabTitle)
@@ -1118,7 +1216,9 @@ function ISChat:createChildren()
     self.infoButton:setUIName(ISChat.infoButtonName)
     self:addChild(self.infoButton)
     self.infoButton:setVisible(true)
-    self:setInfo(getText("SurvivalGuide_YetAnotherChatMod", YET_ANOTHER_CHAT_MOD_VERSION))
+    local info = getText('SurvivalGuide_YetAnotherChatMod', YET_ANOTHER_CHAT_MOD_VERSION)
+    info = info .. getText('SurvivalGuide_YetAnotherChatMod_Color')
+    self:setInfo(info)
 
 
     --range button
