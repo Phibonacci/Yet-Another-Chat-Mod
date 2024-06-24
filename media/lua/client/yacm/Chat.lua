@@ -93,6 +93,20 @@ local function UpdateTabStreams(newTab, tabID)
     end
 end
 
+local function UpdateRangeIndicator(stream)
+    if YacmServerSettings ~= nil
+        and YacmServerSettings[stream.name]['range'] ~= nil
+        and YacmServerSettings[stream.name]['range'] ~= -1
+        and YacmServerSettings[stream.name]['color'] ~= nil
+    then
+        local range = YacmServerSettings[stream.name]['range']
+        ISChat.instance.rangeIndicator = RangeIndicator:new(range,
+            YacmServerSettings[stream.name]['color'])
+    else
+        ISChat.instance.rangeIndicator = nil
+    end
+end
+
 ISChat.onSwitchStream = function()
     if ISChat.focused then
         local t = ISChat.instance.textEntry;
@@ -119,6 +133,7 @@ ISChat.onSwitchStream = function()
         local chatStreams = curTxtPanel.chatStreams
         curTxtPanel.streamID = curTxtPanel.streamID % #chatStreams + 1
         ISChat.instance.textEntry:setText(chatStreams[curTxtPanel.streamID].command)
+        UpdateRangeIndicator(chatStreams[curTxtPanel.streamID])
     end
 end
 
@@ -803,18 +818,6 @@ function ISChat:render()
     ISCollapsableWindow.render(self)
 end
 
-local function UpdateRangeIndicator(stream)
-    if YacmServerSettings ~= nil
-        and YacmServerSettings[stream.name]['range'] ~= nil
-        and YacmServerSettings[stream.name]['range'] ~= -1
-        and YacmServerSettings[stream.name]['color'] ~= nil
-    then
-        local range = YacmServerSettings[stream.name]['range']
-        ISChat.instance.rangeIndicator = RangeIndicator:new(range,
-            YacmServerSettings[stream.name]['color'])
-    end
-end
-
 function IsOnlyCommand(text)
     return text:match('/%a* *') == text
 end
@@ -1118,7 +1121,6 @@ ISChat.ISTabPanelOnMouseDown = function(target, x, y)
             target.draggingTab = tabIndex - 1
             local clickedTab = target.viewList[target.draggingTab + 1]
             target:activateView(clickedTab.name)
-            return true
         end
     end
     return false
@@ -1134,6 +1136,27 @@ local function OnRangeButtonClick()
     else
         ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-off.png"))
     end
+end
+
+-- redefining ISTabPanel:activateView to remove the update of the info button
+local function PanelActivateView(panel, viewName)
+    local self = panel
+    for ind, value in ipairs(self.viewList) do
+        -- we get the view we want to display
+        if value.name == viewName then
+            self.activeView.view:setVisible(false);
+            value.view:setVisible(true);
+            self.activeView = value;
+            self:ensureVisible(ind)
+
+            if self.onActivateView and self.target then
+                self.onActivateView(self.target, self)
+            end
+
+            return true
+        end
+    end
+    return false
 end
 
 function ISChat:createChildren()
@@ -1295,6 +1318,7 @@ function ISChat:createChildren()
     self.panel.onMouseDown = ISChat.ISTabPanelOnMouseDown
     self.panel:setUIName(ISChat.tabPanelName)
     self:addChild(self.panel)
+    self.panel.activateView = PanelActivateView
 
     self:bringToTop()
     self.textEntry:bringToTop()
@@ -1313,9 +1337,13 @@ function ISChat:focus()
     self.textEntry:focus()
     self.textEntry:ignoreFirstInput()
     self.textEntry:setText(self.chatText.lastChatCommand)
-    local stream = GetCommandFromMessage(self.chatText.lastChatCommand)
-    if stream ~= nil then
-        UpdateRangeIndicator(stream)
+    if self.chatText.lastChatCommand ~= nil then
+        local stream = GetCommandFromMessage(self.chatText.lastChatCommand)
+        if stream ~= nil then
+            UpdateRangeIndicator(stream)
+        end
+    else
+        ISChat.instance.rangeIndicator = nil
     end
     self.fade:reset()
     self.fade:update() --reset fraction to start value
