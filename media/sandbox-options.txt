@@ -1,5 +1,14 @@
 VERSION = 1,
 
+option YetAnotherChatMod.VerbEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_VerbEnabled
+}
+
 option YetAnotherChatMod.MarkdownOneAsteriskColor
 {
 	type = string,

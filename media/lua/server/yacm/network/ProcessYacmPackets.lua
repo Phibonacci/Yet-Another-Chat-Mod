@@ -132,6 +132,9 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.OutOfCharacterMessageEnabled,
             ['color'] = GetColorSandbox('OutOfCharacterMessage'),
         },
+        ['options'] = {
+            ['verb'] = SandboxVars.YetAnotherChatMod.VerbEnabled
+        }
     }
 end
 

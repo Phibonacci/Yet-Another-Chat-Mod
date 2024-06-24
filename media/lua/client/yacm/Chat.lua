@@ -446,11 +446,19 @@ function BuildMessageFromPacket(packet)
         radioPrefix = '(' .. string.format('%.1fMHz', packet.frequency / 1000) .. '), '
     end
     local messageColorString = BuildBracketColorString(messageColor)
-    local quote = BuildQuote(packet.type)
+    local quote
+    local verbString
+    if YacmServerSettings == nil or YacmServerSettings['options']['verb'] == true then
+        quote = BuildQuote(packet.type)
+        verbString = BuildVerbString(packet.type)
+    else
+        quote = ''
+        verbString = ' '
+    end
     local formatedMessage = BuildBracketColorString(packet['color']) ..
         packet.author ..
         BuildBracketColorString({ 150, 150, 150 }) ..
-        BuildVerbString(packet.type) ..
+        verbString ..
         radioPrefix .. messageColorString .. quote .. message.body .. messageColorString .. quote
     return formatedMessage, message
 end

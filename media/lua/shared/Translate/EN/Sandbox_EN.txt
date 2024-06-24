@@ -1,8 +1,10 @@
 Sandbox_EN = {
     Sandbox_YetAnotherChatMod                              = "Yet Another Chat Mod"
 
-    Sandbox_YetAnotherChatMod_MarkdownOneAsteriskColor      = "Markdown one asterisk color"
-    Sandbox_YetAnotherChatMod_MarkdownTwoAsterisksColor     = "Markdown two asterisks color"
+    Sandbox_YetAnotherChatMod_VerbEnabled                  = "Add verb prefix to messages, and quotes"
+
+    Sandbox_YetAnotherChatMod_MarkdownOneAsteriskColor     = "Markdown one asterisk color"
+    Sandbox_YetAnotherChatMod_MarkdownTwoAsterisksColor    = "Markdown two asterisks color"
 
     Sandbox_YetAnotherChatMod_WhisperEnabled               = "Enable /whisper chat",
     Sandbox_YetAnotherChatMod_LowEnabled                   = "Enable /low chat",
