@@ -18,13 +18,8 @@ end
 
 function TokenItalic:getColor()
     if YacmServerSettings ~= nil then
-        print('ITALIC IS SET')
-        print(YacmServerSettings['markdown']['italic']['color'][1])
-        print(YacmServerSettings['markdown']['italic']['color'][2])
-        print(YacmServerSettings['markdown']['italic']['color'][3])
         return YacmServerSettings['markdown']['italic']['color']
     else
-        print('ITALIC IS NILL')
         return TokenItalic.color
     end
 end
