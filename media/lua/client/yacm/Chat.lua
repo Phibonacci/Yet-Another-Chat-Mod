@@ -492,7 +492,13 @@ function CreateBubble(author, message, rawMessage)
     if authorObj == nil then
         return
     end
-    local bubble = Bubble:new(authorObj, message, rawMessage, 10)
+    local timer = 10
+    local opacity = 60
+    if YacmServerSettings then
+        timer = YacmServerSettings['options']['bubble']['timer']
+        opacity = YacmServerSettings['options']['bubble']['opacity']
+    end
+    local bubble = Bubble:new(authorObj, message, rawMessage, timer, opacity)
     ISChat.instance.bubble[author] = bubble
     -- the player is not typing anymore if his bubble appears
     if ISChat.instance.typingDots[author] ~= nil then

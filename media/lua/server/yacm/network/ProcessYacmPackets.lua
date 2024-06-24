@@ -129,7 +129,11 @@ local function SetMessageTypeSettings()
             ['color'] = GetColorSandbox('OutOfCharacterMessage'),
         },
         ['options'] = {
-            ['verb'] = SandboxVars.YetAnotherChatMod.VerbEnabled
+            ['verb'] = SandboxVars.YetAnotherChatMod.VerbEnabled,
+            ['bubble'] = {
+                ['timer'] = SandboxVars.YetAnotherChatMod.BubbleTimerInSeconds,
+                ['opacity'] = SandboxVars.YetAnotherChatMod.BubbleOpacity
+            },
         }
     }
 end

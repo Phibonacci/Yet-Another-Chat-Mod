@@ -1,5 +1,26 @@
 VERSION = 1,
 
+option YetAnotherChatMod.BubbleTimerInSeconds
+{
+	type = integer,
+	min = 1,
+	max = 20,
+	default = 8,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_BubbleTimerInSeconds,
+}
+option YetAnotherChatMod.BubbleOpacity
+{
+	type = integer,
+	min = 0,
+	max = 100,
+	default = 75,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_BubbleOpacity,
+}
+
 option YetAnotherChatMod.VerbEnabled
 {
 	type = boolean,

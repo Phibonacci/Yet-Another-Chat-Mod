@@ -26,10 +26,10 @@ function Bubble:render()
     local scale = 1
     local alpha
     if self.timer - elapsedTime > 1000 then
-        alpha = 1
+        alpha = self.opacity
     elseif self.timer - elapsedTime > 0 then
         local fadingTime = elapsedTime - (self.timer - 1000)
-        alpha = (1000 - fadingTime) / 1000
+        alpha = (1000 - fadingTime) / 1000 * self.opacity
     else
         self.dead = true
         return
@@ -73,7 +73,7 @@ end
 function Bubble:prerender()
 end
 
-function Bubble:new(player, text, rawText, timer)
+function Bubble:new(player, text, rawText, timer, opacity)
     local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
     print('textX: ' .. textLength)
     local width = math.min(textLength * 1.25, 162) + 40
@@ -86,6 +86,7 @@ function Bubble:new(player, text, rawText, timer)
     o.player = player
     o.text = BuildFontSizeString('medium') .. text
     o.timer = timer * 1000
+    o.opacity = opacity / 100
     o.background = true
     o.backgroundColor = { r = 0, g = 0, b = 0, a = 0.5 }
     o.borderColor = { r = 0.4, g = 0.4, b = 0.4, a = 1 }
