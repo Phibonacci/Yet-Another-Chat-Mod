@@ -3,7 +3,7 @@ SurvivalGuide_EN {
                                             " <TEXT> <SIZE:small>" ..
                                             " <CENTRE> %1 <BR>" ..
                                             " <TEXT> <SIZE:medium>" ..
-                                            " <IMAGE:media/ui/yacm/icons/eye-on.png> Show the range of the current channel (if range is lower than 60 tiles) <BR>" ..
+                                            " <IMAGE:media/ui/yacm/icons/eye-on.png> Show the range of the current channel (120 range max) <BR>" ..
                                             " /whisper or /w to whisper <BR>" ..
                                             " /low or /l to talk quietly <BR>" ..
                                             " /say or /s to speak at normal volume <BR>" ..

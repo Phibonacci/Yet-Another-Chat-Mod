@@ -5,9 +5,6 @@ local RangeIndicator = ISUIElement:derive("RangeIndicator")
 -- draw a square at the center and parts of losanges on the borders to avoid
 -- drawing too many losanges and hurt the performances
 function RangeIndicator:render()
-    if self.range > 60 then
-        return
-    end
     local zoom = coordinates.GetZoom()
     local width = 128 / zoom
     local height = 64 / zoom
@@ -34,47 +31,50 @@ function RangeIndicator:render()
     local tileTextureLeft = getTexture('media/ui/yacm/indicator/white-tile-left.png')
     local tileTextureRight = getTexture('media/ui/yacm/indicator/white-tile-right.png')
 
-    for j = -self.range, self.range do
-        local i = -self.range + math.abs(j)
-        local xTile = j * width / 2 + i * width / 2
-        local yTile = -j * height / 2 + i * height / 2
-        local texture
-        if j == -self.range then
-            texture = tileTextureBotLeft
-        elseif j < 0 then
-            texture = tileTextureLeft
-        elseif j == 0 then
-            texture = tileTextureTopLeft
-        elseif j == self.range then
-            texture = tileTextureTopRight
-        else
-            texture = tileTextureTop
-        end
-        self:drawTextureScaled(texture, xTile, yTile,
-            width, height, alpha,
-            self.color[1] / 255, self.color[2] / 255, self.color[3] / 255)
-        if i ~= self.range - math.abs(j) then
-            i = self.range - math.abs(j)
-            xTile = j * width / 2 + i * width / 2
-            yTile = -j * height / 2 + i * height / 2
-            if j == 0 then
-                texture = tileTextureBotRight
-            elseif j > 0 then
-                texture = tileTextureRight
+    if self.range <= 120 then
+        for j = -self.range, self.range do
+            local i = -self.range + math.abs(j)
+            local xTile = j * width / 2 + i * width / 2
+            local yTile = -j * height / 2 + i * height / 2
+            local texture
+            if j == -self.range then
+                texture = tileTextureBotLeft
+            elseif j < 0 then
+                texture = tileTextureLeft
+            elseif j == 0 then
+                texture = tileTextureTopLeft
+            elseif j == self.range then
+                texture = tileTextureTopRight
             else
-                texture = tileTextureBot
+                texture = tileTextureTop
             end
             self:drawTextureScaled(texture, xTile, yTile,
                 width, height, alpha,
                 self.color[1] / 255, self.color[2] / 255, self.color[3] / 255)
+            if i ~= self.range - math.abs(j) then
+                i = self.range - math.abs(j)
+                xTile = j * width / 2 + i * width / 2
+                yTile = -j * height / 2 + i * height / 2
+                if j == 0 then
+                    texture = tileTextureBotRight
+                elseif j > 0 then
+                    texture = tileTextureRight
+                else
+                    texture = tileTextureBot
+                end
+                self:drawTextureScaled(texture, xTile, yTile,
+                    width, height, alpha,
+                    self.color[1] / 255, self.color[2] / 255, self.color[3] / 255)
+            end
         end
     end
+    local range = math.min(120, self.range)
     local xTile, yTile = coordinates.CenterFeetOfPlayer(getPlayer(),
-        width * self.range, height * self.range)
+        width * range, height * range)
     self:setX(xTile - xOffset)
     self:setY(yTile - yOffset)
     self:drawRectStatic(0, 0,
-        width * self.range, height * self.range, alpha,
+        width * range, height * range, alpha,
         self.color[1] / 255, self.color[2] / 255, self.color[3] / 255)
 end
 
