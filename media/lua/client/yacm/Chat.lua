@@ -1,5 +1,7 @@
 local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/Version')
 
+local ChatUI = require('yacm/ui/ChatUI')
+
 require('yacm/parser/Parser')
 require('yacm/parser/StringBuilder')
 
@@ -106,8 +108,8 @@ end
 
 ISChat.onSwitchStream = function()
     if ISChat.focused then
-        local t = ISChat.instance.textEntry;
-        local internalText = t:getInternalText();
+        local t = ISChat.instance.textEntry
+        local internalText = t:getInternalText()
         local data = luautils.split(internalText, " ")
         local onlineUsers = getOnlinePlayers()
         for i = 0, onlineUsers:size() - 1 do
@@ -118,7 +120,7 @@ ISChat.onSwitchStream = function()
                     txt = txt .. data[i] .. " "
                 end
                 txt = txt .. username
-                ISChat.instance.textEntry:setText(txt);
+                ISChat.instance.textEntry:setText(txt)
                 return
             end
         end
@@ -217,7 +219,7 @@ end
 
 Events.OnGameStart.Remove(ISChat.createChat)
 
-ISChat.createChat = function()
+local function CreateChat()
     if not isClient() then
         return
     end
@@ -240,7 +242,7 @@ ISChat.createChat = function()
     Events.SwitchChatStream.Add(ISChat.onSwitchStream)
 end
 
-Events.OnGameStart.Add(ISChat.createChat)
+Events.OnGameStart.Add(CreateChat)
 
 local function ProcessChatCommand(stream, command)
     if YacmServerSettings and YacmServerSettings[stream.name] == false then
@@ -812,7 +814,11 @@ function ISChat:render()
             ISChat.instance.typingDots[index] = nil
         end
     end
-    ISCollapsableWindow.render(self)
+    ChatUI.render(self)
+end
+
+function ISChat:prerender()
+    ChatUI.prerender(self)
 end
 
 function IsOnlyCommand(text)
@@ -860,6 +866,12 @@ function ISChat:onActivateView()
     end
 end
 
+local function RenderChatText(self)
+    self:setStencilRect(0, 0, self.width, self.height)
+    ISRichTextPanel.render(self)
+    self:clearStencilRect()
+end
+
 function ISChat:createTab()
     local chatY = self:titleBarHeight() + self.btnHeight + 2 * self.inset
     local chatHeight = self.textEntry:getY() - chatY
@@ -876,7 +888,7 @@ function ISChat:createTab()
     chatText.marginTop = 2
     chatText.marginBottom = 0
     chatText.onRightMouseUp = nil
-    chatText.render = ISChat.render_chatText
+    chatText.render = RenderChatText
     chatText.autosetheight = false
     chatText:addScrollBars()
     chatText.vscroll:setVisible(false)
@@ -890,12 +902,6 @@ function ISChat:createTab()
     chatText.onMouseUp = ISChat.onMouseUp
     chatText.onMouseDown = ISChat.onMouseDown
     return chatText
-end
-
-function ISChat:render_chatText()
-    self:setStencilRect(0, 0, self.width, self.height)
-    ISRichTextPanel.render(self)
-    self:clearStencilRect()
 end
 
 ISChat.onTabAdded = function(tabTitle, tabID)
@@ -979,10 +985,13 @@ end
 
 local function RemoveTab(tabTitle, tabID)
     local foundTab
+    print('REMOVE TAB ' .. tabID)
     if ISChat.instance.tabs[tabID] ~= nil then
         foundTab = ISChat.instance.tabs[tabID]
+        print('TAB FOUND')
         ISChat.instance.tabs[tabID] = nil
     else
+        print('TAB NOT FOUND')
         return
     end
     if ISChat.instance.tabCnt > 1 then
@@ -1045,7 +1054,7 @@ ISChat.onTabRemoved = function(tabTitle, tabID)
     if tabID ~= 1 then -- Admin tab is 1 in the Java code
         return
     end
-    RemoveTab(4) -- Admin tab is 3 in our table
+    RemoveTab('Admin', 4) -- Admin tab is 4 in our table
 end
 
 ISChat.onSetDefaultTab = function(defaultTabTitle)
@@ -1141,9 +1150,9 @@ local function PanelActivateView(panel, viewName)
     for ind, value in ipairs(self.viewList) do
         -- we get the view we want to display
         if value.name == viewName then
-            self.activeView.view:setVisible(false);
-            value.view:setVisible(true);
-            self.activeView = value;
+            self.activeView.view:setVisible(false)
+            value.view:setVisible(true)
+            self.activeView = value
             self:ensureVisible(ind)
 
             if self.onActivateView and self.target then
@@ -1278,7 +1287,8 @@ function ISChat:createChildren()
         height)
     self.textEntry.font = UIFont.Medium
     self.textEntry:initialise()
-    self.textEntry:instantiate()
+    -- self.textEntry:instantiate()
+    ChatUI.textEntry.instantiate(self.textEntry)
     self.textEntry.backgroundColor = { r = 0, g = 0, b = 0, a = 0.5 }
     self.textEntry.borderColor = { r = 1, g = 1, b = 1, a = 0.0 }
     self.textEntry:setHasFrame(true)
@@ -1294,6 +1304,7 @@ function ISChat:createChildren()
     self.textEntry:setUIName(ISChat.textEntryName) -- need to be right this. If it will empty or another then focus will lost on click in chat
     self.textEntry:setHasFrame(true)
     self:addChild(self.textEntry)
+    self.textEntry.prerender = ChatUI.textEntry.prerender
     ISChat.maxTextEntryOpaque = self.textEntry:getFrameAlpha()
 
     --tab panel stuff
@@ -1316,6 +1327,8 @@ function ISChat:createChildren()
     self.panel:setUIName(ISChat.tabPanelName)
     self:addChild(self.panel)
     self.panel.activateView = PanelActivateView
+    self.panel.render = ChatUI.tabPanel.render
+    self.panel.prerender = ChatUI.tabPanel.prerender
 
     self:bringToTop()
     self.textEntry:bringToTop()
@@ -1354,6 +1367,92 @@ function ISChat:unfocus()
     end
     ISChat.focused = false
     self.textEntry:setEditable(false)
+end
+
+function ISChat:onGearButtonClick()
+    local context = ISContextMenu.get(0, self:getAbsoluteX() + self:getWidth() / 2,
+        self:getAbsoluteY() + self.gearButton:getY())
+
+    local timestampOptionName = getText("UI_chat_context_enable_timestamp")
+    if self.showTimestamp then
+        timestampOptionName = getText("UI_chat_context_disable_timestamp")
+    end
+    context:addOption(timestampOptionName, ISChat.instance, ISChat.onToggleTimestampPrefix)
+
+    local tagOptionName = getText("UI_chat_context_enable_tags")
+    if self.showTitle then
+        tagOptionName = getText("UI_chat_context_disable_tags")
+    end
+    context:addOption(tagOptionName, ISChat.instance, ISChat.onToggleTagPrefix)
+
+    local fontSizeOption = context:addOption(getText("UI_chat_context_font_submenu_name"), ISChat.instance)
+    local fontSubMenu = context:getNew(context)
+    context:addSubMenu(fontSizeOption, fontSubMenu)
+    fontSubMenu:addOption(getText("UI_chat_context_font_small"), ISChat.instance, ISChat.onFontSizeChange, "small")
+    fontSubMenu:addOption(getText("UI_chat_context_font_medium"), ISChat.instance, ISChat.onFontSizeChange, "medium")
+    fontSubMenu:addOption(getText("UI_chat_context_font_large"), ISChat.instance, ISChat.onFontSizeChange, "large")
+    if self.chatFont == "small" then
+        fontSubMenu:setOptionChecked(fontSubMenu.options[1], true)
+    elseif self.chatFont == "medium" then
+        fontSubMenu:setOptionChecked(fontSubMenu.options[2], true)
+    elseif self.chatFont == "large" then
+        fontSubMenu:setOptionChecked(fontSubMenu.options[3], true)
+    end
+
+    local minOpaqueOption = context:addOption(getText("UI_chat_context_opaque_min"), ISChat.instance)
+    local minOpaqueSubMenu = context:getNew(context)
+    context:addSubMenu(minOpaqueOption, minOpaqueSubMenu)
+    local opaques = { 0, 0.25, 0.5, 0.6, 0.75, 1 }
+    for i = 1, #opaques do
+        if logTo01(opaques[i]) <= self.maxOpaque then
+            local option = minOpaqueSubMenu:addOption((opaques[i] * 100) .. "%", ISChat.instance,
+                ISChat.onMinOpaqueChange, opaques[i])
+            local current = math.floor(self.minOpaque * 1000)
+            local value = math.floor(logTo01(opaques[i]) * 1000)
+            if current == value then
+                minOpaqueSubMenu:setOptionChecked(option, true)
+            end
+        end
+    end
+
+    local maxOpaqueOption = context:addOption(getText("UI_chat_context_opaque_max"), ISChat.instance)
+    local maxOpaqueSubMenu = context:getNew(context)
+    context:addSubMenu(maxOpaqueOption, maxOpaqueSubMenu)
+    for i = 1, #opaques do
+        if logTo01(opaques[i]) >= self.minOpaque then
+            local option = maxOpaqueSubMenu:addOption((opaques[i] * 100) .. "%", ISChat.instance,
+                ISChat.onMaxOpaqueChange, opaques[i])
+            local current = math.floor(self.maxOpaque * 1000)
+            local value = math.floor(logTo01(opaques[i]) * 1000)
+            if current == value then
+                maxOpaqueSubMenu:setOptionChecked(option, true)
+            end
+        end
+    end
+
+    local fadeTimeOption = context:addOption(getText("UI_chat_context_opaque_fade_time_submenu_name"), ISChat.instance)
+    local fadeTimeSubMenu = context:getNew(context)
+    context:addSubMenu(fadeTimeOption, fadeTimeSubMenu)
+    local availFadeTime = { 0, 1, 2, 3, 5, 10 }
+    local option = fadeTimeSubMenu:addOption(getText("UI_chat_context_disable"), ISChat.instance, ISChat
+        .onFadeTimeChange, 0)
+    if 0 == self.fadeTime then
+        fadeTimeSubMenu:setOptionChecked(option, true)
+    end
+    for i = 2, #availFadeTime do
+        local time = availFadeTime[i]
+        option = fadeTimeSubMenu:addOption(time .. " s", ISChat.instance, ISChat.onFadeTimeChange, time)
+        if time == self.fadeTime then
+            fadeTimeSubMenu:setOptionChecked(option, true)
+        end
+    end
+
+    local opaqueOnFocusOption = context:addOption(getText("UI_chat_context_opaque_on_focus"), ISChat.instance)
+    local opaqueOnFocusSubMenu = context:getNew(context)
+    context:addSubMenu(opaqueOnFocusOption, opaqueOnFocusSubMenu)
+    opaqueOnFocusSubMenu:addOption(getText("UI_chat_context_disable"), ISChat.instance, ISChat.onFocusOpaqueChange, false)
+    opaqueOnFocusSubMenu:addOption(getText("UI_chat_context_enable"), ISChat.instance, ISChat.onFocusOpaqueChange, true)
+    opaqueOnFocusSubMenu:setOptionChecked(opaqueOnFocusSubMenu.options[self.opaqueOnFocus and 2 or 1], true)
 end
 
 Events.OnChatWindowInit.Add(ISChat.initChat)
