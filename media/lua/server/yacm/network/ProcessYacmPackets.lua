@@ -13,7 +13,9 @@ local function SendErrorMessage(player, type, message)
 end
 
 local function PlayersDistance(source, target)
-    return math.floor(source:DistTo(target:getX(), target:getY()) + 0.5)
+    local stupidDistance = source:DistTo(target:getX(), target:getY())
+    local accurateDistance = math.max(stupidDistance - 1, 0)
+    return math.floor(accurateDistance + 0.5)
 end
 
 local MessageHasAccessByType = {
@@ -211,7 +213,7 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
     for i = 0, connectedPlayers:size() - 1 do
         local connectedPlayer = connectedPlayers:get(i)
         if (connectedPlayer:getOnlineID() == player:getOnlineID()
-                or range == -1 or PlayersDistance(player, connectedPlayer) < range)
+                or range == -1 or PlayersDistance(player, connectedPlayer) <= range + 0.001)
             and IsAllowed(player, connectedPlayer, args)
         then
             SendYacmServerCommand(connectedPlayer, packetType, args)
