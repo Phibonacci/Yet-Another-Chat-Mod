@@ -33,7 +33,7 @@ option YetAnotherChatMod.VerbEnabled
 option YetAnotherChatMod.MarkdownOneAsteriskColor
 {
 	type = string,
-	default = #5DFF3C,
+	default = #ADD4A0,
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_MarkdownOneAsteriskColor
@@ -41,7 +41,7 @@ option YetAnotherChatMod.MarkdownOneAsteriskColor
 option YetAnotherChatMod.MarkdownTwoAsterisksColor
 {
 	type = string,
-	default = #FF1C4D,
+	default = #C3A4CF,
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_MarkdownTwoAsterisksColor,
@@ -75,20 +75,10 @@ option YetAnotherChatMod.WhisperZombieRange
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_WhisperZombieRange,
 }
-option YetAnotherChatMod.WhisperZombieRange
-{
-	type = integer,
-	min = 1,
-	max = 10000,
-	default = 3,
-
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_WhisperZombieRange,
-}
 option YetAnotherChatMod.WhisperColor
 {
 	type = string,
-	default = #82C8C8,
+	default = #B4FFC5,
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_WhisperColor,
@@ -125,7 +115,7 @@ option YetAnotherChatMod.LowZombieRange
 option YetAnotherChatMod.LowColor
 {
 	type = string,
-	default = #B4E6E6,
+	default = #B4FFFF,
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_LowColor,
@@ -216,7 +206,7 @@ option YetAnotherChatMod.PrivateMessageEnabled
 option YetAnotherChatMod.PrivateMessageColor
 {
 	type = string,
-	default = #FF95D3,
+	default = #FFB8DA,
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_PrivateMessageColor,
@@ -233,7 +223,7 @@ option YetAnotherChatMod.FactionMessageEnabled
 option YetAnotherChatMod.FactionMessageColor
 {
 	type = string,
-	default = #64FF42,
+	default = #AAFFAA,
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_FactionMessageColor,
@@ -250,7 +240,7 @@ option YetAnotherChatMod.SafeHouseMessageEnabled
 option YetAnotherChatMod.SafeHouseMessageColor
 {
 	type = string,
-	default = #DCFF50,
+	default = #FFFF60,
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_SafeHouseMessageColor,
@@ -267,7 +257,7 @@ option YetAnotherChatMod.GeneralMessageEnabled
 option YetAnotherChatMod.GeneralMessageColor
 {
 	type = string,
-	default = #6D6FAA,
+	default = #BEBEFF,
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_GeneralMessageColor,
@@ -284,7 +274,7 @@ option YetAnotherChatMod.AdminMessageEnabled
 option YetAnotherChatMod.AdminMessageColor
 {
 	type = string,
-	default = #E6826F,
+	default = #FFAAAA,
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_AdminMessageColor,
