@@ -26,6 +26,9 @@ function TypingDots:render()
         texture = typingDots3
     end
     local x, y = coordinates.CenterTopOfPlayer(self.player, 20, 6)
+    if x == nil then
+        return
+    end
     self:setX(x)
     self:setY(y - 6)
     self:drawTexture(texture, 0, 0, 1)
@@ -38,6 +41,9 @@ end
 function TypingDots:new(player, timer)
     TypingDots.__index = self
     local x, y = coordinates.CenterTopOfPlayer(player, 20, 6)
+    if x == nil then
+        x, y = 0, 0
+    end
     setmetatable(TypingDots, { __index = ISUIElement })
     local o = ISUIElement:new(x, y, 20, 6)
     setmetatable(o, TypingDots)

@@ -47,6 +47,24 @@ option YetAnotherChatMod.MarkdownTwoAsterisksColor
 	translation = YetAnotherChatMod_MarkdownTwoAsterisksColor,
 }
 
+option YetAnotherChatMod.RadioChatEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_RadioChatEnabled,
+}
+
+option YetAnotherChatMod.RadioColor
+{
+	type = string,
+	default = #ABF08C,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_RadioColor,
+}
+
 option YetAnotherChatMod.WhisperEnabled
 {
 	type = boolean,

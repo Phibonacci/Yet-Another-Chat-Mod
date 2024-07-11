@@ -5,7 +5,8 @@ local ChatUI = require('yacm/ui/ChatUI')
 require('yacm/parser/Parser')
 require('yacm/parser/StringBuilder')
 
-local Bubble                 = require('yacm/ui/Bubble')
+local PlayerBubble           = require('yacm/ui/bubble/PlayerBubble')
+local RadioBubble            = require('yacm/ui/bubble/RadioBubble')
 local RangeIndicator         = require('yacm/ui/RangeIndicator')
 local TypingDots             = require('yacm/ui/TypingDots')
 local YacmClientSendCommands = require('yacm/network/SendYacmClient.lua')
@@ -21,9 +22,10 @@ ISChat.allChatStreams[4]  = { name = 'yell', command = '/yell ', shortCommand = 
 ISChat.allChatStreams[5]  = { name = 'faction', command = '/faction ', shortCommand = '/f ', tabID = 1 }
 ISChat.allChatStreams[6]  = { name = 'safehouse', command = '/safehouse ', shortCommand = '/sh ', tabID = 1 }
 ISChat.allChatStreams[7]  = { name = 'general', command = '/all ', shortCommand = '/g', tabID = 1 }
-ISChat.allChatStreams[8]  = { name = 'ooc', command = '/ooc ', shortCommand = '/o ', tabID = 2 }
-ISChat.allChatStreams[9]  = { name = 'pm', command = '/pm ', shortCommand = '/p ', tabID = 3 }
-ISChat.allChatStreams[10] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 4 }
+ISChat.allChatStreams[8]  = { name = 'scriptedRadio', command = nil, shortCommand = nil, tabID = 1 }
+ISChat.allChatStreams[9]  = { name = 'ooc', command = '/ooc ', shortCommand = '/o ', tabID = 2 }
+ISChat.allChatStreams[10] = { name = 'pm', command = '/pm ', shortCommand = '/p ', tabID = 3 }
+ISChat.allChatStreams[11] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 4 }
 
 
 ISChat.yacmCommand    = {}
@@ -52,7 +54,7 @@ local function GetCommandFromMessage(command)
         return nil
     end
     for _, stream in ipairs(ISChat.allChatStreams) do
-        if luautils.stringStarts(command, stream.command) then
+        if stream.command and luautils.stringStarts(command, stream.command) then
             return stream, stream.command
         elseif stream.shortCommand and luautils.stringStarts(command, stream.shortCommand) then
             return stream, stream.shortCommand
@@ -463,6 +465,7 @@ local MessageTypeToVerb = {
     ['say'] = ' says, ',
     ['yell'] = ' yells, ',
     ['radio'] = ' over the radio, ',
+    ['scriptedRadio'] = 'over the radio, ',
     ['pm'] = ': ',
     ['faction'] = ' (faction): ',
     ['safehouse'] = ' (Safe House): ',
@@ -494,29 +497,32 @@ function BuildQuote(type)
     return '"'
 end
 
-function BuildMessageFromPacket(packet)
-    local messageColor = BuildColorFromMessageType(packet.type)
-    local message = ParseYacmMessage(packet.message, messageColor, 20, 200)
+function BuildMessageFromPacket(type, message, author, playerColor, frequency)
+    local messageColor = BuildColorFromMessageType(type)
+    local parsedMessage = ParseYacmMessage(message, messageColor, 20, 200)
     local radioPrefix = ''
-    if packet.type == 'radio' then
-        radioPrefix = '(' .. string.format('%.1fMHz', packet.frequency / 1000) .. '), '
+    if type == 'radio' or type == 'scriptedRadio' then
+        radioPrefix = '(' .. string.format('%.1fMHz', frequency / 1000) .. '), '
     end
     local messageColorString = BuildBracketColorString(messageColor)
     local quote
     local verbString
     if YacmServerSettings == nil or YacmServerSettings['options']['verb'] == true then
-        quote = BuildQuote(packet.type)
-        verbString = BuildVerbString(packet.type)
+        quote = BuildQuote(type)
+        verbString = BuildVerbString(type)
     else
         quote = ''
         verbString = ' '
     end
-    local formatedMessage = BuildBracketColorString(packet['color']) ..
-        packet.author ..
+    local formatedMessage = ''
+    if author ~= nil then
+        formatedMessage = formatedMessage .. BuildBracketColorString(playerColor) .. author
+    end
+    formatedMessage = formatedMessage ..
         BuildBracketColorString({ 150, 150, 150 }) ..
         verbString ..
-        radioPrefix .. messageColorString .. quote .. message.body .. messageColorString .. quote
-    return formatedMessage, message
+        radioPrefix .. messageColorString .. quote .. parsedMessage.body .. messageColorString .. quote
+    return formatedMessage, parsedMessage
 end
 
 function BuildChatMessage(fontSize, showTimestamp, showTitle, rawMessage, time, channel)
@@ -552,7 +558,7 @@ function CreateBubble(author, message, rawMessage)
         timer = YacmServerSettings['options']['bubble']['timer']
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
-    local bubble = Bubble:new(authorObj, message, rawMessage, timer, opacity)
+    local bubble = PlayerBubble:new(authorObj, message, rawMessage, timer, opacity)
     ISChat.instance.bubble[author] = bubble
     -- the player is not typing anymore if his bubble appears
     if ISChat.instance.typingDots[author] ~= nil then
@@ -646,7 +652,8 @@ local function AddMessageToTab(tabID, time, formattedMessage, line, channel)
 end
 
 function ISChat.onMessagePacket(packet)
-    local formattedMessage, message = BuildMessageFromPacket(packet)
+    local formattedMessage, message = BuildMessageFromPacket(packet['type'], packet['message'], packet['author'],
+        packet['color'], packet['frequency'])
     if packet.type == 'pm' and packet.target:lower() == getPlayer():getUsername():lower() then
         ISChat.instance.lastPrivateMessageAuthor = packet.author
     end
@@ -656,6 +663,31 @@ function ISChat.onMessagePacket(packet)
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
         formattedMessage, time, packet.type)
     local stream = GetStreamFromType(packet.type)
+    if stream == nil then
+        print('error: onMessagePacket: stream not found')
+        return
+    end
+    AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
+end
+
+function ISChat.onRadioPacket(type, author, message, color, pos, frequency)
+    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, author, color, frequency)
+    ISChat.instance.radioBubble = ISChat.instance.radioBubble or {}
+    if pos ~= nil then
+        local x, y, z = math.abs(pos['x']), math.abs(pos['y']), math.abs(pos['z'])
+        if ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] ~= nil then
+            ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z].dead = true
+        end
+        local timer = 10
+        local opacity = 60
+        local square = getSquare(x, y, z)
+        ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] =
+            RadioBubble:new(square, parsedMessage['bubble'], parsedMessage['rawMessage'], timer, opacity)
+    end
+    local time = Calendar.getInstance():getTimeInMillis()
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
+        formattedMessage, time, type)
+    local stream = GetStreamFromType(type)
     if stream == nil then
         print('error: onMessagePacket: stream not found')
         return
@@ -698,12 +730,17 @@ ISChat.addLineInChat = function(message, tabID)
     if message:getRadioChannel() ~= -1 then
         local messageWithoutColorPrefix = message:getText():gsub('*%d+,%d+,%d+*', '')
         message:setText(messageWithoutColorPrefix)
-        ISChat.onMessagePacket({
-            author = message:getAuthor(),
-            message = messageWithoutColorPrefix,
-            type = 'radio',
-            frequency = message:getRadioChannel()
-        })
+        local color = (YacmServerSettings and YacmServerSettings['options']['radio']['color']) or {
+            171, 240, 140,
+        }
+        ISChat.onRadioPacket(
+            'scriptedRadio',
+            nil,
+            messageWithoutColorPrefix,
+            color,
+            nil, -- todo find a way to locate the radio
+            message:getRadioChannel()
+        )
     else
         message:setOverHeadSpeech(false)
     end
@@ -798,6 +835,20 @@ function ISChat:render()
         end
         for _, index in pairs(indexToDelete) do
             ISChat.instance.bubble[index] = nil
+        end
+    end
+
+    if ISChat.instance.radioBubble then
+        local indexToDelete = {}
+        for index, bubble in pairs(ISChat.instance.radioBubble) do
+            if bubble.dead then
+                table.insert(indexToDelete, index)
+            else
+                bubble:render()
+            end
+        end
+        for _, index in pairs(indexToDelete) do
+            ISChat.instance.radioBubble[index] = nil
         end
     end
 
@@ -985,13 +1036,10 @@ end
 
 local function RemoveTab(tabTitle, tabID)
     local foundTab
-    print('REMOVE TAB ' .. tabID)
     if ISChat.instance.tabs[tabID] ~= nil then
         foundTab = ISChat.instance.tabs[tabID]
-        print('TAB FOUND')
         ISChat.instance.tabs[tabID] = nil
     else
-        print('TAB NOT FOUND')
         return
     end
     if ISChat.instance.tabCnt > 1 then

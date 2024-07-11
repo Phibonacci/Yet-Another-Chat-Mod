@@ -1,15 +1,12 @@
 require('yacm/parser/StringBuilder')
-local coordinates = require('yacm/utils/coordinates')
 
-local Bubble = ISUIElement:derive("Bubble")
+local ABubble = ISUIElement:derive("ABubble")
 
-function Bubble:render()
-    if self.dead then
-        return
-    end
+
+function ABubble:drawBubble(x, y)
     local time = Calendar.getInstance():getTimeInMillis()
     local elapsedTime = time - self.startTime
-    local x, y = coordinates.CenterTopOfPlayer(self.player, self:getWidth(), self:getHeight(), false)
+
     self:setX(x)
     self:setY(y)
     local bubbleTop = getTexture("media/ui/yacm/bubble/bubble-top.png")
@@ -67,23 +64,26 @@ function Bubble:render()
     end
 
     ISRichTextPanel.render(self)
-    self.previousTime = time
 end
 
-function Bubble:prerender()
+function ABubble:render()
+    if self.dead then
+        return
+    end
+    self:drawBubble(x, y)
 end
 
-function Bubble:new(player, text, rawText, timer, opacity)
+function ABubble:prerender()
+end
+
+function ABubble:new(x, y, text, rawText, timer, opacity)
     local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
-    print('textX: ' .. textLength)
     local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
-    local x, y = coordinates.CenterTopOfPlayer(player, width, height)
-    Bubble.__index = self
-    setmetatable(Bubble, { __index = ISRichTextPanel })
+    ABubble.__index = self
+    setmetatable(ABubble, { __index = ISRichTextPanel })
     local o = ISRichTextPanel:new(x, y, width, height)
-    setmetatable(o, Bubble)
-    o.player = player
+    setmetatable(o, ABubble)
     o.text = BuildFontSizeString('medium') .. text
     o.timer = timer * 1000
     o.opacity = opacity / 100
@@ -103,4 +103,4 @@ function Bubble:new(player, text, rawText, timer, opacity)
     return o
 end
 
-return Bubble
+return ABubble

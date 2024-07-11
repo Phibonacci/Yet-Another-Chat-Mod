@@ -81,6 +81,9 @@ end
 function RangeIndicator:new(range, color)
     RangeIndicator.__index = self
     local x, y = coordinates.CenterTopOfPlayer(getPlayer(), 20, 6)
+    if x == nil then
+        x, y = 0, 0
+    end
     setmetatable(RangeIndicator, { __index = ISUIElement })
     local o = ISUIElement:new(x, y, 20, 6)
     setmetatable(o, RangeIndicator)
