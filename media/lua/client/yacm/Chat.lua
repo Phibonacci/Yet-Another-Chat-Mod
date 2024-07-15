@@ -501,7 +501,7 @@ function BuildMessageFromPacket(type, message, author, playerColor, frequency)
     local messageColor = BuildColorFromMessageType(type)
     local parsedMessage = ParseYacmMessage(message, messageColor, 20, 200)
     local radioPrefix = ''
-    if type == 'radio' or type == 'scriptedRadio' then
+    if frequency then
         radioPrefix = '(' .. string.format('%.1fMHz', frequency / 1000) .. '), '
     end
     local messageColorString = BuildBracketColorString(messageColor)
@@ -670,11 +670,10 @@ function ISChat.onMessagePacket(packet)
     AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
 end
 
-function ISChat.onRadioPacket(type, author, message, color, pos, frequency)
-    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, author, color, frequency)
+local function CreateRadioBubble(position, formattedMessage, rawTextMessage)
     ISChat.instance.radioBubble = ISChat.instance.radioBubble or {}
-    if pos ~= nil then
-        local x, y, z = math.abs(pos['x']), math.abs(pos['y']), math.abs(pos['z'])
+    if position ~= nil then
+        local x, y, z = math.abs(position['x']), math.abs(position['y']), math.abs(position['z'])
         if ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] ~= nil then
             ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z].dead = true
         end
@@ -682,17 +681,26 @@ function ISChat.onRadioPacket(type, author, message, color, pos, frequency)
         local opacity = 60
         local square = getSquare(x, y, z)
         ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] =
-            RadioBubble:new(square, parsedMessage['bubble'], parsedMessage['rawMessage'], timer, opacity)
+            RadioBubble:new(square, formattedMessage, rawTextMessage, timer, opacity)
     end
+end
+
+function ISChat.onRadioPacket(type, author, message, color, radiosByFrequency)
     local time = Calendar.getInstance():getTimeInMillis()
-    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
-        formattedMessage, time, type)
     local stream = GetStreamFromType(type)
     if stream == nil then
         print('error: onMessagePacket: stream not found')
         return
     end
-    AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
+    for frequency, radios in pairs(radiosByFrequency) do
+        local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, author, color, frequency)
+        local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
+            formattedMessage, time, type)
+        for _, position in pairs(radios) do
+            CreateRadioBubble(position, parsedMessage['bubble'], parsedMessage['rawMessage'])
+        end
+        AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
+    end
 end
 
 function ISChat.sendErrorToCurrentTab(message)

@@ -19,6 +19,10 @@ local function PlayersDistance(source, target)
     return math.floor(accurateDistance + 0.5)
 end
 
+local function DistanceManhatten(source, target)
+    return math.abs(target:getX() - source:getX()) + math.abs(target:getY() - source:getY())
+end
+
 local MessageHasAccessByType = {
     ['whisper']   = function(author, player, args) return true end,
     ['low']       = function(author, player, args) return true end,
@@ -247,7 +251,29 @@ local radioSprites = {
     'appliances_com_01_67',
 }
 
-local function SendRadioPackets(player, args, radioFrequencies)
+local function IsInRadioEmittingRange(radioEmitters, receiver)
+    if radioEmitters == nil then
+        return false
+    end
+    for _, radioEmitter in pairs(radioEmitters) do
+        local radioData = radioEmitter:getDeviceData()
+        if radioData ~= nil then
+            local transmitRange = radioData:getTransmitRange()
+            print('emitter')
+            print(radioEmitter)
+            print(receiver)
+            local distance = DistanceManhatten(radioEmitter, receiver)
+            print('transmitRange: ' .. transmitRange .. ', distance: ' .. distance)
+            if distance <= transmitRange then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function SendRadioPackets(author, player, args, radioFrequencies)
+    local radiosByFrequency = {}
     local radioMaxRange = 10
     local radios = World.getItemsInRangeByGroup(player, radioMaxRange, 'IsoRadio')
     for _, radio in pairs(radios) do
@@ -267,20 +293,27 @@ local function SendRadioPackets(player, args, radioFrequencies)
             volume = math.abs(volume)
             local radioRange = math.abs(volume * radioMaxRange + 0.5)
             local playerDistance = PlayersDistance(player, radio)
-            if turnedOn and frequency ~= nil and radioFrequencies[frequency] == true
+            print('radio infos')
+            print(playerDistance <= radioRange)
+            print(IsInRadioEmittingRange(radioFrequencies[frequency], radio))
+            if turnedOn and frequency ~= nil and radioFrequencies[frequency] ~= nil
                 and playerDistance <= radioRange
+                and IsInRadioEmittingRange(radioFrequencies[frequency], radio)
             then
-                SendYacmServerCommand(player, 'RadioMessage', {
-                    author = args.author,
-                    message = args.message,
-                    color = args.color,
-                    type = args.type,
-                    pos = pos,
-                    frequency = frequency,
-                })
+                if radiosByFrequency[frequency] == nil then
+                    radiosByFrequency[frequency] = {}
+                end
+                table.insert(radiosByFrequency[frequency], pos)
             end
         end
     end
+    SendYacmServerCommand(player, 'RadioMessage', {
+        author = args.author,
+        message = args.message,
+        color = args.color,
+        type = args.type,
+        radios = radiosByFrequency,
+    })
 end
 
 local function ProcessYacmPacket(player, args, packetType, sendError)
@@ -324,15 +357,20 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
     if MessageTypeSettings[args.type] and MessageTypeSettings[args.type]['radio'] == true
         and packetType == 'ChatMessage' and range > 0
     then
-        local items = World.getItemsInRangeByGroup(player, range, 'IsoRadio')
-        radioEmission = #items > 0
-        for _, item in pairs(items) do
-            local radioData = item:getDeviceData()
+        local radios = World.getItemsInRangeByGroup(player, range, 'IsoRadio')
+        for _, radio in pairs(radios) do
+            local radioData = radio:getDeviceData()
             if radioData ~= nil then
                 local frequency = radioData:getChannel()
-                local turnedOn = radioData:getIsTurnedOn()
-                if turnedOn and frequency ~= nil then
-                    radioFrequencies[frequency] = true
+                ServerPrint(player, 'radio is muted: ' .. (radioData:getMicIsMuted() and 'true' or 'false'))
+                if radioData:getIsTwoWay() and radioData:getIsTurnedOn()
+                    and not radioData:getMicIsMuted() and frequency ~= nil
+                then
+                    if radioFrequencies[frequency] == nil then
+                        radioFrequencies[frequency] = {}
+                    end
+                    table.insert(radioFrequencies[frequency], radio)
+                    radioEmission = true
                 end
             end
         end
@@ -341,13 +379,13 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
     for i = 0, connectedPlayers:size() - 1 do
         local connectedPlayer = connectedPlayers:get(i)
         if (connectedPlayer:getOnlineID() == player:getOnlineID()
-                or range == -1 or PlayersDistance(player, connectedPlayer) <= range + 0.001)
+                or range == -1 or PlayersDistance(player, connectedPlayer) < range + 0.001)
             and IsAllowed(player, connectedPlayer, args)
         then
-            if radioEmission then
-                SendRadioPackets(connectedPlayer, args, radioFrequencies)
-            end
             SendYacmServerCommand(connectedPlayer, packetType, args)
+            if radioEmission then
+                SendRadioPackets(player, connectedPlayer, args, radioFrequencies)
+            end
         end
     end
 end
