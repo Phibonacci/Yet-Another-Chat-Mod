@@ -1,5 +1,6 @@
 local StringParser = require('yacm/utils/StringParser')
-local World = require('yacm/utils/world')
+local Character = require('yacm/utils/Character')
+local World = require('yacm/utils/World')
 
 local function SendYacmServerCommand(player, commandName, args)
     sendServerCommand(player, 'YACM', commandName, args)
@@ -307,6 +308,22 @@ local function SendRadioPackets(author, player, args, radioFrequencies)
             end
         end
     end
+    local radio = Character.getHandItemByGroup(player, 'Radio')
+    local radioData = radio and radio:getDeviceData() or nil
+    if radioData then
+        ServerPrint(player, 'target radioData found')
+        local frequency = radioData:getChannel()
+        if radioData and radioData:getIsTwoWay() and radioData:getIsTurnedOn()
+            and frequency ~= nil and radioFrequencies[frequency] ~= nil
+            and IsInRadioEmittingRange(radioFrequencies[frequency], radio)
+        then
+            if radiosByFrequency[frequency] == nil then
+                radiosByFrequency[frequency] = {}
+            end
+            ServerPrint(player, 'radio added to command')
+            table.insert(radiosByFrequency[frequency], radio)
+        end
+    end
     SendYacmServerCommand(player, 'RadioMessage', {
         author = args.author,
         message = args.message,
@@ -374,15 +391,36 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
                 end
             end
         end
+        local radio = Character.getHandItemByGroup(player, 'Radio')
+        ServerPrint(player, 'Radio in hand? ' .. (radio ~= nil and 'true' or 'false'))
+        local isoRadio = Character.getHandItemByGroup(player, 'IsoRadio')
+        ServerPrint(player, 'IsoRadio in hand? ' .. (isoRadio ~= nil and 'true' or 'false'))
+        local radioData = radio and radio:getDeviceData() or nil
+        if radioData then
+            local frequency = radioData:getChannel()
+            if radioData and radioData:getIsTwoWay() and radioData:getIsTurnedOn()
+                and not radioData:getMicIsMuted() and frequency ~= nil
+            then
+                if radioFrequencies[frequency] == nil then
+                    radioFrequencies[frequency] = {}
+                end
+                ServerPrint(player, 'Radio found on author')
+                table.insert(radioFrequencies[frequency], radio)
+                radioEmission = true
+            end
+        end
     end
     local connectedPlayers = getOnlinePlayers()
     for i = 0, connectedPlayers:size() - 1 do
         local connectedPlayer = connectedPlayers:get(i)
-        if (connectedPlayer:getOnlineID() == player:getOnlineID()
-                or range == -1 or PlayersDistance(player, connectedPlayer) < range + 0.001)
-            and IsAllowed(player, connectedPlayer, args)
+        if IsAllowed(player, connectedPlayer, args)
         then
-            SendYacmServerCommand(connectedPlayer, packetType, args)
+            ServerPrint(player, 'found target player #' .. i)
+            if (connectedPlayer:getOnlineID() == player:getOnlineID()
+                    or range == -1 or PlayersDistance(player, connectedPlayer) < range + 0.001)
+            then
+                SendYacmServerCommand(connectedPlayer, packetType, args)
+            end
             if radioEmission then
                 SendRadioPackets(player, connectedPlayer, args, radioFrequencies)
             end

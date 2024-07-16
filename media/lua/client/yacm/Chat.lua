@@ -673,7 +673,12 @@ end
 local function CreateRadioBubble(position, formattedMessage, rawTextMessage)
     ISChat.instance.radioBubble = ISChat.instance.radioBubble or {}
     if position ~= nil then
-        local x, y, z = math.abs(position['x']), math.abs(position['y']), math.abs(position['z'])
+        local x, y, z = position['x'], position['y'], position['z']
+        if x == nil or y == nil or z == nil then -- todo better packet without nul pos
+            CreateBubble(getPlayer():getUsername(), formattedMessage, rawTextMessage)
+            return
+        end
+        x, y, z = math.abs(x), math.abs(y), math.abs(z)
         if ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] ~= nil then
             ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z].dead = true
         end
