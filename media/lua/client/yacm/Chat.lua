@@ -1197,9 +1197,6 @@ local function OnRangeButtonClick()
     ISChat.instance.rangeIndicatorState = not ISChat.instance.rangeIndicatorState
     if ISChat.instance.rangeIndicatorState == true then
         ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-on.png"))
-        if ISChat.instance.focused then
-            UpdateRangeIndicator(ISChat.defaultTabStream[ISChat.instance.currentTabID])
-        end
     else
         ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-off.png"))
     end
