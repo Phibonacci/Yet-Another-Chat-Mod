@@ -553,7 +553,7 @@ function CreateBubble(author, message, rawMessage)
         return
     end
     local timer = 10
-    local opacity = 60
+    local opacity = 70
     if YacmServerSettings then
         timer = YacmServerSettings['options']['bubble']['timer']
         opacity = YacmServerSettings['options']['bubble']['opacity']
@@ -683,7 +683,7 @@ local function CreateRadioBubble(position, formattedMessage, rawTextMessage)
             ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z].dead = true
         end
         local timer = 10
-        local opacity = 60
+        local opacity = 70
         local square = getSquare(x, y, z)
         ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] =
             RadioBubble:new(square, formattedMessage, rawTextMessage, timer, opacity)
