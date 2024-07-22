@@ -2,7 +2,7 @@ local coordinates = {}
 
 function coordinates.CenterTopOfPlayer(player, width, height)
     if player == nil then
-        print('CenterTopOfPlayer: nil player parameter')
+        print('error: CenterTopOfPlayer: nil player parameter')
         return nil
     end
     local x, y = coordinates.CenterTopOfObject(player, width, height)
@@ -14,7 +14,7 @@ end
 
 function coordinates.CenterTopOfObject(object, width, height)
     if object == nil then
-        print('CenterTopOfObject: nil player parameter')
+        print('error: CenterTopOfObject: nil player parameter')
         return nil
     end
     local x, y = ISCoordConversion.ToScreen(object:getX(), object:getY(), object:getZ(), nil)
@@ -26,7 +26,7 @@ end
 
 function coordinates.CenterFeetOfPlayer(player, width, height)
     if player == nil then
-        print('CenterFeetOfPlayer: nil player parameter')
+        print('error: CenterFeetOfPlayer: nil player parameter')
         return nil
     end
     local x, y = ISCoordConversion.ToScreen(player:getX(), player:getY(), player:getZ(), nil)
