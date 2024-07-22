@@ -667,7 +667,9 @@ function ISChat.onMessagePacket(packet)
         print('error: onMessagePacket: stream not found')
         return
     end
-    AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
+    if not packet.hideInChat then
+        AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
+    end
 end
 
 local function CreateRadioBubble(position, formattedMessage, rawTextMessage)
@@ -736,10 +738,15 @@ function ISChat.onChatErrorPacket(type, message)
     AddMessageToTab(stream['tabID'], time, formattedMessage, line)
 end
 
+local function GetMessageType(message)
+    local stringRep = message:toString()
+    return stringRep:match('^ChatMessage{chat=(%a*),')
+end
+
 -- TODO: try to clean this mess copied from the base game
 ISChat.addLineInChat = function(message, tabID)
     local line = message:getText()
-    print('message with prefix: "' .. message:getTextWithPrefix() .. '"')
+    local messageType = GetMessageType(message)
     if message:getRadioChannel() ~= -1 then
         local messageWithoutColorPrefix = message:getText():gsub('*%d+,%d+,%d+*', '')
         message:setText(messageWithoutColorPrefix)
@@ -757,6 +764,18 @@ ISChat.addLineInChat = function(message, tabID)
     else
         message:setOverHeadSpeech(false)
     end
+
+    if messageType == 'Local' then -- when pressing Q to shout
+        ISChat.onMessagePacket({
+            author = message:getAuthor(),
+            message = line,
+            type = 'yell',
+            color = { 255, 255, 255 },
+            hideInChat = YacmServerSettings and YacmServerSettings['options'] and
+                YacmServerSettings['options']['hideCallout'] or nil
+        })
+    end
+
     if message:isServerAlert() then
         ISChat.instance.servermsg = ''
         if message:isShowAuthor() then
