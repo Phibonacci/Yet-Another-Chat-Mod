@@ -744,6 +744,32 @@ function ISChat.onMessagePacket(type, author, message, color, hideInChat, target
     end
 end
 
+function BuildServerMessage(fontSize, showTimestamp, showTitle, rawMessage, time, channel)
+    local line = StringBuilder.BuildFontSizeString(fontSize)
+    if showTimestamp then
+        line = line .. StringBuilder.BuildTimePrefixString(time)
+    end
+    if showTitle and channel ~= nil then
+        line = line .. BuildChannelPrefixString(channel)
+    end
+    line = line .. rawMessage
+    return line
+end
+
+function ISChat.onServerMessage(message)
+    local color = (YacmServerSettings and YacmServerSettings['server']['color']) or { 255, 86, 64 }
+    local time = Calendar.getInstance():getTimeInMillis()
+    local stream = GetStreamFromType('general')
+    if stream == nil then
+        print('yacm error: onMessagePacket: stream not found')
+        return
+    end
+    local parsedMessage = Parser.ParseYacmMessage(message, color, 20, 200)
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
+        parsedMessage.body, time, 'server')
+    AddMessageToTab(stream['tabID'], time, parsedMessage.body, line, 'server')
+end
+
 local function CreateSquaresRadiosBubbles(parsedMessages, squaresPos)
     if squaresPos == nil then
         print('yacm error: CreateSquaresRadiosBubbles: squaresPos table is null')
@@ -953,6 +979,8 @@ ISChat.addLineInChat = function(message, tabID)
         end
         ISChat.instance.servermsg = ISChat.instance.servermsg .. message:getText()
         ISChat.instance.servermsgTimer = 5000
+        ISChat.instance.onServerMessage(line)
+        return
     else
         return
     end

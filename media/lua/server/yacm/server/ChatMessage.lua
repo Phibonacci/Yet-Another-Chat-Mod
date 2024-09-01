@@ -90,7 +90,7 @@ local function GetColorFromString(colorString)
     local defaultColor = { 255, 0, 255 }
     local rgb = StringParser.hexaStringToRGB(colorString)
     if rgb == nil then
-        print('yacm error: invalid string for Sandbox Variable: "' .. name .. '"')
+        print('yacm error: invalid color string: "' .. colorString .. '"')
         return defaultColor
     end
     return rgb
@@ -192,6 +192,9 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.OutOfCharacterMessageEnabled,
             ['color'] = GetColorSandbox('OutOfCharacterMessage'),
             ['radio'] = false,
+        },
+        ['server'] = {
+            ['color'] = { 255, 86, 64 },
         },
         ['scriptedRadio'] = {
             ['enabled'] = true,
