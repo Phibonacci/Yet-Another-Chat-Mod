@@ -4,13 +4,13 @@ local YacmClientRecvCommands = {}
 
 YacmClientRecvCommands['ChatMessage'] = function(args)
     ISChat.onMessagePacket(args['type'], args['author'], args['message'], args['color'], args['hideInChat'],
-        args['target'])
+        args['target'], false, args['pitch'])
 end
 
 YacmClientRecvCommands['RadioMessage'] = function(args)
     ISChat.onRadioPacket(
         args['type'], args['author'], args['message'], args['color'],
-        args['radios'])
+        args['radios'], args['pitch'])
 end
 
 YacmClientRecvCommands['RadioEmittingMessage'] = function(args)

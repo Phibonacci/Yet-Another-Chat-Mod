@@ -191,6 +191,7 @@ local function isPunctuationMark(letter)
 end
 
 function AVoice:createSoundTable(soundPrefix)
+    local isFirstWordLetter = true
     local soundTable = {}
     local size = 0
     local index = 1
@@ -201,21 +202,21 @@ function AVoice:createSoundTable(soundPrefix)
         local firstLetter = self.message:sub(index, index)
         if firstLetter == ' ' then
             index = index + 1
-            self.isFirstWordLetter = true
+            isFirstWordLetter = true
             time = time + 10
         elseif isPunctuationMark(firstLetter) then
             index = index + 1
-            self.isFirstWordLetter = true
+            isFirstWordLetter = true
             time = time + self.phonemeDuration
         else
             local nextLetters = self.message:sub(index)
             local phoneme = GetPhoneme(nextLetters)
             if phoneme == nil then
                 index = index + 1
-                self.isFirstWordLetter = true
+                isFirstWordLetter = true
             else
-                soundFile = self:GetSoundPathFromPhoneme(phoneme, self.isFirstWordLetter, soundPrefix)
-                self.isFirstWordLetter = false
+                soundFile = self:GetSoundPathFromPhoneme(phoneme, isFirstWordLetter, soundPrefix)
+                isFirstWordLetter = false
                 if #phoneme == 1 or phoneme == 'OO' then
                     local identicalLetters = nextLetters:match('^(' .. phoneme:sub(1, 1) .. '+)')
                     assert(identicalLetters ~= nil,
@@ -239,21 +240,21 @@ function AVoice:createSoundTable(soundPrefix)
     return soundTable, size
 end
 
-function AVoice:new(message, object, soundPrefix)
+function AVoice:new(message, object, soundPrefix, voicePitch)
     local o = {}
+    print('Voice pitch is ' .. voicePitch)
     setmetatable(o, self)
     self.__index = self
     o.message = message:upper()
     o.object = object
+    o.pitch = voicePitch
+    o.pitchVariation = 0
     o.soundEmitter = nil
     o.soundId = nil
-    o.isFirstWordLetter = true
     o.phonemeDuration = 95
     o.soundTable, o.soundTableSize = o:createSoundTable(soundPrefix)
     o.nextSoundTableIndex = 1
     o.startingTime = Calendar.getInstance():getTimeInMillis()
-    o.pitch = 1
-    o.pitchVariation = 0
     return o
 end
 

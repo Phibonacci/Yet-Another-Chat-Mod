@@ -49,7 +49,7 @@ RadioBubble.types = {
     vehicle = 3,
 }
 
-function RadioBubble:new(object, text, rawText, timer, opacity, type, isVoicesEnabled)
+function RadioBubble:new(object, text, rawText, timer, opacity, type, isVoicesEnabled, voicePitch)
     local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
     local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
@@ -67,7 +67,7 @@ function RadioBubble:new(object, text, rawText, timer, opacity, type, isVoicesEn
     o.type = type
     o.object = object
     if isVoicesEnabled then
-        o.voice = RadioVoice:new(rawText, object)
+        o.voice = RadioVoice:new(rawText, object, voicePitch)
     end
     return o
 end

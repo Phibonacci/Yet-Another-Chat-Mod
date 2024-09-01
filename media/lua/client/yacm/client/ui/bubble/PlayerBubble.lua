@@ -28,7 +28,7 @@ function PlayerBubble:render()
     self:drawBubble(x, y)
 end
 
-function PlayerBubble:new(player, text, rawText, timer, opacity, isVoicesEnabled)
+function PlayerBubble:new(player, text, rawText, timer, opacity, isVoicesEnabled, voicePitch)
     local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
     local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
@@ -45,7 +45,7 @@ function PlayerBubble:new(player, text, rawText, timer, opacity, isVoicesEnabled
     setmetatable(o, PlayerBubble)
     o.player = player
     if isVoicesEnabled then
-        o.voice = PlayerVoice:new(rawText, player)
+        o.voice = PlayerVoice:new(rawText, player, voicePitch)
     end
     return o
 end

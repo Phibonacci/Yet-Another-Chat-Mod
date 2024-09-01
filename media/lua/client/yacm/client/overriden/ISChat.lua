@@ -202,6 +202,14 @@ local function InitGlobalModData()
     elseif yacmModData['isVoiceEnabled'] ~= nil then
         ISChat.instance.isVoiceEnabled = yacmModData['isVoiceEnabled']
     end
+    if yacmModData['voicePitch'] == nil then
+        local randomPitch = ZombRandFloat(0.85, 1.15)
+        if getPlayer():getVisual():isFemale() then
+            randomPitch = randomPitch + 0.20
+        end
+        yacmModData['voicePitch'] = randomPitch
+        ModData.add('yacm', yacmModData)
+    end
     ISChat.instance.yacmModData = yacmModData
 end
 
@@ -270,19 +278,20 @@ local function ProcessChatCommand(stream, command)
     if YacmServerSettings and YacmServerSettings[stream.name] == false then
         return false
     end
+    local pitch = ISChat.instance.yacmModData['voicePitch']
     local yacmCommand = Parser.ParseYacmMessage(command)
     local playerColor = ISChat.instance.yacmModData['playerColor']
     if yacmCommand == nil then
         return false
     end
     if stream.name == 'yell' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'yell')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'yell', pitch)
     elseif stream.name == 'say' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'say')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'say', pitch)
     elseif stream.name == 'low' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'low')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'low', pitch)
     elseif stream.name == 'whisper' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'whisper')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'whisper', pitch)
     elseif stream.name == 'pm' then
         local targetStart, targetEnd = command:find('^%s*"%a+%s?%a+"')
         if targetStart == nil then
@@ -293,18 +302,18 @@ local function ProcessChatCommand(stream, command)
         end
         local target = command:sub(targetStart, targetEnd)
         local pmBody = command:sub(targetEnd + 2)
-        YacmClientSendCommands.sendPrivateMessage(pmBody, playerColor, target)
+        YacmClientSendCommands.sendPrivateMessage(pmBody, playerColor, target, pitch)
         ISChat.instance.chatText.lastChatCommand = ISChat.instance.chatText.lastChatCommand .. target .. ' '
     elseif stream.name == 'faction' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'faction')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'faction', pitch)
     elseif stream.name == 'safehouse' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'safehouse')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'safehouse', pitch)
     elseif stream.name == 'general' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'general')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'general', pitch)
     elseif stream.name == 'admin' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'admin')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'admin', pitch)
     elseif stream.name == 'ooc' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'ooc')
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'ooc', pitch)
     else
         return false
     end
@@ -548,7 +557,7 @@ function BuildChatMessage(fontSize, showTimestamp, showTitle, rawMessage, time, 
     return line
 end
 
-function CreatePlayerBubble(author, message, rawMessage)
+function CreatePlayerBubble(author, message, rawMessage, voicePitch)
     ISChat.instance.bubble = ISChat.instance.bubble or {}
     ISChat.instance.typingDots = ISChat.instance.typingDots or {}
     local onlineUsers = getOnlinePlayers()
@@ -567,7 +576,8 @@ function CreatePlayerBubble(author, message, rawMessage)
         timer = YacmServerSettings['options']['bubble']['timer']
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
-    local bubble = PlayerBubble:new(authorObj, message, rawMessage, timer, opacity, ISChat.instance.isVoiceEnabled)
+    local bubble = PlayerBubble:new(
+        authorObj, message, rawMessage, timer, opacity, ISChat.instance.isVoiceEnabled, voicePitch)
     ISChat.instance.bubble[author] = bubble
     -- the player is not typing anymore if his bubble appears
     if ISChat.instance.typingDots[author] ~= nil then
@@ -575,7 +585,7 @@ function CreatePlayerBubble(author, message, rawMessage)
     end
 end
 
-local function CreateSquareRadioBubble(position, bubbleMessage, rawTextMessage)
+local function CreateSquareRadioBubble(position, bubbleMessage, rawTextMessage, voicePitch)
     ISChat.instance.radioBubble = ISChat.instance.radioBubble or {}
     if position ~= nil then
         local x, y, z = position['x'], position['y'], position['z']
@@ -592,12 +602,12 @@ local function CreateSquareRadioBubble(position, bubbleMessage, rawTextMessage)
         local square = getSquare(x, y, z)
         local bubble = RadioBubble:new(
             square, bubbleMessage, rawTextMessage, timer, opacity, RadioBubble.types.square,
-            ISChat.instance.isVoiceEnabled)
+            ISChat.instance.isVoiceEnabled, voicePitch)
         ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] = bubble
     end
 end
 
-function CreatePlayerRadioBubble(author, message, rawMessage)
+function CreatePlayerRadioBubble(author, message, rawMessage, voicePitch)
     ISChat.instance.playerRadioBubble = ISChat.instance.playerRadioBubble or {}
     local onlineUsers = getOnlinePlayers()
     if author == nil then
@@ -616,11 +626,11 @@ function CreatePlayerRadioBubble(author, message, rawMessage)
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
     local bubble = RadioBubble:new(authorObj, message, rawMessage, timer, opacity,
-        RadioBubble.types.player, ISChat.instance.isVoiceEnabled)
+        RadioBubble.types.player, ISChat.instance.isVoiceEnabled, voicePitch)
     ISChat.instance.playerRadioBubble[author] = bubble
 end
 
-function CreateVehicleRadioBubble(vehicle, message, rawMessage)
+function CreateVehicleRadioBubble(vehicle, message, rawMessage, voicePitch)
     ISChat.instance.vehicleRadioBubble = ISChat.instance.vehicleRadioBubble or {}
     local timer = 10
     local opacity = 70
@@ -634,7 +644,7 @@ function CreateVehicleRadioBubble(vehicle, message, rawMessage)
         return
     end
     local bubble = RadioBubble:new(vehicle, message, rawMessage, timer, opacity,
-        RadioBubble.types.vehicle, ISChat.instance.isVoiceEnabled)
+        RadioBubble.types.vehicle, ISChat.instance.isVoiceEnabled, voicePitch)
     ISChat.instance.vehicleRadioBubble[keyId] = bubble
 end
 
@@ -729,7 +739,7 @@ local function ReduceBoredom()
     player:getBodyDamage():setBoredomLevel(boredom - 0.6)
 end
 
-function ISChat.onMessagePacket(type, author, message, color, hideInChat, target, isFromDiscord)
+function ISChat.onMessagePacket(type, author, message, color, hideInChat, target, isFromDiscord, voicePitch)
     if author ~= getPlayer():getUsername() then
         ReduceBoredom()
     end
@@ -739,8 +749,8 @@ function ISChat.onMessagePacket(type, author, message, color, hideInChat, target
         ISChat.instance.lastPrivateMessageAuthor = author
     end
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
-    if not isFromDiscord then
-        CreatePlayerBubble(author, parsedMessage['bubble'], parsedMessage['rawMessage'])
+    if not isFromDiscord and voicePitch ~= nil then
+        CreatePlayerBubble(author, parsedMessage['bubble'], parsedMessage['rawMessage'], voicePitch)
     end
     local time = Calendar.getInstance():getTimeInMillis()
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
@@ -781,27 +791,28 @@ function ISChat.onServerMessage(message)
     AddMessageToTab(stream['tabID'], time, parsedMessage.body, line, 'server')
 end
 
-local function CreateSquaresRadiosBubbles(parsedMessages, squaresPos)
+local function CreateSquaresRadiosBubbles(parsedMessages, squaresPos, voicePitch)
     if squaresPos == nil then
         print('yacm error: CreateSquaresRadiosBubbles: squaresPos table is null')
         return
     end
     for _, position in pairs(squaresPos) do
-        CreateSquareRadioBubble(position, parsedMessages['bubble'], parsedMessages['rawMessage'])
+        CreateSquareRadioBubble(position, parsedMessages['bubble'], parsedMessages['rawMessage'], voicePitch)
     end
 end
 
-local function CreatePlayersRadiosBubbles(parsedMessages, playersUsernames)
+local function CreatePlayersRadiosBubbles(parsedMessages, playersUsernames, voicePitch)
     if playersUsernames == nil then
         print('yacm error: CreatePlayersRadiosBubbles: playersUsernames table is null')
         return
     end
     for _, username in pairs(playersUsernames) do
-        CreatePlayerRadioBubble(getPlayer():getUsername(), parsedMessages['bubble'], parsedMessages['rawMessage'])
+        CreatePlayerRadioBubble(
+            getPlayer():getUsername(), parsedMessages['bubble'], parsedMessages['rawMessage'], voicePitch)
     end
 end
 
-local function CreateVehiclesRadiosBubbles(parsedMessages, vehiclesKeyIds)
+local function CreateVehiclesRadiosBubbles(parsedMessages, vehiclesKeyIds, voicePitch)
     if vehiclesKeyIds == nil then
         print('yacm error: CreateVehiclesRadiosBubbles: vehiclesKeyIds table is null')
         return
@@ -812,7 +823,7 @@ local function CreateVehiclesRadiosBubbles(parsedMessages, vehiclesKeyIds)
         if vehicle == nil then
             print('yacm error: CreateVehiclesRadiosBubble: vehicle not found for key id ' .. vehicleKeyId)
         else
-            CreateVehicleRadioBubble(vehicle, parsedMessages['bubble'], parsedMessages['rawMessage'])
+            CreateVehicleRadioBubble(vehicle, parsedMessages['bubble'], parsedMessages['rawMessage'], voicePitch)
         end
     end
 end
@@ -834,7 +845,7 @@ function ISChat.onRadioEmittingPacket(type, author, message, color, frequency)
     AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
 end
 
-function ISChat.onRadioPacket(type, author, message, color, radiosInfo)
+function ISChat.onRadioPacket(type, author, message, color, radiosInfo, voicePitch)
     local time = Calendar.getInstance():getTimeInMillis()
     local stream = GetStreamFromType(type)
     if stream == nil then
@@ -850,9 +861,9 @@ function ISChat.onRadioPacket(type, author, message, color, radiosInfo)
         local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency)
         local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
             formattedMessage, time, type)
-        CreateSquaresRadiosBubbles(parsedMessages, radios['squares'])
-        CreatePlayersRadiosBubbles(parsedMessages, radios['players'])
-        CreateVehiclesRadiosBubbles(parsedMessages, radios['vehicles'])
+        CreateSquaresRadiosBubbles(parsedMessages, radios['squares'], voicePitch)
+        CreatePlayersRadiosBubbles(parsedMessages, radios['players'], voicePitch)
+        CreateVehiclesRadiosBubbles(parsedMessages, radios['vehicles'], voicePitch)
         -- a special packet is making sure the author always has a radio feedback in the chat
         -- useful in case the listening range and emitting range of the radio differs
         -- this is to avoid any confusion from players thinking the radios mights not work
@@ -939,7 +950,8 @@ ISChat.addLineInChat = function(message, tabID)
             line,
             { 255, 255, 255 },
             YacmServerSettings and YacmServerSettings['options'] and
-            YacmServerSettings['options']['hideCallout'] or nil
+            YacmServerSettings['options']['hideCallout'] or nil,
+            nil -- voice pitch, should not be used, if we want it we need to send a packet to the server instead
         )
     end
 
@@ -961,7 +973,8 @@ ISChat.addLineInChat = function(message, tabID)
                 discordColor,
                 nil,
                 nil,
-                true
+                true,
+                nil -- voice pitch, should not be used
             )
         end
         if YacmServerSettings and YacmServerSettings['options']
