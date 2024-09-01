@@ -6,17 +6,50 @@ function ABubble:loadTextures()
     error('loadTextures not implemented in child class')
 end
 
+function ABubble:render()
+    error('render not implemented in child class')
+end
+
+function ABubble:prerender()
+    -- nothing
+end
+
+local function Lerp(start, target, progression)
+    if progression < 0.0 then
+        progression = 0.0
+    elseif progression >= 1.0 then
+        progression = 1.0
+    end
+    local distance = target - start
+    distance = distance * progression
+    return start + distance
+end
+
 function ABubble:drawBubble(x, y)
     if not self.texturesLoaded then
         self:loadTextures()
         self.texturesLoaded = true
     end
+
     local time = Calendar.getInstance():getTimeInMillis()
     local elapsedTime = time - self.startTime
+    local delta = time - self.previousTime
 
-    self:setX(x)
-    self:setY(y)
+    if self.currentProgression >= 1 then
+        self.currentProgression = 1
+        self.heightOffset = 0
+    else
+        local newProgression = delta / (2 * 100)
+        self.currentProgression = self.currentProgression + newProgression
+        self.heightOffset = Lerp(self.heightOffsetStart, 0, self.currentProgression)
+    end
 
+    self.currentX = x
+    self.currentY = y + self.heightOffset
+    self:setX(self.currentX)
+    self:setY(self.currentY)
+
+    local zoom = getCore():getZoom(getPlayer():getPlayerNum())
     local scale = 1
     local alpha
     if self.timer - elapsedTime > 1000 then
@@ -26,6 +59,7 @@ function ABubble:drawBubble(x, y)
         alpha = (1000 - fadingTime) / 1000 * self.opacity
     else
         self.dead = true
+        self:unsubscribe()
         return
     end
 
@@ -36,9 +70,9 @@ function ABubble:drawBubble(x, y)
     local centerX = leftW
     local rightX = centerX + centerW
     local topH = math.floor(10 * 1 / scale)
-    self:drawTexture(self.bubbleTopLeft, leftX, 0, alpha)
+    self:drawTextureScaled(self.bubbleTopLeft, leftX, 0, leftW, topH, alpha)
     self:drawTextureScaled(self.bubbleTop, centerX, 0, centerW, topH, alpha)
-    self:drawTexture(self.bubbleTopRight, rightX, 0, alpha)
+    self:drawTextureScaled(self.bubbleTopRight, rightX, 0, rightW, topH, alpha)
 
     local centerY = topH
     local botH = math.floor(10 * 1 / scale)
@@ -49,31 +83,42 @@ function ABubble:drawBubble(x, y)
     self:drawTextureScaled(self.bubbleCenter, centerX, centerY, centerW, centerH, alpha)
     self:drawTextureScaled(self.bubbleCenterRight, rightX, centerY, rightW, centerH, alpha)
 
-    self:drawTexture(self.bubbleBotLeft, leftX, botY, alpha)
+    self:drawTextureScaled(self.bubbleBotLeft, leftX, botY, leftW, botH, alpha)
     self:drawTextureScaled(self.bubbleBot, centerX, botY, centerW, botH, alpha)
-    self:drawTexture(self.bubbleBotRight, rightX, botY, alpha)
+    self:drawTextureScaled(self.bubbleBotRight, rightX, botY, rightW, botH, alpha)
 
     if x > 0 and y > 0
         and x + self:getWidth() < getCore():getScreenWidth()
         and y + self:getHeight() < getCore():getScreenHeight()
     then
-        self:drawTexture(self.bubbleArrow, centerX + centerW / 2 + 5, botY + 4 * botH / 5, alpha)
+        self:drawTextureScaled(self.bubbleArrow, centerX + centerW / 2 + 5, botY + 4 * botH / 5, 7 / scale, 9 / scale,
+            alpha)
     end
 
     ISRichTextPanel.render(self)
+    self.previousTime = time
 end
 
-function ABubble:render()
-    if self.dead then
+function ABubble:subscribe()
+    if self.subscribed then
         return
     end
-    self:drawBubble(x, y)
+    self.subscribed = true
+    self.postUIDrawCall = function()
+        self:render()
+    end
+    Events.OnPostUIDraw.Add(self.postUIDrawCall)
 end
 
-function ABubble:prerender()
+function ABubble:unsubscribe()
+    if not self.subscribed then
+        return
+    end
+    self.subscribed = false
+    Events.OnPostUIDraw.Remove(self.postUIDrawCall)
 end
 
-function ABubble:new(x, y, text, rawText, timer, opacity)
+function ABubble:new(x, y, text, rawText, timer, opacity, heightOffsetStart)
     local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
     local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
@@ -98,6 +143,12 @@ function ABubble:new(x, y, text, rawText, timer, opacity)
     ISUIElement.initialise(o)
     o:paginate()
     o.texturesLoaded = false
+    o.currentX = x
+    o.currentY = y
+    o.currentProgression = 0
+    o.heightOffsetStart = heightOffsetStart
+    o.heightOffset = heightOffsetStart
+    o.subscribed = false
     return o
 end
 

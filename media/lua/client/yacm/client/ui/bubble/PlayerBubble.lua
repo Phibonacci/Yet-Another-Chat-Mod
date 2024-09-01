@@ -37,7 +37,7 @@ function PlayerBubble:new(player, text, rawText, timer, opacity)
     end
     PlayerBubble.__index = self
     setmetatable(PlayerBubble, { __index = ABubble })
-    local o = ABubble:new(x, y, text, rawText, timer, opacity)
+    local o = ABubble:new(x, y, text, rawText, timer, opacity, 20)
     if x == nil then
         self.dead = true
     end

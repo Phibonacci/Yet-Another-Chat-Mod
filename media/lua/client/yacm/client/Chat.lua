@@ -561,6 +561,10 @@ function CreatePlayerBubble(author, message, rawMessage)
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
     local bubble = PlayerBubble:new(authorObj, message, rawMessage, timer, opacity)
+    bubble:subscribe()
+    if ISChat.instance.bubble[author] then
+        ISChat.instance.bubble[author]:unsubscribe()
+    end
     ISChat.instance.bubble[author] = bubble
     -- the player is not typing anymore if his bubble appears
     if ISChat.instance.typingDots[author] ~= nil then
@@ -583,8 +587,12 @@ local function CreateSquareRadioBubble(position, bubbleMessage, rawTextMessage)
         local timer = 10
         local opacity = 70
         local square = getSquare(x, y, z)
-        ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] =
-            RadioBubble:new(square, bubbleMessage, rawTextMessage, timer, opacity, RadioBubble.types.square)
+        local bubble = RadioBubble:new(square, bubbleMessage, rawTextMessage, timer, opacity, RadioBubble.types.square)
+        if ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] then
+            ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z]:unsubscribe()
+        end
+        bubble:subscribe()
+        ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] = bubble
     end
 end
 
@@ -607,6 +615,10 @@ function CreatePlayerRadioBubble(author, message, rawMessage)
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
     local bubble = RadioBubble:new(authorObj, message, rawMessage, timer, opacity, RadioBubble.types.player)
+    if ISChat.instance.playerRadioBubble[author] then
+        ISChat.instance.playerRadioBubble[author]:unsubscribe()
+    end
+    bubble:subscribe()
     ISChat.instance.playerRadioBubble[author] = bubble
 end
 
@@ -624,6 +636,10 @@ function CreateVehicleRadioBubble(vehicle, message, rawMessage)
         return
     end
     local bubble = RadioBubble:new(vehicle, message, rawMessage, timer, opacity, RadioBubble.types.vehicle)
+    if ISChat.instance.vehicleRadioBubble[keyId] then
+        ISChat.instance.vehicleRadioBubble[keyId]:unsubscribe()
+    end
+    bubble:subscribe()
     ISChat.instance.vehicleRadioBubble[keyId] = bubble
 end
 
@@ -959,11 +975,10 @@ function ISChat:render()
         for index, bubble in pairs(bubbles) do
             if bubble.dead then
                 table.insert(indexToDelete, index)
-            else
-                bubble:render()
             end
         end
         for _, index in pairs(indexToDelete) do
+            bubbles[index]:unsubscribe()
             bubbles[index] = nil
         end
     end

@@ -233,9 +233,6 @@ local function IsAllowedToTalk(author, args, sendError)
         print('yacm error: AuthorHasAccessByType has no method for ' .. args.type)
         return false
     end
-    print(ChatMessage.MessageTypeSettings[args.type]['enabled'] == true
-        and (not ChatMessage.MessageTypeSettings[args.type]['aliveOnly'] or author:getBodyDamage():getHealth() > 0)
-        and AuthorHasAccessByType[args.type](author, args, sendError))
     return ChatMessage.MessageTypeSettings[args.type]['enabled'] == true
         and (not ChatMessage.MessageTypeSettings[args.type]['aliveOnly'] or author:getBodyDamage():getHealth() > 0)
         and AuthorHasAccessByType[args.type](author, args, sendError)

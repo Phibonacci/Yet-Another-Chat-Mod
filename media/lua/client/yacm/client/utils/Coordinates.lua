@@ -17,7 +17,6 @@ function Coordinates.CenterTopOfObject(object, width, height)
         print('yacm error: CenterTopOfObject: nil player parameter')
         return nil
     end
-    -- local x, y = ISCoordConversion.ToScreen(object:getX(), object:getY(), object:getZ(), nil)
     local x, y = IsoUtils.XToScreenExact(object:getX(), object:getY(), object:getZ(), 0),
         IsoUtils.YToScreenExact(object:getX(), object:getY(), object:getZ(), 0)
     local zoom = getCore():getZoom(getPlayer():getPlayerNum())

@@ -58,7 +58,7 @@ function RadioBubble:new(object, text, rawText, timer, opacity, type)
     end
     RadioBubble.__index = self
     setmetatable(RadioBubble, { __index = ABubble })
-    local o = ABubble:new(x, y, text, rawText, timer, opacity)
+    local o = ABubble:new(x, y, text, rawText, timer, opacity, 20)
     if x == nil then
         self.dead = true
     end
