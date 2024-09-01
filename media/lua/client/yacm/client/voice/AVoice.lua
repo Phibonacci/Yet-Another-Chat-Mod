@@ -164,7 +164,6 @@ function AVoice:update()
                 local square = getSquare(self.object:getX(), self.object:getY(), self.object:getZ())
 
                 self.soundId = self.soundEmitter:playSoundImpl(nextSound.sound, square)
-                print('Play ' .. nextSound.sound)
 
                 -- If it's a character and the one played by the client then we don't want to hear the sound from only one side
                 if self.object.getUsername ~= nil and self.object:getUsername() == getPlayer():getUsername() then
@@ -229,7 +228,6 @@ function AVoice:createSoundTable(soundPrefix)
             end
         end
         if soundFile ~= nil then
-            print('Add ' .. soundFile)
             table.insert(soundTable, {
                 time = time,
                 sound = soundFile,
@@ -242,7 +240,6 @@ function AVoice:createSoundTable(soundPrefix)
 end
 
 function AVoice:new(message, object, soundPrefix)
-    print('AVoice:new')
     local o = {}
     setmetatable(o, self)
     self.__index = self
