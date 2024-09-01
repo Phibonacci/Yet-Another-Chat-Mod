@@ -856,14 +856,14 @@ ISChat.addLineInChat = function(message, tabID)
     end
 
     if messageType == 'Local' then -- when pressing Q to shout
-        ISChat.onMessagePacket({
-            author = message:getAuthor(),
-            message = line,
-            type = 'yell',
-            color = { 255, 255, 255 },
-            hideInChat = YacmServerSettings and YacmServerSettings['options'] and
-                YacmServerSettings['options']['hideCallout'] or nil
-        })
+        ISChat.onMessagePacket(
+            'yell',
+            message:getAuthor(),
+            line,
+            { 255, 255, 255 },
+            YacmServerSettings and YacmServerSettings['options'] and
+            YacmServerSettings['options']['hideCallout'] or nil
+        )
     end
 
     if message:isServerAlert() then
