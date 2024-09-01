@@ -1,5 +1,6 @@
 local ABubble = require('yacm/client/ui/bubble/ABubble')
 local Coordinates = require('yacm/client/utils/Coordinates')
+local RadioVoice = require('yacm/client/voice/RadioVoice')
 
 local RadioBubble = ISUIElement:derive("RadioBubble")
 
@@ -65,6 +66,7 @@ function RadioBubble:new(object, text, rawText, timer, opacity, type)
     setmetatable(o, RadioBubble)
     o.type = type
     o.object = object
+    o.voice = RadioVoice:new(rawText, object)
     return o
 end
 

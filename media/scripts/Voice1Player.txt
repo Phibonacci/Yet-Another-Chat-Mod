@@ -1,0 +1,534 @@
+module YetAnotherChatMod {
+    sound Voice1PlayerA {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/A.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerAI {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/AI.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerAIR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/AIR.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerAR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/AR.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerB {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/B.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerC {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/C.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerCH {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/CH.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerD {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/D.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerE {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/E.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerEE {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/EE.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerER {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/ER.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerERE {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/ERE.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerF {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/F.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerG {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/G.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerH {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/H.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerI {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/I.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerIR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/IR.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerIS {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/IS.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerJ {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/J.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerL {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/L.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerM {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/M.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerN {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/N.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerNG {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/NG.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerO {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/O.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerOO {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/OO.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerOOR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/OOR.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerOW {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/OW.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerOY {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/OY.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerP {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/P.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/R.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerS {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/S.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerSH {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/SH.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerT {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/T.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerTH {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/TH.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerU {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/U.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerUR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/UR.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerV {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/V.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerW {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/W.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerY {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/Y.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerYStart {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/YStart.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1PlayerZ {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/player/Z.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+}

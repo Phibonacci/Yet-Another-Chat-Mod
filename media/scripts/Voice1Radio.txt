@@ -1,0 +1,534 @@
+module YetAnotherChatMod {
+    sound Voice1RadioA {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/A.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioAI {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/AI.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioAIR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/AIR.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioAR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/AR.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioB {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/B.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioC {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/C.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioCH {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/CH.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioD {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/D.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioE {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/E.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioEE {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/EE.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioER {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/ER.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioERE {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/ERE.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioF {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/F.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioG {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/G.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioH {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/H.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioI {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/I.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioIR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/IR.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioIS {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/IS.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioJ {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/J.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioL {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/L.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioM {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/M.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioN {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/N.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioNG {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/NG.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioO {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/O.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioOO {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/OO.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioOOR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/OOR.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioOW {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/OW.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioOY {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/OY.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioP {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/P.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/R.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioS {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/S.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioSH {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/SH.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioT {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/T.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioTH {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/TH.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioU {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/U.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioUR {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/UR.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioV {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/V.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioW {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/W.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioY {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/Y.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioYStart {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/YStart.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+
+    sound Voice1RadioZ {
+        category = EHE: Main,
+        loop = false,
+        is3D = true,
+        clip {
+            file = media/sound/yacm/phonemes/1/radio/Z.ogg,
+            distanceMax = 650,
+            reverbFactor = 0.1,
+            volume = 0.7,
+            pitch = 1,
+        }
+    }
+}
