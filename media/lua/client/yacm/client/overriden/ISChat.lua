@@ -7,7 +7,8 @@ local Parser                 = require('yacm/client/parser/Parser')
 local PlayerBubble           = require('yacm/client/ui/bubble/PlayerBubble')
 local RadioBubble            = require('yacm/client/ui/bubble/RadioBubble')
 local RangeIndicator         = require('yacm/client/ui/RangeIndicator')
-local StringParser           = require('yacm/client/utils/StringParser')
+local StringFormat           = require('yacm/shared/utils/StringFormat')
+local StringParser           = require('yacm/shared/utils/StringParser')
 local TypingDots             = require('yacm/client/ui/TypingDots')
 local World                  = require('yacm/shared/utils/World')
 local StringBuilder          = require('yacm/client/parser/StringBuilder')
@@ -30,7 +31,7 @@ ISChat.allChatStreams[11] = { name = 'admin', command = '/admin ', shortCommand 
 
 ISChat.yacmCommand    = {}
 ISChat.yacmCommand[1] = { name = 'color', command = '/color', shortCommand = nil }
-ISChat.yacmCommand[2] = { name = 'range', command = '/range', shortCommand = nil }
+ISChat.yacmCommand[2] = { name = 'pitch', command = '/pitch', shortCommand = nil }
 
 
 ISChat.defaultTabStream    = {}
@@ -178,11 +179,11 @@ end
 Events.OnChatWindowInit.Remove(ISChat.initChat)
 
 local function GetRandomInt(min, max)
-    return math.floor(ZombRandFloat(min, max))
+    return ZombRand(max - min) + min
 end
 
 local function GenerateRandomColor()
-    return { 255 - GetRandomInt(1, 255), 255 - GetRandomInt(1, 255), 255 - GetRandomInt(1, 255), }
+    return { GetRandomInt(0, 254), GetRandomInt(0, 254), GetRandomInt(0, 254), }
 end
 
 local function SetPlayerColor(color)
@@ -190,11 +191,17 @@ local function SetPlayerColor(color)
     ModData.add('yacm', ISChat.instance.yacmModData)
 end
 
+local function SetPlayerPitch(pitch)
+    ISChat.instance.yacmModData['voicePitch'] = pitch
+    ModData.add('yacm', ISChat.instance.yacmModData)
+end
+
 local function InitGlobalModData()
     local yacmModData = ModData.getOrCreate("yacm")
+    ISChat.instance.yacmModData = yacmModData
+
     if yacmModData['playerColor'] == nil then
-        yacmModData['playerColor'] = GenerateRandomColor()
-        ModData.add('yacm', yacmModData)
+        SetPlayerColor(GenerateRandomColor())
     end
     if yacmModData['isVoiceEnabled'] == nil and ISChat.instance.isVoiceEnabled == nil then
         -- wait for the server settings to override this if voices are enabled by default
@@ -205,12 +212,10 @@ local function InitGlobalModData()
     if yacmModData['voicePitch'] == nil then
         local randomPitch = ZombRandFloat(0.85, 1.15)
         if getPlayer():getVisual():isFemale() then
-            randomPitch = randomPitch + 0.20
+            randomPitch = randomPitch + 0.30
         end
-        yacmModData['voicePitch'] = randomPitch
-        ModData.add('yacm', yacmModData)
+        SetPlayerPitch(randomPitch)
     end
-    ISChat.instance.yacmModData = yacmModData
 end
 
 local lastAskedDataTime = Calendar.getInstance():getTimeInMillis() - 2000
@@ -353,18 +358,54 @@ local function GetArgumentsFromMessage(yacmCommand, message)
 end
 
 local function ProcessColorCommand(arguments)
-    local color = StringParser.rgbStringToRGB(arguments) or StringParser.hexaStringToRGB(arguments)
-    if color == nil then
+    local currentColor = ISChat.instance.yacmModData['playerColor']
+    if arguments == nil then
+        ISChat.sendInfoToCurrentTab('color value is ' .. StringFormat.color(currentColor))
+        return true
+    end
+    local newColor = StringParser.rgbStringToRGB(arguments) or StringParser.hexaStringToRGB(arguments)
+    if newColor == nil then
         return false
     end
-    SetPlayerColor(color)
+    SetPlayerColor(newColor)
+    ISChat.sendInfoToCurrentTab('player color updated to '
+        .. StringFormat.color(newColor)
+        .. ' from '
+        .. StringFormat.color(currentColor))
+    return true
+end
+
+local function ProcessPitchCommand(arguments)
+    if arguments == nil then
+        ISChat.sendInfoToCurrentTab('pitch value is ' .. ISChat.instance.yacmModData['voicePitch'])
+        return true
+    end
+    local regex = '^(%d+.?%d*) *$'
+    local valueAsText = arguments:match(regex)
+    print('"' .. arguments .. '"')
+    if valueAsText then
+        local value = tonumber(valueAsText)
+        if value ~= nil and value >= 0.85 and value <= 1.45 then
+            local currentPitch = ISChat.instance.yacmModData['voicePitch']
+            SetPlayerPitch(value)
+            ISChat.sendInfoToCurrentTab('pitch value updated to ' .. value .. ' from ' .. currentPitch)
+            return true
+        end
+    end
+    return false
 end
 
 local function ProcessYacmCommand(yacmCommand, message)
     local arguments = GetArgumentsFromMessage(yacmCommand, message)
     if yacmCommand['name'] == 'color' then
-        if arguments == nil or ProcessColorCommand(arguments) == false then
-            ISChat.sendErrorToCurrentTab('color command expects the format: /color 255, 255, 255')
+        if ProcessColorCommand(arguments) == false then
+            ISChat.sendErrorToCurrentTab(
+                'color command expects the format: "/color value" with value as 255, 255, 255 or #FFFFFF')
+            return false
+        end
+    elseif yacmCommand['name'] == 'pitch' then
+        if ProcessPitchCommand(arguments) == false then
+            ISChat.sendErrorToCurrentTab('pitch command expects the format: "/pitch value" with value from 0.85 to 1.45')
             return false
         end
     end
@@ -873,6 +914,15 @@ function ISChat.onRadioPacket(type, author, message, color, radiosInfo, voicePit
     end
 end
 
+function ISChat.sendInfoToCurrentTab(message)
+    local time = Calendar.getInstance():getTimeInMillis()
+    local formattedMessage = StringBuilder.BuildBracketColorString({ 70, 70, 255 }) .. message
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, false,
+        formattedMessage, time, nil)
+    local tabID = ISChat.defaultTabStream[ISChat.instance.currentTabID]['tabID']
+    AddMessageToTab(tabID, time, formattedMessage, line, nil)
+end
+
 function ISChat.sendErrorToCurrentTab(message)
     local time = Calendar.getInstance():getTimeInMillis()
     local formattedMessage = StringBuilder.BuildBracketColorString({ 255, 40, 40 }) ..
@@ -1241,6 +1291,7 @@ local function UpdateInfoWindow()
         info = info .. getText('SurvivalGuide_YetAnotherChatMod_Ooc')
     end
     info = info .. getText('SurvivalGuide_YetAnotherChatMod_Color')
+    info = info .. getText('SurvivalGuide_YetAnotherChatMod_Pitch')
     ISChat.instance:setInfo(info)
 end
 

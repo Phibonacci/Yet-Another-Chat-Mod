@@ -1,0 +1,4 @@
+Sandbox_EN = {
+    UI_YACM_chat_enable_voices                               = "Enable voices",
+    UI_YACM_chat_disable_voices                              = "Disable voices",
+}

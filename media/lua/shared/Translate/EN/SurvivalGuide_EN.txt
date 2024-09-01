@@ -14,5 +14,6 @@ SurvivalGuide_EN {
     SurvivalGuide_YetAnotherChatMod_Ooc       = " /ooc or /o to speak out of character <BR>",
     SurvivalGuide_YetAnotherChatMod_Pm        = " /pm username or /p username to send a private message (/r to answer) <BR>",
     SurvivalGuide_YetAnotherChatMod_Admin     = " /admin or /a to speak in admin channel <BR>",
-    SurvivalGuide_YetAnotherChatMod_Color     = " /color r,g,b with r,g,b a number from 0 to 255 or /color #FFFFFF to update player color",
+    SurvivalGuide_YetAnotherChatMod_Color     = " "/color r,g,b" with r,g,b a number from 0 to 255 or /color #FFFFFF to update player color or just "/color" to see the current color <BR>",
+    SurvivalGuide_YetAnotherChatMod_Pitch     = " "/pitch value" with value from 0.85 to 1.45 to update player voice pitch or just "/pitch" to see the current pitch",
 }

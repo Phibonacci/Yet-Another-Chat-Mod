@@ -242,7 +242,6 @@ end
 
 function AVoice:new(message, object, soundPrefix, voicePitch)
     local o = {}
-    print('Voice pitch is ' .. voicePitch)
     setmetatable(o, self)
     self.__index = self
     o.message = message:upper()
