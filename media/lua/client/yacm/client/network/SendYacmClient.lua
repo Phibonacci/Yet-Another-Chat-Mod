@@ -52,7 +52,7 @@ function YacmClientSendCommands.sendMuteRadio(radio, state)
             y = radio:getY(),
             z = radio:getZ(),
         })
-    else
+    elseif instanceof(radio, 'Radio') then -- is an inventoryItem radio
         local id = radio:getID()
         if id == nil then
             print('error: YacmClientSendCommands.sendMuteRadio: no id found')
@@ -79,7 +79,7 @@ function YacmClientSendCommands.sendAskRadioState(radio)
             y = radio:getY(),
             z = radio:getZ(),
         })
-    else
+    elseif instanceof(radio, 'Radio') then -- is an inventoryItem radio
         local id = radio:getID()
         if id == nil then
             print('error: YacmClientSendCommands.sendAskRadioState: no id found')
