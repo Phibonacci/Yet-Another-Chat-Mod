@@ -1,5 +1,6 @@
 local ABubble = require('yacm/client/ui/bubble/ABubble')
 local Coordinates = require('yacm/client/utils/Coordinates')
+local Voice = require('yacm/client/voice/Voice')
 
 local PlayerBubble = ISUIElement:derive("PlayerBubble")
 
@@ -43,6 +44,7 @@ function PlayerBubble:new(player, text, rawText, timer, opacity)
     end
     setmetatable(o, PlayerBubble)
     o.player = player
+    o.voice = Voice:new(rawText, player)
     return o
 end
 

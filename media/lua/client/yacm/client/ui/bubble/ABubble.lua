@@ -26,6 +26,12 @@ local function Lerp(start, target, progression)
 end
 
 function ABubble:drawBubble(x, y)
+    if self.dead then
+        return
+    end
+    if self.voice then
+        self.voice:subscribe()
+    end
     if not self.texturesLoaded then
         self:loadTextures()
         self.texturesLoaded = true
@@ -59,6 +65,9 @@ function ABubble:drawBubble(x, y)
         alpha = (1000 - fadingTime) / 1000 * self.opacity
     else
         self.dead = true
+        if self.voice then
+            self.voice:unsubscribe()
+        end
         return
     end
 
