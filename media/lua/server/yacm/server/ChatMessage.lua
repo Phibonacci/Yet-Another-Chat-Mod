@@ -15,7 +15,49 @@ local function DistanceManhatten(source, target)
     return math.abs(target:getX() - source:getX()) + math.abs(target:getY() - source:getY())
 end
 
-local MessageHasAccessByType = {
+local AuthorHasAccessByType = {
+    ['whisper']   = function(author, args, sendError) return true end,
+    ['low']       = function(author, args, sendError) return true end,
+
+    ['say']       = function(author, args, sendError) return true end,
+
+    ['yell']      = function(author, args, sendError) return true end,
+    ['pm']        = function(author, args, sendError)
+        if args.target == nil or World.getPlayerByUsername(args.target) == nil then
+            if args.target ~= nil then
+                if sendError then
+                    SendServer.ChatErrorMessage(author, args.type, 'unknown player "' .. args.target .. '".')
+                end
+            else
+                print('yacm error: YACM: Received a private message from "' ..
+                    author:getUsername() .. '" without a contact name')
+            end
+            return false
+        end
+        return true
+    end,
+    ['faction']   = function(author, args, sendError)
+        local hasFaction = Faction.getPlayerFaction(author) ~= nil
+        if not hasFaction and sendError then
+            SendServer.ChatErrorMessage(author, args.type, 'you are not part of a faction.')
+        end
+        return hasFaction
+    end,
+    ['safehouse'] = function(author, args, sendError)
+        local hasSafeHouse = SafeHouse.hasSafehouse(author) ~= nil
+        if not hasSafeHouse and sendError then
+            SendServer.ChatErrorMessage(author, args.type, 'you are not part of a safe house.')
+        end
+        return hasSafeHouse
+    end,
+    ['general']   = function(author, args, sendError) return true end,
+    ['admin']     = function(author, args, sendError)
+        return author:getAccessLevel() == 'Admin'
+    end,
+    ['ooc']       = function(author, args, sendError) return true end,
+}
+
+local ListenerHasAccessByType = {
     ['whisper']   = function(author, player, args) return true end,
     ['low']       = function(author, player, args) return true end,
 
@@ -27,8 +69,8 @@ local MessageHasAccessByType = {
             (player:getUsername():lower() == args.target:lower() or player:getUsername():lower() == args.author:lower())
     end,
     ['faction']   = function(author, player, args)
-        local playerFaction = Faction.getPlayerFaction(player)
         local authorFaction = Faction.getPlayerFaction(author)
+        local playerFaction = Faction.getPlayerFaction(player)
         return playerFaction ~= nil and authorFaction ~= nil and playerFaction:getName() == authorFaction:getName()
     end,
     ['safehouse'] = function(author, player, args)
@@ -77,6 +119,7 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.WhisperEnabled,
             ['color'] = GetColorSandbox('Whisper'),
             ['radio'] = true,
+            ['aliveOnly'] = true,
         },
         ['low'] = {
             ['range'] = SandboxVars.YetAnotherChatMod.LowRange,
@@ -84,6 +127,7 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.LowEnabled,
             ['color'] = GetColorSandbox('Low'),
             ['radio'] = true,
+            ['aliveOnly'] = true,
         },
         ['say'] = {
             ['range'] = SandboxVars.YetAnotherChatMod.SayRange,
@@ -91,6 +135,7 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.SayEnabled,
             ['color'] = GetColorSandbox('Say'),
             ['radio'] = true,
+            ['aliveOnly'] = true,
         },
         ['yell'] = {
             ['range'] = SandboxVars.YetAnotherChatMod.YellRange,
@@ -98,6 +143,7 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.YellEnabled,
             ['color'] = GetColorSandbox('Yell'),
             ['radio'] = true,
+            ['aliveOnly'] = true,
         },
         ['pm'] = {
             ['range'] = -1,
@@ -105,6 +151,7 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.PrivateMessageEnabled,
             ['color'] = GetColorSandbox('PrivateMessage'),
             ['radio'] = false,
+            ['aliveOnly'] = true,
         },
         ['faction'] = {
             ['range'] = -1,
@@ -112,6 +159,7 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.FactionMessageEnabled,
             ['color'] = GetColorSandbox('FactionMessage'),
             ['radio'] = false,
+            ['aliveOnly'] = true,
         },
         ['safehouse'] = {
             ['range'] = -1,
@@ -119,6 +167,7 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.SafeHouseMessageEnabled,
             ['color'] = GetColorSandbox('SafeHouseMessage'),
             ['radio'] = false,
+            ['aliveOnly'] = true,
         },
         ['general'] = {
             ['range'] = -1,
@@ -126,6 +175,7 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.GeneralMessageEnabled,
             ['color'] = GetColorSandbox('GeneralMessage'),
             ['radio'] = false,
+            ['aliveOnly'] = true,
         },
         ['admin'] = {
             ['range'] = -1,
@@ -133,6 +183,7 @@ local function SetMessageTypeSettings()
             ['enabled'] = SandboxVars.YetAnotherChatMod.AdminMessageEnabled,
             ['color'] = GetColorSandbox('AdminMessage'),
             ['radio'] = false,
+            ['aliveOnly'] = false,
         },
         ['ooc'] = {
             ['range'] = SandboxVars.YetAnotherChatMod.OutOfCharacterMessageRange,
@@ -160,7 +211,6 @@ local function SetMessageTypeSettings()
     }
 end
 
-
 local function GetRangeForMessageType(type)
     local messageSettings = ChatMessage.MessageTypeSettings[type]
     if messageSettings ~= nil then
@@ -170,25 +220,33 @@ local function GetRangeForMessageType(type)
     return nil
 end
 
-local function GetConnectedPlayer(username)
-    local connectedPlayers = getOnlinePlayers()
-    for i = 0, connectedPlayers:size() - 1 do
-        local connectedPlayer = connectedPlayers:get(i)
-        if connectedPlayer:getUsername():lower() == username:lower() then
-            return connectedPlayer
-        end
-    end
-    return nil
-end
-
-local function IsAllowed(author, player, args)
-    if args.type == nil or ChatMessage.MessageTypeSettings[args.type] == nil
-        or ChatMessage.MessageTypeSettings[args.type]['enabled'] ~= true
-        or MessageHasAccessByType[args.type] == nil
-    then
+local function IsAllowedToTalk(author, args, sendError)
+    if args.type == nil then
+        print('yacm error: args.type is null')
         return false
     end
-    return MessageHasAccessByType[args.type](author, player, args)
+    if ChatMessage.MessageTypeSettings[args.type] == nil then
+        print('yacm error: ChatMessage.MessageTypeSettings of ' .. args.type .. ' is null')
+        return false
+    end
+    if AuthorHasAccessByType[args.type] == nil then
+        print('yacm error: AuthorHasAccessByType has no method for ' .. args.type)
+        return false
+    end
+    print(ChatMessage.MessageTypeSettings[args.type]['enabled'] == true
+        and (not ChatMessage.MessageTypeSettings[args.type]['aliveOnly'] or author:getBodyDamage():getHealth() > 0)
+        and AuthorHasAccessByType[args.type](author, args, sendError))
+    return ChatMessage.MessageTypeSettings[args.type]['enabled'] == true
+        and (not ChatMessage.MessageTypeSettings[args.type]['aliveOnly'] or author:getBodyDamage():getHealth() > 0)
+        and AuthorHasAccessByType[args.type](author, args, sendError)
+end
+
+local function IsAllowedToListen(author, player, args)
+    if ListenerHasAccessByType[args.type] == nil then
+        print('yacm error: IsAllowedToListen: MessageHasAccessByType has no method for ' .. args.type)
+        return false
+    end
+    return ListenerHasAccessByType[args.type](author, player, args)
 end
 
 local function IsInRadioEmittingRange(radioEmitters, receiver)
@@ -365,45 +423,29 @@ end
 
 function ChatMessage.ProcessMessage(player, args, packetType, sendError)
     if args.type == nil then
-        error('error: YACM: Received a message from "' .. player:getUsername() .. '" with no type')
+        print('yacm error: Received a message from "' .. player:getUsername() .. '" with no type')
         return
     end
-    if args.type == "faction" then
-        if Faction.getPlayerFaction(player) == nil then
-            if sendError then
-                SendServer.ChatErrorMessage(player, args.type, 'you are not part of a faction.')
-            end
-            return
-        end
-    elseif args.type == 'safehouse' then
-        if SafeHouse.hasSafehouse(player) == nil then
-            if sendError then
-                SendServer.ChatErrorMessage(player, args.type, 'you are not part of a safe house.')
-            end
-            return
-        end
-    elseif args.type == 'pm' then
-        if args.target == nil or GetConnectedPlayer(args.target) == nil then
-            if args.target ~= nil then
-                if sendError then
-                    SendServer.ChatErrorMessage(player, args.type, 'unknown player "' .. args.target .. '".')
-                end
-            else
-                error('error: YACM: Received a private message from "' .. player:getUsername() .. '" without a contact.')
-            end
-            return
-        end
+
+    if AuthorHasAccessByType[args.type] == nil then
+        print('yacm error: AuthorHasAccessByType has not method for type ' .. args.type)
+        return
     end
+
+    if not IsAllowedToTalk(player, args, sendError) then
+        return
+    end
+
     local range = GetRangeForMessageType(args.type)
     if range == nil then
-        error('error: YACM: No range for message type "' .. args.type .. '".')
+        error('yacm error: No range for message type "' .. args.type .. '".')
         return
     end
     local radioEmission, radioFrequencies = GetEmittingRadios(player, packetType, args['type'], range)
     local connectedPlayers = getOnlinePlayers()
     for i = 0, connectedPlayers:size() - 1 do
         local connectedPlayer = connectedPlayers:get(i)
-        if IsAllowed(player, connectedPlayer, args)
+        if IsAllowedToListen(player, connectedPlayer, args)
         then
             if connectedPlayer:getOnlineID() == player:getOnlineID()
                 or range == -1 or PlayersDistance(player, connectedPlayer) < range + 0.001
