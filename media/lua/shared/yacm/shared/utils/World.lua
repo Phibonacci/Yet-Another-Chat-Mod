@@ -98,6 +98,46 @@ function World.getItemsInRangeByGroup(player, range, groupName)
     return getItemsInRangeByFilter(player, range, filterTypeEnum.group, groupName)
 end
 
+function World.getVehiclesInRange(player, range)
+    if range < 1 then
+        return {}
+    end
+    local vehicles = {}
+    -- we want to list vehicles on the player floor first
+    local zList = { player:getZ(), player:getZ() + 1 }
+    if player:getZ() > 0 then
+        table.insert(zList, player:getZ() - 1)
+    end
+    for currentRange = 0, range do
+        for _, z in pairs(zList) do
+            for yOffset = -currentRange, currentRange do
+                local y = player:getY() + yOffset
+                local xOffset = currentRange - math.abs(yOffset)
+                local xList = { player:getX() + xOffset }
+                if xOffset ~= 0 then
+                    table.insert(xList, player:getX() - xOffset)
+                end
+
+                for _, x in pairs(xList) do
+                    local square = getSquare(x, y, z)
+                    if square ~= nil then
+                        local vehicle = square:getVehicleContainer()
+                        if vehicle ~= nil then
+                            local vehicleId = vehicle:getKeyId()
+                            if vehicleId == nil then
+                                print('error: World.getVehiclesInRange: impossible error: vehicle key ID is null')
+                            else
+                                vehicles[vehicleId] = vehicle
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return vehicles
+end
+
 function World.getPlayerByUsername(username)
     local connectedPlayers = getOnlinePlayers()
     for i = 0, connectedPlayers:size() - 1 do

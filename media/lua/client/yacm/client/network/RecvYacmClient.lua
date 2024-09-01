@@ -8,7 +8,8 @@ end
 
 YacmClientRecvCommands['RadioMessage'] = function(args)
     ISChat.onRadioPacket(
-        args['type'], args['author'], args['message'], args['color'], args['radios'])
+        args['type'], args['author'], args['message'], args['color'],
+        args['radios'])
 end
 
 YacmClientRecvCommands['Typing'] = function(args)

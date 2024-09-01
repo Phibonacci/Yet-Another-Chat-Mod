@@ -1,4 +1,4 @@
-require('yacm/client/parser/StringBuilder')
+local StringBuilder = require('yacm/client/parser/StringBuilder')
 
 local AToken = {}
 
@@ -48,11 +48,11 @@ end
 
 -- format for the old bubbles
 function AToken:formatBubble(keepTags, wrapWords)
-    return self:formatCustom(wrapWords, keepTags, BuildAsteriskColorString)
+    return self:formatCustom(wrapWords, keepTags, StringBuilder.BuildAsteriskColorString)
 end
 
 function AToken:format(keepTags, wrapWords, maxBubbleLength)
-    return self:formatCustom(wrapWords, keepTags, BuildBracketColorString, maxBubbleLength)
+    return self:formatCustom(wrapWords, keepTags, StringBuilder.BuildBracketColorString, maxBubbleLength)
 end
 
 function AToken:getColor()

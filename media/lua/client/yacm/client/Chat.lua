@@ -2,16 +2,16 @@ local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/shared/Version')
 
 local ChatUI = require('yacm/client/ui/ChatUI')
 
-require('yacm/client/parser/Parser')
-require('yacm/client/parser/StringBuilder')
 
+local Parser                 = require('yacm/client/parser/Parser')
 local PlayerBubble           = require('yacm/client/ui/bubble/PlayerBubble')
 local RadioBubble            = require('yacm/client/ui/bubble/RadioBubble')
 local RangeIndicator         = require('yacm/client/ui/RangeIndicator')
-local TypingDots             = require('yacm/client/ui/TypingDots')
-local YacmClientSendCommands = require('yacm/client/network/SendYacmClient')
-
 local StringParser           = require('yacm/client/utils/StringParser')
+local TypingDots             = require('yacm/client/ui/TypingDots')
+local World                  = require('yacm/shared/utils/World')
+local StringBuilder          = require('yacm/client/parser/StringBuilder')
+local YacmClientSendCommands = require('yacm/client/network/SendYacmClient')
 
 
 ISChat.allChatStreams     = {}
@@ -263,7 +263,7 @@ local function ProcessChatCommand(stream, command)
     if YacmServerSettings and YacmServerSettings[stream.name] == false then
         return false
     end
-    local yacmCommand = ParseYacmMessage(command)
+    local yacmCommand = Parser.ParseYacmMessage(command)
     local playerColor = ISChat.instance.yacmModData['playerColor']
     if yacmCommand == nil then
         return false
@@ -406,7 +406,7 @@ local function BuildChannelPrefixString(channel)
     else
         color = { 255, 255, 255 }
     end
-    return BuildBracketColorString(color) .. '[' .. channel .. '] '
+    return StringBuilder.BuildBracketColorString(color) .. '[' .. channel .. '] '
 end
 
 function ISChat:updateChatPrefixSettings()
@@ -418,14 +418,14 @@ function ISChat:updateChatPrefixSettings()
         chatText.chatTextRawLines = chatText.chatTextRawLines or {}
         for i, msg in ipairs(chatText.chatTextRawLines) do
             self.chatFont = self.chatFont or 'medium'
-            local line = BuildFontSizeString(self.chatFont)
+            local line = StringBuilder.BuildFontSizeString(self.chatFont)
             if self.showTimestamp then
-                line = line .. BuildTimePrefixString(msg.time)
+                line = line .. StringBuilder.BuildTimePrefixString(msg.time)
             end
             if self.showTitle then
                 line = line .. BuildChannelPrefixString(msg.channel)
             end
-            line = line .. msg.line .. BuildNewLine()
+            line = line .. msg.line .. StringBuilder.BuildNewLine()
             table.insert(chatText.chatTextLines, line)
             if i == #chatText.chatMessages then
                 line = string.gsub(line, " <LINE> $", "")
@@ -503,12 +503,12 @@ end
 
 function BuildMessageFromPacket(type, message, author, playerColor, frequency)
     local messageColor = BuildColorFromMessageType(type)
-    local parsedMessage = ParseYacmMessage(message, messageColor, 20, 200)
+    local parsedMessage = Parser.ParseYacmMessage(message, messageColor, 20, 200)
     local radioPrefix = ''
     if frequency then
         radioPrefix = '(' .. string.format('%.1fMHz', frequency / 1000) .. '), '
     end
-    local messageColorString = BuildBracketColorString(messageColor)
+    local messageColorString = StringBuilder.BuildBracketColorString(messageColor)
     local quote
     local verbString
     if YacmServerSettings == nil or YacmServerSettings['options']['verb'] == true then
@@ -520,19 +520,19 @@ function BuildMessageFromPacket(type, message, author, playerColor, frequency)
     end
     local formatedMessage = ''
     if author ~= nil then
-        formatedMessage = formatedMessage .. BuildBracketColorString(playerColor) .. author
+        formatedMessage = formatedMessage .. StringBuilder.BuildBracketColorString(playerColor) .. author
     end
     formatedMessage = formatedMessage ..
-        BuildBracketColorString({ 150, 150, 150 }) ..
+        StringBuilder.BuildBracketColorString({ 150, 150, 150 }) ..
         verbString ..
         radioPrefix .. messageColorString .. quote .. parsedMessage.body .. messageColorString .. quote
     return formatedMessage, parsedMessage
 end
 
 function BuildChatMessage(fontSize, showTimestamp, showTitle, rawMessage, time, channel)
-    local line = BuildFontSizeString(fontSize)
+    local line = StringBuilder.BuildFontSizeString(fontSize)
     if showTimestamp then
-        line = line .. BuildTimePrefixString(time)
+        line = line .. StringBuilder.BuildTimePrefixString(time)
     end
     if showTitle and channel ~= nil then
         line = line .. BuildChannelPrefixString(channel)
@@ -541,19 +541,17 @@ function BuildChatMessage(fontSize, showTimestamp, showTitle, rawMessage, time, 
     return line
 end
 
-function CreateBubble(author, message, rawMessage)
+function CreatePlayerBubble(author, message, rawMessage)
     ISChat.instance.bubble = ISChat.instance.bubble or {}
     ISChat.instance.typingDots = ISChat.instance.typingDots or {}
     local onlineUsers = getOnlinePlayers()
-    local authorObj = nil
-    for i = 0, onlineUsers:size() - 1 do
-        local user = onlineUsers:get(i)
-        if user:getUsername() == author then
-            authorObj = onlineUsers:get(i)
-            break
-        end
+    if author == nil then
+        print('error: CreatePlayerBubble: author is null')
+        return
     end
+    local authorObj = World.getPlayerByUsername(author)
     if authorObj == nil then
+        print('error: CreatePlayerBubble: author not found ' .. author)
         return
     end
     local timer = 10
@@ -568,6 +566,23 @@ function CreateBubble(author, message, rawMessage)
     if ISChat.instance.typingDots[author] ~= nil then
         ISChat.instance.typingDots[author] = nil
     end
+end
+
+function CreateVehicleBubble(vehicle, message, rawMessage)
+    ISChat.instance.vehicleBubble = ISChat.instance.vehicleBubble or {}
+    local timer = 10
+    local opacity = 70
+    if YacmServerSettings then
+        timer = YacmServerSettings['options']['bubble']['timer']
+        opacity = YacmServerSettings['options']['bubble']['opacity']
+    end
+    local keyId = vehicle:getKeyId()
+    if keyId == nil then
+        print('error: CreateVehicleBubble: key id is null')
+        return
+    end
+    local bubble = PlayerBubble:new(vehicle, message, rawMessage, timer, opacity)
+    ISChat.instance.vehicleBubble[keyId] = bubble
 end
 
 function ISChat.onTypingPacket(author, type)
@@ -635,10 +650,10 @@ local function AddMessageToTab(tabID, time, formattedMessage, line, channel)
                 table.insert(newLines, v)
             end
         end
-        table.insert(newLines, line .. BuildNewLine())
+        table.insert(newLines, line .. StringBuilder.BuildNewLine())
         chatText.chatTextLines = newLines
     else
-        table.insert(chatText.chatTextLines, line .. BuildNewLine())
+        table.insert(chatText.chatTextLines, line .. StringBuilder.BuildNewLine())
     end
     chatText.text = ''
     local newText = ''
@@ -662,7 +677,7 @@ function ISChat.onMessagePacket(packet)
         ISChat.instance.lastPrivateMessageAuthor = packet.author
     end
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
-    CreateBubble(packet.author, message['bubble'], message['rawMessage'])
+    CreatePlayerBubble(packet.author, message['bubble'], message['rawMessage'])
     local time = Calendar.getInstance():getTimeInMillis()
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
         formattedMessage, time, packet.type)
@@ -676,12 +691,12 @@ function ISChat.onMessagePacket(packet)
     end
 end
 
-local function CreateRadioBubble(position, formattedMessage, rawTextMessage)
+local function CreateRadioBubble(position, bubbleMessage, rawTextMessage)
     ISChat.instance.radioBubble = ISChat.instance.radioBubble or {}
     if position ~= nil then
         local x, y, z = position['x'], position['y'], position['z']
-        if x == nil or y == nil or z == nil then -- todo better packet without nul pos
-            CreateBubble(getPlayer():getUsername(), formattedMessage, rawTextMessage)
+        if x == nil or y == nil or z == nil then
+            print('error: CreateRadioBubble: nil position for a square radio')
             return
         end
         x, y, z = math.abs(x), math.abs(y), math.abs(z)
@@ -692,32 +707,69 @@ local function CreateRadioBubble(position, formattedMessage, rawTextMessage)
         local opacity = 70
         local square = getSquare(x, y, z)
         ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] =
-            RadioBubble:new(square, formattedMessage, rawTextMessage, timer, opacity)
+            RadioBubble:new(square, bubbleMessage, rawTextMessage, timer, opacity)
     end
 end
 
-function ISChat.onRadioPacket(type, author, message, color, radiosByFrequency)
+local function CreateSquaresRadiosBubbles(parsedMessages, squaresPos)
+    if squaresPos == nil then
+        print('error: CreateSquaresRadiosBubbles: squaresPos table is null')
+        return
+    end
+    for _, position in pairs(squaresPos) do
+        CreateRadioBubble(position, parsedMessages['bubble'], parsedMessages['rawMessage'])
+    end
+end
+
+local function CreatePlayersRadiosBubbles(parsedMessages, playersUsernames)
+    if playersUsernames == nil then
+        print('error: CreatePlayersRadiosBubbles: playersUsernames table is null')
+        return
+    end
+    for _, username in pairs(playersUsernames) do
+        CreatePlayerBubble(getPlayer():getUsername(), parsedMessages['bubble'], parsedMessages['rawMessage'])
+    end
+end
+
+local function CreateVehiclesRadiosBubbles(parsedMessages, vehiclesKeyIds)
+    if vehiclesKeyIds == nil then
+        print('error: CreateVehiclesRadiosBubbles: vehiclesKeyIds table is null')
+        return
+    end
+    local vehicles = World.getVehiclesInRange(getPlayer(), 10)
+    for _, vehicleKeyId in pairs(vehiclesKeyIds) do
+        local vehicle = vehicles[vehicleKeyId]
+        if vehicle == nil then
+            print('error: CreateVehiclesRadiosBubble: vehicle not found for key id ' .. vehicleKeyId)
+        else
+            CreateVehicleBubble(vehicle, parsedMessages['bubble'], parsedMessages['rawMessage'])
+        end
+    end
+end
+
+function ISChat.onRadioPacket(type, author, message, color, radiosInfo)
     local time = Calendar.getInstance():getTimeInMillis()
     local stream = GetStreamFromType(type)
     if stream == nil then
         print('error: onMessagePacket: stream not found')
         return
     end
-    for frequency, radios in pairs(radiosByFrequency) do
-        local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, author, color, frequency)
+
+    for frequency, radios in pairs(radiosInfo) do
+        local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency)
         local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
             formattedMessage, time, type)
-        for _, position in pairs(radios) do
-            CreateRadioBubble(position, parsedMessage['bubble'], parsedMessage['rawMessage'])
-        end
+        CreateSquaresRadiosBubbles(parsedMessages, radios['squares'])
+        CreatePlayersRadiosBubbles(parsedMessages, radios['players'])
+        CreateVehiclesRadiosBubbles(parsedMessages, radios['vehicles'])
         AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
     end
 end
 
 function ISChat.sendErrorToCurrentTab(message)
     local time = Calendar.getInstance():getTimeInMillis()
-    local formattedMessage = BuildBracketColorString({ 255, 40, 40 }) ..
-        'error: ' .. BuildBracketColorString({ 255, 70, 70 }) .. message
+    local formattedMessage = StringBuilder.BuildBracketColorString({ 255, 40, 40 }) ..
+        'error: ' .. StringBuilder.BuildBracketColorString({ 255, 70, 70 }) .. message
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, false,
         formattedMessage, time, nil)
     local tabID = ISChat.defaultTabStream[ISChat.instance.currentTabID]['tabID']
@@ -726,8 +778,8 @@ end
 
 function ISChat.onChatErrorPacket(type, message)
     local time = Calendar.getInstance():getTimeInMillis()
-    local formattedMessage = BuildBracketColorString({ 255, 50, 50 }) ..
-        'error: ' .. BuildBracketColorString({ 255, 60, 60 }) .. message
+    local formattedMessage = StringBuilder.BuildBracketColorString({ 255, 50, 50 }) ..
+        'error: ' .. StringBuilder.BuildBracketColorString({ 255, 60, 60 }) .. message
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
         formattedMessage, time, type)
     local stream
@@ -885,6 +937,20 @@ function ISChat:render()
         end
         for _, index in pairs(indexToDelete) do
             ISChat.instance.radioBubble[index] = nil
+        end
+    end
+
+    if ISChat.instance.vehicleBubble then
+        local indexToDelete = {}
+        for index, bubble in pairs(ISChat.instance.vehicleBubble) do
+            if bubble.dead then
+                table.insert(indexToDelete, index)
+            else
+                bubble:render()
+            end
+        end
+        for _, index in pairs(indexToDelete) do
+            ISChat.instance.vehicleBubble[index] = nil
         end
     end
 
@@ -1442,6 +1508,10 @@ end
 function ISChat:onGearButtonClick()
     local context = ISContextMenu.get(0, self:getAbsoluteX() + self:getWidth() / 2,
         self:getAbsoluteY() + self.gearButton:getY())
+    if context == nil then
+        print('error: ISChat:onGearButtonClick: gear button context is null')
+        return
+    end
 
     local timestampOptionName = getText("UI_chat_context_enable_timestamp")
     if self.showTimestamp then

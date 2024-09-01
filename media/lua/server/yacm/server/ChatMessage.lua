@@ -199,11 +199,7 @@ local function IsInRadioEmittingRange(radioEmitters, receiver)
         local radioData = radioEmitter:getDeviceData()
         if radioData ~= nil then
             local transmitRange = radioData:getTransmitRange()
-            print('emitter')
-            print(radioEmitter)
-            print(receiver)
             local distance = DistanceManhatten(radioEmitter, receiver)
-            print('transmitRange: ' .. transmitRange .. ', distance: ' .. distance)
             if distance <= transmitRange then
                 return true
             end
@@ -212,10 +208,11 @@ local function IsInRadioEmittingRange(radioEmitters, receiver)
     return false
 end
 
-local function SendRadioPackets(author, player, args, radioFrequencies)
+local function GetSquaresRadios(player, args, radioFrequencies)
     local radiosByFrequency = {}
     local radioMaxRange = 10
     local radios = World.getItemsInRangeByGroup(player, radioMaxRange, 'IsoRadio')
+    local found = false
     for _, radio in pairs(radios) do
         local pos = {
             x = radio:getX(),
@@ -233,9 +230,6 @@ local function SendRadioPackets(author, player, args, radioFrequencies)
             volume = math.abs(volume)
             local radioRange = math.abs(volume * radioMaxRange + 0.5)
             local playerDistance = PlayersDistance(player, radio)
-            print('radio infos')
-            print(playerDistance <= radioRange)
-            print(IsInRadioEmittingRange(radioFrequencies[frequency], radio))
             if turnedOn and frequency ~= nil and radioFrequencies[frequency] ~= nil
                 and playerDistance <= radioRange
                 and IsInRadioEmittingRange(radioFrequencies[frequency], radio)
@@ -244,32 +238,129 @@ local function SendRadioPackets(author, player, args, radioFrequencies)
                     radiosByFrequency[frequency] = {}
                 end
                 table.insert(radiosByFrequency[frequency], pos)
+                found = true
             end
         end
     end
+    return radiosByFrequency, found
+end
+
+local function GetPlayerRadios(player, args, radioFrequencies)
+    local radiosByFrequency = {}
     local radio = Character.getHandItemByGroup(player, 'Radio')
+    local found = false
+    if radio == nil then
+        return radiosByFrequency
+    end
     local radioData = radio and radio:getDeviceData() or nil
     if radioData then
-        SendServer.Print(player, 'target radioData found')
         local frequency = radioData:getChannel()
-        if radioData and radioData:getIsTwoWay() and radioData:getIsTurnedOn()
+        if radioData:getIsTurnedOn()
             and frequency ~= nil and radioFrequencies[frequency] ~= nil
             and IsInRadioEmittingRange(radioFrequencies[frequency], radio)
         then
             if radiosByFrequency[frequency] == nil then
                 radiosByFrequency[frequency] = {}
             end
-            SendServer.Print(player, 'radio added to command')
-            table.insert(radiosByFrequency[frequency], radio)
+            table.insert(radiosByFrequency[frequency], player:getUsername())
+            found = true
         end
     end
+    return radiosByFrequency, found
+end
+
+local function GetVehiclesRadios(player, args, radioFrequencies)
+    local vehiclesByFrequency = {}
+    local radioMaxRange = 10
+    local vehicles = World.getVehiclesInRange(player, radioMaxRange)
+    local found = false
+    for _, vehicle in pairs(vehicles) do
+        local radio = vehicle:getPartById('Radio')
+        if radio ~= nil then
+            local radioData = radio:getDeviceData()
+            if radioData ~= nil then
+                local frequency = radioData:getChannel()
+                if radioData:getIsTurnedOn()
+                    and frequency ~= nil and radioFrequencies[frequency] ~= nil
+                    and IsInRadioEmittingRange(radioFrequencies[frequency], radio)
+                then
+                    if vehiclesByFrequency[frequency] == nil then
+                        vehiclesByFrequency[frequency] = {}
+                    end
+                    table.insert(vehiclesByFrequency[frequency], vehicle:getKeyId())
+                    found = true
+                end
+            end
+        end
+    end
+    return vehiclesByFrequency, found
+end
+
+local function SendRadioPackets(author, player, args, sourceRadioByFrequencies)
+    local squaresRadios, squaresRadiosFound = GetSquaresRadios(player, args, sourceRadioByFrequencies)
+    local playersRadios, playersRadiosFound = GetPlayerRadios(player, args, sourceRadioByFrequencies)
+    local vehiclesRadios, vehiclesRadiosFound = GetVehiclesRadios(player, args, sourceRadioByFrequencies)
+
+    if not squaresRadiosFound and not playersRadiosFound and not vehiclesRadiosFound then
+        return
+    end
+
+    local targetRadiosByFrequencies = {}
+    for frequency, _ in pairs(sourceRadioByFrequencies) do
+        targetRadiosByFrequencies[frequency] = {
+            squares = squaresRadios[frequency] or {},
+            players = playersRadios[frequency] or {},
+            vehicles = vehiclesRadios[frequency] or {},
+        }
+    end
+
     SendServer.Command(player, 'RadioMessage', {
         author = args.author,
         message = args.message,
         color = args.color,
         type = args.type,
-        radios = radiosByFrequency,
+        radios = targetRadiosByFrequencies,
     })
+end
+
+local function GetEmittingRadios(player, packetType, messageType, range)
+    local radioEmission = false
+    local radioFrequencies = {}
+    if ChatMessage.MessageTypeSettings[messageType] and ChatMessage.MessageTypeSettings[messageType]['radio'] == true
+        and packetType == 'ChatMessage' and range > 0
+    then
+        local radios = World.getItemsInRangeByGroup(player, range, 'IsoRadio')
+        for _, radio in pairs(radios) do
+            local radioData = radio:getDeviceData()
+            if radioData ~= nil then
+                local frequency = radioData:getChannel()
+                if radioData:getIsTwoWay() and radioData:getIsTurnedOn()
+                    and not radioData:getMicIsMuted() and frequency ~= nil
+                then
+                    if radioFrequencies[frequency] == nil then
+                        radioFrequencies[frequency] = {}
+                    end
+                    table.insert(radioFrequencies[frequency], radio)
+                    radioEmission = true
+                end
+            end
+        end
+        local radio = Character.getHandItemByGroup(player, 'Radio')
+        local radioData = radio and radio:getDeviceData() or nil
+        if radioData then
+            local frequency = radioData:getChannel()
+            if radioData and radioData:getIsTwoWay() and radioData:getIsTurnedOn()
+                and not radioData:getMicIsMuted() and frequency ~= nil
+            then
+                if radioFrequencies[frequency] == nil then
+                    radioFrequencies[frequency] = {}
+                end
+                table.insert(radioFrequencies[frequency], radio)
+                radioEmission = true
+            end
+        end
+    end
+    return radioEmission, radioFrequencies
 end
 
 function ChatMessage.ProcessMessage(player, args, packetType, sendError)
@@ -308,44 +399,7 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
         error('error: YACM: No range for message type "' .. args.type .. '".')
         return
     end
-    local radioEmission = false
-    local radioFrequencies = {}
-    if ChatMessage.MessageTypeSettings[args.type] and ChatMessage.MessageTypeSettings[args.type]['radio'] == true
-        and packetType == 'ChatMessage' and range > 0
-    then
-        local radios = World.getItemsInRangeByGroup(player, range, 'IsoRadio')
-        for _, radio in pairs(radios) do
-            local radioData = radio:getDeviceData()
-            if radioData ~= nil then
-                local frequency = radioData:getChannel()
-                SendServer.Print(player, 'radio is muted: ' .. (radioData:getMicIsMuted() and 'true' or 'false'))
-                if radioData:getIsTwoWay() and radioData:getIsTurnedOn()
-                    and not radioData:getMicIsMuted() and frequency ~= nil
-                then
-                    if radioFrequencies[frequency] == nil then
-                        radioFrequencies[frequency] = {}
-                    end
-                    table.insert(radioFrequencies[frequency], radio)
-                    radioEmission = true
-                end
-            end
-        end
-        local radio = Character.getHandItemByGroup(player, 'Radio')
-        local radioData = radio and radio:getDeviceData() or nil
-        if radioData then
-            local frequency = radioData:getChannel()
-            if radioData and radioData:getIsTwoWay() and radioData:getIsTurnedOn()
-                and not radioData:getMicIsMuted() and frequency ~= nil
-            then
-                if radioFrequencies[frequency] == nil then
-                    radioFrequencies[frequency] = {}
-                end
-                SendServer.Print(player, 'Radio found on author')
-                table.insert(radioFrequencies[frequency], radio)
-                radioEmission = true
-            end
-        end
-    end
+    local radioEmission, radioFrequencies = GetEmittingRadios(player, packetType, args['type'], range)
     local connectedPlayers = getOnlinePlayers()
     for i = 0, connectedPlayers:size() - 1 do
         local connectedPlayer = connectedPlayers:get(i)

@@ -1,4 +1,4 @@
-require('yacm/client/parser/StringBuilder')
+local StringBuilder = require('yacm/client/parser/StringBuilder')
 
 local ABubble = ISUIElement:derive("ABubble")
 
@@ -84,7 +84,7 @@ function ABubble:new(x, y, text, rawText, timer, opacity)
     setmetatable(ABubble, { __index = ISRichTextPanel })
     local o = ISRichTextPanel:new(x, y, width, height)
     setmetatable(o, ABubble)
-    o.text = BuildFontSizeString('medium') .. text
+    o.text = StringBuilder.BuildFontSizeString('medium') .. text
     o.timer = timer * 1000
     o.opacity = opacity / 100
     o.background = true

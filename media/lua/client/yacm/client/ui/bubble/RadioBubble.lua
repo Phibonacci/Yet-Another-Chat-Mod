@@ -1,5 +1,3 @@
-require('yacm/client/parser/StringBuilder')
-
 local ABubble = require('yacm/client/ui/bubble/ABubble')
 local Coordinates = require('yacm/client/utils/Coordinates')
 

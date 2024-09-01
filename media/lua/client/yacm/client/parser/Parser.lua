@@ -3,6 +3,8 @@ local TokenItalic = require 'yacm/client/lexer/TokenItalic'
 local TokenRoot = require 'yacm/client/lexer/TokenRoot'
 local TokenString = require 'yacm/client/lexer/TokenString'
 
+local Parser = {}
+
 local function GetTag(message, indexStart, tag)
     if string.len(message) - indexStart + 1 < string.len(tag) then
         return nil
@@ -137,7 +139,7 @@ local function ParseYacmHeader(message)
     }, headerEnd
 end
 
-function ParseYacmMessage(message, defaultColor, wrapWords, maxBubbleLength)
+function Parser.ParseYacmMessage(message, defaultColor, wrapWords, maxBubbleLength)
     -- local header, headerEnd = ParseYacmHeader(message)
     -- if header == nil then
     --     return nil
@@ -151,3 +153,5 @@ function ParseYacmMessage(message, defaultColor, wrapWords, maxBubbleLength)
         ['rawMessage'] = rawMessage,
     }
 end
+
+return Parser
