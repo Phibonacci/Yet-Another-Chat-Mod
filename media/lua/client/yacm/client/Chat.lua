@@ -712,23 +712,32 @@ local function AddMessageToTab(tabID, time, formattedMessage, line, channel)
     end
 end
 
-function ISChat.onMessagePacket(packet)
-    local formattedMessage, message = BuildMessageFromPacket(packet['type'], packet['message'], packet['author'],
-        packet['color'], packet['frequency'])
-    if packet.type == 'pm' and packet.target:lower() == getPlayer():getUsername():lower() then
-        ISChat.instance.lastPrivateMessageAuthor = packet.author
+local function ReduceBoredom()
+    local player = getPlayer()
+    local boredom = player:getBodyDamage():getBoredomLevel()
+    player:getBodyDamage():setBoredomLevel(boredom - 0.6)
+end
+
+function ISChat.onMessagePacket(type, author, message, color, hideInChat, target)
+    if author ~= getPlayer():getUsername() then
+        ReduceBoredom()
+    end
+    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, author,
+        color)
+    if type == 'pm' and target:lower() == getPlayer():getUsername():lower() then
+        ISChat.instance.lastPrivateMessageAuthor = author
     end
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
-    CreatePlayerBubble(packet.author, message['bubble'], message['rawMessage'])
+    CreatePlayerBubble(author, parsedMessage['bubble'], parsedMessage['rawMessage'])
     local time = Calendar.getInstance():getTimeInMillis()
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
-        formattedMessage, time, packet.type)
-    local stream = GetStreamFromType(packet.type)
+        formattedMessage, time, type)
+    local stream = GetStreamFromType(type)
     if stream == nil then
         print('yacm error: onMessagePacket: stream not found')
         return
     end
-    if not packet.hideInChat then
+    if not hideInChat then
         AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
     end
 end
@@ -777,6 +786,9 @@ function ISChat.onRadioPacket(type, author, message, color, radiosInfo)
         return
     end
 
+    if author ~= getPlayer():getUsername() then
+        ReduceBoredom()
+    end
     for frequency, radios in pairs(radiosInfo) do
         local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency)
         local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,

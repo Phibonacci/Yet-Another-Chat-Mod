@@ -3,7 +3,8 @@ local Radio = require('yacm/client/Radio')
 local YacmClientRecvCommands = {}
 
 YacmClientRecvCommands['ChatMessage'] = function(args)
-    ISChat.onMessagePacket(args)
+    ISChat.onMessagePacket(args['type'], args['author'], args['message'], args['color'], args['hideInChat'],
+        args['target'])
 end
 
 YacmClientRecvCommands['RadioMessage'] = function(args)

@@ -142,7 +142,7 @@ function World.getPlayerByUsername(username)
     local connectedPlayers = getOnlinePlayers()
     for i = 0, connectedPlayers:size() - 1 do
         local connectedPlayer = connectedPlayers:get(i)
-        if username == connectedPlayer:getUsername() then
+        if username:lower() == connectedPlayer:getUsername():lower() then
             return connectedPlayer
         end
     end

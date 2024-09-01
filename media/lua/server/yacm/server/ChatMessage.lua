@@ -407,7 +407,7 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
         then
             if connectedPlayer:getOnlineID() == player:getOnlineID()
                 or range == -1 or PlayersDistance(player, connectedPlayer) < range + 0.001
-                or Character.AreInSameVehicle(player, connectedPlayer)
+                or Character.areInSameVehicle(player, connectedPlayer)
             then
                 SendServer.Command(connectedPlayer, packetType, args)
             end
