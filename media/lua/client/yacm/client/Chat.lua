@@ -546,12 +546,12 @@ function CreatePlayerBubble(author, message, rawMessage)
     ISChat.instance.typingDots = ISChat.instance.typingDots or {}
     local onlineUsers = getOnlinePlayers()
     if author == nil then
-        print('error: CreatePlayerBubble: author is null')
+        print('yacm error: CreatePlayerBubble: author is null')
         return
     end
     local authorObj = World.getPlayerByUsername(author)
     if authorObj == nil then
-        print('error: CreatePlayerBubble: author not found ' .. author)
+        print('yacm error: CreatePlayerBubble: author not found ' .. author)
         return
     end
     local timer = 10
@@ -568,8 +568,50 @@ function CreatePlayerBubble(author, message, rawMessage)
     end
 end
 
-function CreateVehicleBubble(vehicle, message, rawMessage)
-    ISChat.instance.vehicleBubble = ISChat.instance.vehicleBubble or {}
+local function CreateSquareRadioBubble(position, bubbleMessage, rawTextMessage)
+    ISChat.instance.radioBubble = ISChat.instance.radioBubble or {}
+    if position ~= nil then
+        local x, y, z = position['x'], position['y'], position['z']
+        if x == nil or y == nil or z == nil then
+            print('yacm error: CreateSquareRadioBubble: nil position for a square radio')
+            return
+        end
+        x, y, z = math.abs(x), math.abs(y), math.abs(z)
+        if ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] ~= nil then
+            ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z].dead = true
+        end
+        local timer = 10
+        local opacity = 70
+        local square = getSquare(x, y, z)
+        ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] =
+            RadioBubble:new(square, bubbleMessage, rawTextMessage, timer, opacity, RadioBubble.types.square)
+    end
+end
+
+function CreatePlayerRadioBubble(author, message, rawMessage)
+    ISChat.instance.playerRadioBubble = ISChat.instance.playerRadioBubble or {}
+    local onlineUsers = getOnlinePlayers()
+    if author == nil then
+        print('yacm error: CreatePlayerBubble: author is null')
+        return
+    end
+    local authorObj = World.getPlayerByUsername(author)
+    if authorObj == nil then
+        print('yacm error: CreatePlayerBubble: author not found ' .. author)
+        return
+    end
+    local timer = 10
+    local opacity = 70
+    if YacmServerSettings then
+        timer = YacmServerSettings['options']['bubble']['timer']
+        opacity = YacmServerSettings['options']['bubble']['opacity']
+    end
+    local bubble = RadioBubble:new(authorObj, message, rawMessage, timer, opacity, RadioBubble.types.player)
+    ISChat.instance.playerRadioBubble[author] = bubble
+end
+
+function CreateVehicleRadioBubble(vehicle, message, rawMessage)
+    ISChat.instance.vehicleRadioBubble = ISChat.instance.vehicleRadioBubble or {}
     local timer = 10
     local opacity = 70
     if YacmServerSettings then
@@ -578,11 +620,11 @@ function CreateVehicleBubble(vehicle, message, rawMessage)
     end
     local keyId = vehicle:getKeyId()
     if keyId == nil then
-        print('error: CreateVehicleBubble: key id is null')
+        print('yacm error: CreateVehicleBubble: key id is null')
         return
     end
-    local bubble = PlayerBubble:new(vehicle, message, rawMessage, timer, opacity)
-    ISChat.instance.vehicleBubble[keyId] = bubble
+    local bubble = RadioBubble:new(vehicle, message, rawMessage, timer, opacity, RadioBubble.types.vehicle)
+    ISChat.instance.vehicleRadioBubble[keyId] = bubble
 end
 
 function ISChat.onTypingPacket(author, type)
@@ -683,7 +725,7 @@ function ISChat.onMessagePacket(packet)
         formattedMessage, time, packet.type)
     local stream = GetStreamFromType(packet.type)
     if stream == nil then
-        print('error: onMessagePacket: stream not found')
+        print('yacm error: onMessagePacket: stream not found')
         return
     end
     if not packet.hideInChat then
@@ -691,58 +733,38 @@ function ISChat.onMessagePacket(packet)
     end
 end
 
-local function CreateRadioBubble(position, bubbleMessage, rawTextMessage)
-    ISChat.instance.radioBubble = ISChat.instance.radioBubble or {}
-    if position ~= nil then
-        local x, y, z = position['x'], position['y'], position['z']
-        if x == nil or y == nil or z == nil then
-            print('error: CreateRadioBubble: nil position for a square radio')
-            return
-        end
-        x, y, z = math.abs(x), math.abs(y), math.abs(z)
-        if ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] ~= nil then
-            ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z].dead = true
-        end
-        local timer = 10
-        local opacity = 70
-        local square = getSquare(x, y, z)
-        ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] =
-            RadioBubble:new(square, bubbleMessage, rawTextMessage, timer, opacity)
-    end
-end
-
 local function CreateSquaresRadiosBubbles(parsedMessages, squaresPos)
     if squaresPos == nil then
-        print('error: CreateSquaresRadiosBubbles: squaresPos table is null')
+        print('yacm error: CreateSquaresRadiosBubbles: squaresPos table is null')
         return
     end
     for _, position in pairs(squaresPos) do
-        CreateRadioBubble(position, parsedMessages['bubble'], parsedMessages['rawMessage'])
+        CreateSquareRadioBubble(position, parsedMessages['bubble'], parsedMessages['rawMessage'])
     end
 end
 
 local function CreatePlayersRadiosBubbles(parsedMessages, playersUsernames)
     if playersUsernames == nil then
-        print('error: CreatePlayersRadiosBubbles: playersUsernames table is null')
+        print('yacm error: CreatePlayersRadiosBubbles: playersUsernames table is null')
         return
     end
     for _, username in pairs(playersUsernames) do
-        CreatePlayerBubble(getPlayer():getUsername(), parsedMessages['bubble'], parsedMessages['rawMessage'])
+        CreatePlayerRadioBubble(getPlayer():getUsername(), parsedMessages['bubble'], parsedMessages['rawMessage'])
     end
 end
 
 local function CreateVehiclesRadiosBubbles(parsedMessages, vehiclesKeyIds)
     if vehiclesKeyIds == nil then
-        print('error: CreateVehiclesRadiosBubbles: vehiclesKeyIds table is null')
+        print('yacm error: CreateVehiclesRadiosBubbles: vehiclesKeyIds table is null')
         return
     end
     local vehicles = World.getVehiclesInRange(getPlayer(), 10)
     for _, vehicleKeyId in pairs(vehiclesKeyIds) do
         local vehicle = vehicles[vehicleKeyId]
         if vehicle == nil then
-            print('error: CreateVehiclesRadiosBubble: vehicle not found for key id ' .. vehicleKeyId)
+            print('yacm error: CreateVehiclesRadiosBubble: vehicle not found for key id ' .. vehicleKeyId)
         else
-            CreateVehicleBubble(vehicle, parsedMessages['bubble'], parsedMessages['rawMessage'])
+            CreateVehicleRadioBubble(vehicle, parsedMessages['bubble'], parsedMessages['rawMessage'])
         end
     end
 end
@@ -751,7 +773,7 @@ function ISChat.onRadioPacket(type, author, message, color, radiosInfo)
     local time = Calendar.getInstance():getTimeInMillis()
     local stream = GetStreamFromType(type)
     if stream == nil then
-        print('error: onRadioPacket: stream not found')
+        print('yacm error: onRadioPacket: stream not found')
         return
     end
 
@@ -853,7 +875,7 @@ ISChat.addLineInChat = function(message, tabID)
     elseif tabID + 1 == 2 then
         chatText = ISChat.instance.tabs[tabID + 1]
     else
-        print('error: addLineInChat: unknown id ' .. tabID)
+        print('yacm error: addLineInChat: unknown id ' .. tabID)
         return
     end
     if chatText.tabTitle ~= ISChat.instance.chatText.tabTitle then
@@ -905,16 +927,24 @@ ISChat.addLineInChat = function(message, tabID)
 end
 
 function ISChat:render()
-    if ISChat.instance.rangeIndicator ~= nil
-        and ISChat.instance.rangeIndicatorState == true
+    local instance = ISChat.instance
+    if instance.rangeIndicator ~= nil
+        and instance.rangeIndicatorState == true
         and ISChat.focused == true
     then
-        ISChat.instance.rangeIndicator:render()
+        instance.rangeIndicator:render()
     end
 
-    if ISChat.instance.bubble then
+    local allBubbles = {
+        instance.radioBubble,
+        instance.vehicleRadioBubble,
+        instance.playerRadioBubble,
+        instance.bubble,
+        instance.typingDots
+    }
+    for _, bubbles in pairs(allBubbles) do
         local indexToDelete = {}
-        for index, bubble in pairs(ISChat.instance.bubble) do
+        for index, bubble in pairs(bubbles) do
             if bubble.dead then
                 table.insert(indexToDelete, index)
             else
@@ -922,49 +952,7 @@ function ISChat:render()
             end
         end
         for _, index in pairs(indexToDelete) do
-            ISChat.instance.bubble[index] = nil
-        end
-    end
-
-    if ISChat.instance.radioBubble then
-        local indexToDelete = {}
-        for index, bubble in pairs(ISChat.instance.radioBubble) do
-            if bubble.dead then
-                table.insert(indexToDelete, index)
-            else
-                bubble:render()
-            end
-        end
-        for _, index in pairs(indexToDelete) do
-            ISChat.instance.radioBubble[index] = nil
-        end
-    end
-
-    if ISChat.instance.vehicleBubble then
-        local indexToDelete = {}
-        for index, bubble in pairs(ISChat.instance.vehicleBubble) do
-            if bubble.dead then
-                table.insert(indexToDelete, index)
-            else
-                bubble:render()
-            end
-        end
-        for _, index in pairs(indexToDelete) do
-            ISChat.instance.vehicleBubble[index] = nil
-        end
-    end
-
-    if ISChat.instance.typingDots then
-        local indexToDelete = {}
-        for index, typingDots in pairs(ISChat.instance.typingDots) do
-            if typingDots.dead then
-                table.insert(indexToDelete, index)
-            else
-                typingDots:render()
-            end
-        end
-        for _, index in pairs(indexToDelete) do
-            ISChat.instance.typingDots[index] = nil
+            bubbles[index] = nil
         end
     end
     ChatUI.render(self)
@@ -1224,7 +1212,7 @@ ISChat.onToggleChatBox = function(key)
     if key == getCore():getKey("Switch chat stream") then
         local nextTabId = GetNextTabId(chat.currentTabID)
         if nextTabId == nil then
-            print('error: onToggleChatBox: next tab ID not found')
+            print('yacm error: onToggleChatBox: next tab ID not found')
             return
         end
         chat.currentTabID = nextTabId
@@ -1509,7 +1497,7 @@ function ISChat:onGearButtonClick()
     local context = ISContextMenu.get(0, self:getAbsoluteX() + self:getWidth() / 2,
         self:getAbsoluteY() + self.gearButton:getY())
     if context == nil then
-        print('error: ISChat:onGearButtonClick: gear button context is null')
+        print('yacm error: ISChat:onGearButtonClick: gear button context is null')
         return
     end
 

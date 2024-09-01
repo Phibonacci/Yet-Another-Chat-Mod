@@ -48,7 +48,7 @@ local function GetColorFromString(colorString)
     local defaultColor = { 255, 0, 255 }
     local rgb = StringParser.hexaStringToRGB(colorString)
     if rgb == nil then
-        print('error: invalid string for Sandbox Variable: "' .. name .. '"')
+        print('yacm error: invalid string for Sandbox Variable: "' .. name .. '"')
         return defaultColor
     end
     return rgb
@@ -405,8 +405,6 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
         local connectedPlayer = connectedPlayers:get(i)
         if IsAllowed(player, connectedPlayer, args)
         then
-            SendServer.Print(player, 'found target player #' .. i)
-            SendServer.Print(player, PlayersDistance(player, connectedPlayer) .. ' < ' .. range)
             if connectedPlayer:getOnlineID() == player:getOnlineID()
                 or range == -1 or PlayersDistance(player, connectedPlayer) < range + 0.001
                 or Character.AreInSameVehicle(player, connectedPlayer)

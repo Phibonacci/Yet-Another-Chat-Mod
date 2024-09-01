@@ -3,22 +3,56 @@ local Coordinates = require('yacm/client/utils/Coordinates')
 
 local RadioBubble = ISUIElement:derive("RadioBubble")
 
+function RadioBubble:loadTextures()
+    self.bubbleTop = getTexture("media/ui/yacm/bubble/radio/bubble-top.png")
+    self.bubbleTopLeft = getTexture("media/ui/yacm/bubble/radio/bubble-top-left.png")
+    self.bubbleTopRight = getTexture("media/ui/yacm/bubble/radio/bubble-top-right.png")
+    self.bubbleCenter = getTexture("media/ui/yacm/bubble/radio/bubble-center.png")
+    self.bubbleCenterLeft = getTexture("media/ui/yacm/bubble/radio/bubble-left.png")
+    self.bubbleCenterRight = getTexture("media/ui/yacm/bubble/radio/bubble-right.png")
+    self.bubbleBot = getTexture("media/ui/yacm/bubble/radio/bubble-bot.png")
+    self.bubbleBotLeft = getTexture("media/ui/yacm/bubble/radio/bubble-bot-left.png")
+    self.bubbleBotRight = getTexture("media/ui/yacm/bubble/radio/bubble-bot-right.png")
+    self.bubbleArrow = getTexture("media/ui/yacm/bubble/radio/bubble-arrow.png")
+end
+
 function RadioBubble:render()
     if self.dead then
         return
     end
-    local x, y = Coordinates.CenterTopOfObject(self.square, self:getWidth(), self:getHeight())
+    local x, y = RadioBubble.CenterTop(self.type, self.object, self:getWidth(), self:getHeight())
     if x == nil then
         return
     end
     self:drawBubble(x, y)
 end
 
-function RadioBubble:new(square, text, rawText, timer, opacity)
+function RadioBubble.CenterTop(type, object, width, height)
+    if type == RadioBubble.types.square then
+        return Coordinates.CenterTopOfObject(object, width, height)
+    elseif type == RadioBubble.types.player then
+        local x, y = Coordinates.CenterTopOfPlayer(object, width, height)
+        x = x + 30
+        y = y - 30
+        return x, y
+    elseif type == RadioBubble.types.vehicle then
+        return Coordinates.CenterTopOfPlayer(object, width, height)
+    else
+        error('tried to initialize RadioBubble without a type')
+    end
+end
+
+RadioBubble.types = {
+    square = 1,
+    player = 2,
+    vehicle = 3,
+}
+
+function RadioBubble:new(object, text, rawText, timer, opacity, type)
     local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
     local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
-    local x, y = Coordinates.CenterTopOfObject(square, width, height)
+    local x, y = RadioBubble.CenterTop(type, object, width, height)
     if x == nil then
         x, y = 0, 0
     end
@@ -29,7 +63,8 @@ function RadioBubble:new(square, text, rawText, timer, opacity)
         self.dead = true
     end
     setmetatable(o, RadioBubble)
-    o.square = square
+    o.type = type
+    o.object = object
     return o
 end
 

@@ -2,23 +2,20 @@ local StringBuilder = require('yacm/client/parser/StringBuilder')
 
 local ABubble = ISUIElement:derive("ABubble")
 
+function ABubble:loadTextures()
+    error('loadTextures not implemented in child class')
+end
 
 function ABubble:drawBubble(x, y)
+    if not self.texturesLoaded then
+        self:loadTextures()
+        self.texturesLoaded = true
+    end
     local time = Calendar.getInstance():getTimeInMillis()
     local elapsedTime = time - self.startTime
 
     self:setX(x)
     self:setY(y)
-    local bubbleTop = getTexture("media/ui/yacm/bubble/bubble-top.png")
-    local bubbleTopLeft = getTexture("media/ui/yacm/bubble/bubble-top-left.png")
-    local bubbleTopRight = getTexture("media/ui/yacm/bubble/bubble-top-right.png")
-    local bubbleCenter = getTexture("media/ui/yacm/bubble/bubble-center.png")
-    local bubbleCenterLeft = getTexture("media/ui/yacm/bubble/bubble-left.png")
-    local bubbleCenterRight = getTexture("media/ui/yacm/bubble/bubble-right.png")
-    local bubbleBot = getTexture("media/ui/yacm/bubble/bubble-bot.png")
-    local bubbleBotLeft = getTexture("media/ui/yacm/bubble/bubble-bot-left.png")
-    local bubbleBotRight = getTexture("media/ui/yacm/bubble/bubble-bot-right.png")
-    local bubbleArrow = getTexture("media/ui/yacm/bubble/bubble-arrow.png")
 
     local scale = 1
     local alpha
@@ -39,28 +36,28 @@ function ABubble:drawBubble(x, y)
     local centerX = leftW
     local rightX = centerX + centerW
     local topH = math.floor(10 * 1 / scale)
-    self:drawTexture(bubbleTopLeft, leftX, 0, alpha)
-    self:drawTextureScaled(bubbleTop, centerX, 0, centerW, topH, alpha)
-    self:drawTexture(bubbleTopRight, rightX, 0, alpha)
+    self:drawTexture(self.bubbleTopLeft, leftX, 0, alpha)
+    self:drawTextureScaled(self.bubbleTop, centerX, 0, centerW, topH, alpha)
+    self:drawTexture(self.bubbleTopRight, rightX, 0, alpha)
 
     local centerY = topH
     local botH = math.floor(10 * 1 / scale)
     local centerH = math.floor(self:getHeight()) - botH - topH
     local botY = centerY + centerH
 
-    self:drawTextureScaled(bubbleCenterLeft, leftX, centerY, leftW, centerH, alpha)
-    self:drawTextureScaled(bubbleCenter, centerX, centerY, centerW, centerH, alpha)
-    self:drawTextureScaled(bubbleCenterRight, rightX, centerY, rightW, centerH, alpha)
+    self:drawTextureScaled(self.bubbleCenterLeft, leftX, centerY, leftW, centerH, alpha)
+    self:drawTextureScaled(self.bubbleCenter, centerX, centerY, centerW, centerH, alpha)
+    self:drawTextureScaled(self.bubbleCenterRight, rightX, centerY, rightW, centerH, alpha)
 
-    self:drawTexture(bubbleBotLeft, leftX, botY, alpha)
-    self:drawTextureScaled(bubbleBot, centerX, botY, centerW, botH, alpha)
-    self:drawTexture(bubbleBotRight, rightX, botY, alpha)
+    self:drawTexture(self.bubbleBotLeft, leftX, botY, alpha)
+    self:drawTextureScaled(self.bubbleBot, centerX, botY, centerW, botH, alpha)
+    self:drawTexture(self.bubbleBotRight, rightX, botY, alpha)
 
     if x > 0 and y > 0
         and x + self:getWidth() < getCore():getScreenWidth()
         and y + self:getHeight() < getCore():getScreenHeight()
     then
-        self:drawTexture(bubbleArrow, centerX + centerW / 2 + 5, botY + 3 * botH / 4, alpha)
+        self:drawTexture(self.bubbleArrow, centerX + centerW / 2 + 5, botY + 4 * botH / 5, alpha)
     end
 
     ISRichTextPanel.render(self)
@@ -100,6 +97,7 @@ function ABubble:new(x, y, text, rawText, timer, opacity)
     o.dead = false
     ISUIElement.initialise(o)
     o:paginate()
+    o.texturesLoaded = false
     return o
 end
 

@@ -42,7 +42,7 @@ function YacmClientSendCommands.sendMuteRadio(radio, state)
     if not isClient() then return end
     local radioData = radio:getDeviceData()
     if radioData == nil then
-        print('error: YacmClientSendCommands.sendMuteRadio: no radioData found')
+        print('yacm error: YacmClientSendCommands.sendMuteRadio: no radioData found')
         return
     end
     if radioData:isIsoDevice() then
@@ -55,7 +55,7 @@ function YacmClientSendCommands.sendMuteRadio(radio, state)
     elseif instanceof(radio, 'Radio') then -- is an inventoryItem radio
         local id = radio:getID()
         if id == nil then
-            print('error: YacmClientSendCommands.sendMuteRadio: no id found')
+            print('yacm error: YacmClientSendCommands.sendMuteRadio: no id found')
             return
         end
         SendYacmClientCommand('MuteInHandRadio', {
@@ -70,7 +70,7 @@ function YacmClientSendCommands.sendAskRadioState(radio)
     if not isClient() then return end
     local radioData = radio:getDeviceData()
     if radioData == nil then
-        print('error: YacmClientSendCommands.sendAskRadioState: no radioData found')
+        print('yacm error: YacmClientSendCommands.sendAskRadioState: no radioData found')
         return
     end
     if radioData:isIsoDevice() then
@@ -82,7 +82,7 @@ function YacmClientSendCommands.sendAskRadioState(radio)
     elseif instanceof(radio, 'Radio') then -- is an inventoryItem radio
         local id = radio:getID()
         if id == nil then
-            print('error: YacmClientSendCommands.sendAskRadioState: no id found')
+            print('yacm error: YacmClientSendCommands.sendAskRadioState: no id found')
             return
         end
         SendYacmClientCommand('AskInHandRadioState', {

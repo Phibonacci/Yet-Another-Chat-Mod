@@ -125,7 +125,7 @@ function World.getVehiclesInRange(player, range)
                         if vehicle ~= nil then
                             local vehicleId = vehicle:getKeyId()
                             if vehicleId == nil then
-                                print('error: World.getVehiclesInRange: impossible error: vehicle key ID is null')
+                                print('yacm error: World.getVehiclesInRange: impossible error: vehicle key ID is null')
                             else
                                 vehicles[vehicleId] = vehicle
                             end

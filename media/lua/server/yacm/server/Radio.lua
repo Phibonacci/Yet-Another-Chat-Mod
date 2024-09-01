@@ -4,11 +4,11 @@ local Radio = {}
 
 function Radio.MuteRadio(radio, state)
     if radio == nil then
-        print('error: Radio.MuteRadio: radio is nil')
+        print('yacm error: Radio.MuteRadio: radio is nil')
         return
     end
     if state == nil then
-        print('error: Radio.MuteRadio: state is nil')
+        print('yacm error: Radio.MuteRadio: state is nil')
         return
     end
     local radioData = radio:getDeviceData()
@@ -16,14 +16,13 @@ function Radio.MuteRadio(radio, state)
 end
 
 function Radio.SyncSquare(radio, player)
-    print('SyncSquare')
     if radio == nil then
-        print('error: Radio.SyncSquare: radio is nil')
+        print('yacm error: Radio.SyncSquare: radio is nil')
         return
     end
     local radioData = radio:getDeviceData()
     if radioData == nil or radioData:isIsoDevice() ~= true then
-        print('error: Radio.SyncSquare: radio is not on a square')
+        print('yacm error: Radio.SyncSquare: radio is not on a square')
         return
     end
     local turnedOn = radioData:getIsTurnedOn()
@@ -48,12 +47,12 @@ end
 
 function Radio.SyncHand(radio, player, id)
     if radio == nil then
-        print('error: Radio.SyncHand: radio is nil')
+        print('yacm error: Radio.SyncHand: radio is nil')
         return
     end
     local radioData = radio:getDeviceData()
     if radioData == nil then
-        print('error: Radio.SyncHand: radio has no device data')
+        print('yacm error: Radio.SyncHand: radio has no device data')
         return
     end
     local turnedOn = radioData:getIsTurnedOn()
