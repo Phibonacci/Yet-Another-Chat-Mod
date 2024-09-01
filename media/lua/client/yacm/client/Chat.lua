@@ -751,7 +751,7 @@ function ISChat.onRadioPacket(type, author, message, color, radiosInfo)
     local time = Calendar.getInstance():getTimeInMillis()
     local stream = GetStreamFromType(type)
     if stream == nil then
-        print('error: onMessagePacket: stream not found')
+        print('error: onRadioPacket: stream not found')
         return
     end
 
