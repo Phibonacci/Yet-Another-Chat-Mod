@@ -37,4 +37,10 @@ function Character.getItemById(player, id)
     end
 end
 
+function Character.AreInSameVehicle(player1, player2)
+    local v1 = player1:getVehicle()
+    local v2 = player2:getVehicle()
+    return v1 ~= nil and v2 ~= nil and v1:getKeyId() == v2:getKeyId()
+end
+
 return Character

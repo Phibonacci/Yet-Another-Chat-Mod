@@ -355,8 +355,9 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
         if IsAllowed(player, connectedPlayer, args)
         then
             SendServer.Print(player, 'found target player #' .. i)
-            if (connectedPlayer:getOnlineID() == player:getOnlineID()
-                    or range == -1 or PlayersDistance(player, connectedPlayer) < range + 0.001)
+            if connectedPlayer:getOnlineID() == player:getOnlineID()
+                or range == -1 or PlayersDistance(player, connectedPlayer) < range + 0.001
+                or Character.AreInSameVehicle(player, connectedPlayer)
             then
                 SendServer.Command(connectedPlayer, packetType, args)
             end
