@@ -99,7 +99,7 @@ RecvServer['AskInHandRadioState'] = function(player, args)
             ' but no radio was found')
         return
     end
-    Radio.SyncHand(radio, player)
+    Radio.SyncHand(radio, player, id)
 end
 
 RecvServer['AskSquareRadioState'] = function(player, args)
