@@ -46,8 +46,7 @@ function AToken:formatCustom(wrapWords, keepTags, rgbCall, lengthLeft)
     return newMessage, rawMessage, lengthLeft
 end
 
--- format for the old bubbles
-function AToken:formatBubble(keepTags, wrapWords)
+function AToken:formatVanillaBubble(keepTags, wrapWords)
     return self:formatCustom(wrapWords, keepTags, StringBuilder.BuildAsteriskColorString)
 end
 

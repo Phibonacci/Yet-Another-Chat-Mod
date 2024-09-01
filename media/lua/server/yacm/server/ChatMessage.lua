@@ -176,6 +176,7 @@ local function SetMessageTypeSettings()
             ['color'] = GetColorSandbox('GeneralMessage'),
             ['radio'] = false,
             ['aliveOnly'] = true,
+            ['discord'] = SandboxVars.YetAnotherChatMod.GeneralDiscordEnabled,
         },
         ['admin'] = {
             ['range'] = -1,
@@ -203,7 +204,8 @@ local function SetMessageTypeSettings()
                 ['opacity'] = SandboxVars.YetAnotherChatMod.BubbleOpacity,
             },
             ['radio'] = {
-                ['chatEnabled'] = SandboxVars.YetAnotherChatMod.RadioChatEnabled,
+                ['discord'] = SandboxVars.YetAnotherChatMod.RadioDiscordEnabled,
+                ['frequency'] = SandboxVars.YetAnotherChatMod.RadioDiscordFrequency,
                 ['color'] = GetColorFromString(SandboxVars.YetAnotherChatMod.RadioColor),
             },
             ['hideCallout'] = SandboxVars.YetAnotherChatMod.HideCallout,
@@ -263,9 +265,9 @@ local function IsInRadioEmittingRange(radioEmitters, receiver)
     return false
 end
 
-local function GetSquaresRadios(player, args, radioFrequencies)
+local function GetSquaresRadios(player, args, radioFrequencies, range)
     local radiosByFrequency = {}
-    local radioMaxRange = 10
+    local radioMaxRange = range
     local radios = World.getItemsInRangeByGroup(player, radioMaxRange, 'IsoRadio')
     local found = false
     for _, radio in pairs(radios) do
@@ -283,10 +285,11 @@ local function GetSquaresRadios(player, args, radioFrequencies)
                 volume = 0
             end
             volume = math.abs(volume)
-            local radioRange = math.abs(volume * radioMaxRange + 0.5)
-            local playerDistance = PlayersDistance(player, radio)
+            -- TODO find a way to use volume in a non confusing way
+            -- local radioRange = math.abs(volume * radioMaxRange + 0.5)
+            -- local playerDistance = PlayersDistance(player, radio)
             if turnedOn and frequency ~= nil and radioFrequencies[frequency] ~= nil
-                and playerDistance <= radioRange
+                -- and playerDistance <= radioRange
                 and IsInRadioEmittingRange(radioFrequencies[frequency], radio)
             then
                 if radiosByFrequency[frequency] == nil then
@@ -300,7 +303,7 @@ local function GetSquaresRadios(player, args, radioFrequencies)
     return radiosByFrequency, found
 end
 
-local function GetPlayerRadios(player, args, radioFrequencies)
+local function GetPlayerRadios(player, args, radioFrequencies, range)
     local radiosByFrequency = {}
     local radio = Character.getHandItemByGroup(player, 'Radio')
     local found = false
@@ -324,9 +327,9 @@ local function GetPlayerRadios(player, args, radioFrequencies)
     return radiosByFrequency, found
 end
 
-local function GetVehiclesRadios(player, args, radioFrequencies)
+local function GetVehiclesRadios(player, args, radioFrequencies, range)
     local vehiclesByFrequency = {}
-    local radioMaxRange = 10
+    local radioMaxRange = range
     local vehicles = World.getVehiclesInRange(player, radioMaxRange)
     local found = false
     for _, vehicle in pairs(vehicles) do
@@ -352,9 +355,18 @@ local function GetVehiclesRadios(player, args, radioFrequencies)
 end
 
 local function SendRadioPackets(author, player, args, sourceRadioByFrequencies)
-    local squaresRadios, squaresRadiosFound = GetSquaresRadios(player, args, sourceRadioByFrequencies)
-    local playersRadios, playersRadiosFound = GetPlayerRadios(player, args, sourceRadioByFrequencies)
-    local vehiclesRadios, vehiclesRadiosFound = GetVehiclesRadios(player, args, sourceRadioByFrequencies)
+    if ChatMessage.MessageTypeSettings['say'] == nil then -- the radio volume range is always set to 'say'
+        print('yacm error: SendRadioPackets: no setting for type "say"')
+        return
+    end
+    if ChatMessage.MessageTypeSettings['say']['range'] == nil or ChatMessage.MessageTypeSettings[args.type]['range'] <= -1 then
+        print('yacm error: SendRadioPackets: no range for type "say"')
+        return
+    end
+    local range = ChatMessage.MessageTypeSettings['say']['range']
+    local squaresRadios, squaresRadiosFound = GetSquaresRadios(player, args, sourceRadioByFrequencies, range)
+    local playersRadios, playersRadiosFound = GetPlayerRadios(player, args, sourceRadioByFrequencies, range)
+    local vehiclesRadios, vehiclesRadiosFound = GetVehiclesRadios(player, args, sourceRadioByFrequencies, range)
 
     if not squaresRadiosFound and not playersRadiosFound and not vehiclesRadiosFound then
         return
@@ -418,6 +430,25 @@ local function GetEmittingRadios(player, packetType, messageType, range)
     return radioEmission, radioFrequencies
 end
 
+local function SendRadioEmittingPackets(player, args, radioFrequencies)
+    for frequency, _ in pairs(radioFrequencies) do
+        if ChatMessage.MessageTypeSettings and ChatMessage.MessageTypeSettings['options']['radio']['discord']
+            and frequency == ChatMessage.MessageTypeSettings['options']['radio']['frequency']
+        then
+            SendServer.Command(player, 'DiscordMessage', {
+                message = args.message,
+            })
+        end
+        SendServer.Command(player, 'RadioEmittingMessage', {
+            type = args.type,
+            author = args.author,
+            message = args.message,
+            color = args.color,
+            frequency = frequency,
+        })
+    end
+end
+
 function ChatMessage.ProcessMessage(player, args, packetType, sendError)
     if args.type == nil then
         print('yacm error: Received a message from "' .. player:getUsername() .. '" with no type')
@@ -433,12 +464,21 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
         return
     end
 
+    if args.type == 'general' and
+        ChatMessage.MessageTypeSettings and ChatMessage.MessageTypeSettings['general']['discord']
+    then
+        SendServer.Command(player, 'DiscordMessage', {
+            message = args.message,
+        })
+    end
+
     local range = GetRangeForMessageType(args.type)
     if range == nil then
         error('yacm error: No range for message type "' .. args.type .. '".')
         return
     end
     local radioEmission, radioFrequencies = GetEmittingRadios(player, packetType, args['type'], range)
+    SendRadioEmittingPackets(player, args, radioFrequencies)
     local connectedPlayers = getOnlinePlayers()
     for i = 0, connectedPlayers:size() - 1 do
         local connectedPlayer = connectedPlayers:get(i)

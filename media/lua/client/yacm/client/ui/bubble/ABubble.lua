@@ -59,7 +59,6 @@ function ABubble:drawBubble(x, y)
         alpha = (1000 - fadingTime) / 1000 * self.opacity
     else
         self.dead = true
-        self:unsubscribe()
         return
     end
 
@@ -97,25 +96,6 @@ function ABubble:drawBubble(x, y)
 
     ISRichTextPanel.render(self)
     self.previousTime = time
-end
-
-function ABubble:subscribe()
-    if self.subscribed then
-        return
-    end
-    self.subscribed = true
-    self.postUIDrawCall = function()
-        self:render()
-    end
-    Events.OnPostUIDraw.Add(self.postUIDrawCall)
-end
-
-function ABubble:unsubscribe()
-    if not self.subscribed then
-        return
-    end
-    self.subscribed = false
-    Events.OnPostUIDraw.Remove(self.postUIDrawCall)
 end
 
 function ABubble:new(x, y, text, rawText, timer, opacity, heightOffsetStart)

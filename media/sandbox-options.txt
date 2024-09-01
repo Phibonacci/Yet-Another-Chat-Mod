@@ -56,13 +56,32 @@ option YetAnotherChatMod.MarkdownTwoAsterisksColor
 	translation = YetAnotherChatMod_MarkdownTwoAsterisksColor,
 }
 
-option YetAnotherChatMod.RadioChatEnabled
+option YetAnotherChatMod.GeneralDiscordEnabled
+{
+	type = boolean,
+	default = false,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_GeneralDiscordEnabled,
+}
+option YetAnotherChatMod.RadioDiscordEnabled
 {
 	type = boolean,
 	default = true,
 
 	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_RadioChatEnabled,
+	translation = YetAnotherChatMod_RadioDiscordEnabled,
+}
+
+option YetAnotherChatMod.RadioDiscordFrequency
+{
+	type = integer,
+	min = 200,
+	max = 1000000,
+	default = 100000,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_RadioDiscordFrequency,
 }
 
 option YetAnotherChatMod.RadioColor

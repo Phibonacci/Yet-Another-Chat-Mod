@@ -1,15 +1,21 @@
 Sandbox_EN = {
-    Sandbox_YetAnotherChatMod                              = "Yet Another Chat Mod"
+    Sandbox_YetAnotherChatMod                              = "Yet Another Chat Mod",
 
-    Sandbox_YetAnotherChatMod_BubbleTimerInSeconds         = "Bubble timer (seconds)"
-    Sandbox_YetAnotherChatMod_BubbleOpacity                = "Bubble opacity"
+    Sandbox_YetAnotherChatMod_BubbleTimerInSeconds         = "Bubble timer (seconds)",
+    Sandbox_YetAnotherChatMod_BubbleOpacity                = "Bubble opacity",
 
-    Sandbox_YetAnotherChatMod_VerbEnabled                  = "Add verb prefix to messages, and quotes"
+    Sandbox_YetAnotherChatMod_VerbEnabled                  = "Add verb prefix to messages, and quotes",
 
-    Sandbox_YetAnotherChatMod_HideCallout                  = "Hide callouts in chat window (Q spam)"
+    Sandbox_YetAnotherChatMod_HideCallout                  = "Hide callouts in chat window (Q spam)",
 
-    Sandbox_YetAnotherChatMod_MarkdownOneAsteriskColor     = "Markdown one asterisk color"
-    Sandbox_YetAnotherChatMod_MarkdownTwoAsterisksColor    = "Markdown two asterisks color"
+    Sandbox_YetAnotherChatMod_MarkdownOneAsteriskColor     = "Markdown one asterisk color",
+    Sandbox_YetAnotherChatMod_MarkdownTwoAsterisksColor    = "Markdown two asterisks color",
+
+    Sandbox_YetAnotherChatMod_GeneralDiscordEnabled        = "Enable discord sync with /all messages",
+    Sandbox_YetAnotherChatMod_RadioDiscordEnabled          = "Enable discord sync with a radio channel",
+    Sandbox_YetAnotherChatMod_RadioDiscordFrequency        = "Set the radio frequency to sync with discord",
+
+    Sandbox_YetAnotherChatMod_RadioColor                   = "Set the color of scripted radio messages",
 
     Sandbox_YetAnotherChatMod_WhisperEnabled               = "Enable /whisper chat",
     Sandbox_YetAnotherChatMod_LowEnabled                   = "Enable /low chat",

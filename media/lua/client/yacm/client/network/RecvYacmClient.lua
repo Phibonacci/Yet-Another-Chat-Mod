@@ -13,6 +13,16 @@ YacmClientRecvCommands['RadioMessage'] = function(args)
         args['radios'])
 end
 
+YacmClientRecvCommands['RadioEmittingMessage'] = function(args)
+    ISChat.onRadioEmittingPacket(
+        args['type'], args['author'], args['message'], args['color'],
+        args['frequency'])
+end
+
+YacmClientRecvCommands['DiscordMessage'] = function(args)
+    ISChat.onDiscordPacket(args['message'])
+end
+
 YacmClientRecvCommands['Typing'] = function(args)
     ISChat.onTypingPacket(args['author'], args['type'])
 end

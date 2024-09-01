@@ -104,52 +104,17 @@ local function FormatMessage(message, defaultColor, wrapWords, maxBubbleLength)
     local tagsFound = ListTags(message)
     local token = Tokenize(message, tagsFound, defaultColor)
     local wrappedMessage, wrappedRawMessage = token:format(false, wrapWords, maxBubbleLength)
-    return token:format(false), wrappedMessage, wrappedRawMessage
-end
-
-local function ParseYacmHeaderArg(header, pattern)
-    local authorStart, authorEnd = string.find(header, pattern)
-    authorStart = authorStart + 2
-    authorEnd = authorEnd - 1
-    local arg = nil
-    if authorEnd - authorStart < 1 then
-        return nil
-    end
-    arg = header.sub(header, authorStart, authorEnd)
-    return arg
-end
-
-local function ParseYacmHeader(message)
-    local yacmPattern = '<YACM t:%a+;a:%a+;>';
-    local typePattern = 't:%a+;';
-    local authorPattern = 'a:%a+;';
-    local headerStart, headerEnd = string.find(message, yacmPattern)
-    if headerStart == nil then
-        return nil
-    end
-    local headerString = string.sub(message, headerStart, headerEnd)
-    local type = ParseYacmHeaderArg(headerString, typePattern)
-    local author = ParseYacmHeaderArg(headerString, authorPattern)
-    if type == nil or author == nil then
-        return nil
-    end
-    return {
-        ['type'] = type,
-        ['author'] = author,
-    }, headerEnd
+    return token:format(false),
+        wrappedMessage,
+        wrappedRawMessage
 end
 
 function Parser.ParseYacmMessage(message, defaultColor, wrapWords, maxBubbleLength)
-    -- local header, headerEnd = ParseYacmHeader(message)
-    -- if header == nil then
-    --     return nil
-    -- end
-    local body = message --string.sub(message, headerEnd + 1)
-    local bodyChat, bodyBubble, rawMessage = FormatMessage(body, defaultColor, wrapWords, maxBubbleLength)
+    local chatMessage, bubbleMessage, rawMessage = FormatMessage(message, defaultColor, wrapWords,
+        maxBubbleLength)
     return {
-        --['header'] = header,
-        ['body'] = bodyChat,
-        ['bubble'] = bodyBubble,
+        ['body'] = chatMessage,
+        ['bubble'] = bubbleMessage,
         ['rawMessage'] = rawMessage,
     }
 end

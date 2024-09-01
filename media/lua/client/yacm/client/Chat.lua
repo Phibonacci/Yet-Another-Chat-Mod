@@ -561,10 +561,6 @@ function CreatePlayerBubble(author, message, rawMessage)
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
     local bubble = PlayerBubble:new(authorObj, message, rawMessage, timer, opacity)
-    bubble:subscribe()
-    if ISChat.instance.bubble[author] then
-        ISChat.instance.bubble[author]:unsubscribe()
-    end
     ISChat.instance.bubble[author] = bubble
     -- the player is not typing anymore if his bubble appears
     if ISChat.instance.typingDots[author] ~= nil then
@@ -588,10 +584,6 @@ local function CreateSquareRadioBubble(position, bubbleMessage, rawTextMessage)
         local opacity = 70
         local square = getSquare(x, y, z)
         local bubble = RadioBubble:new(square, bubbleMessage, rawTextMessage, timer, opacity, RadioBubble.types.square)
-        if ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] then
-            ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z]:unsubscribe()
-        end
-        bubble:subscribe()
         ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] = bubble
     end
 end
@@ -615,10 +607,6 @@ function CreatePlayerRadioBubble(author, message, rawMessage)
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
     local bubble = RadioBubble:new(authorObj, message, rawMessage, timer, opacity, RadioBubble.types.player)
-    if ISChat.instance.playerRadioBubble[author] then
-        ISChat.instance.playerRadioBubble[author]:unsubscribe()
-    end
-    bubble:subscribe()
     ISChat.instance.playerRadioBubble[author] = bubble
 end
 
@@ -636,10 +624,6 @@ function CreateVehicleRadioBubble(vehicle, message, rawMessage)
         return
     end
     local bubble = RadioBubble:new(vehicle, message, rawMessage, timer, opacity, RadioBubble.types.vehicle)
-    if ISChat.instance.vehicleRadioBubble[keyId] then
-        ISChat.instance.vehicleRadioBubble[keyId]:unsubscribe()
-    end
-    bubble:subscribe()
     ISChat.instance.vehicleRadioBubble[keyId] = bubble
 end
 
@@ -734,7 +718,7 @@ local function ReduceBoredom()
     player:getBodyDamage():setBoredomLevel(boredom - 0.6)
 end
 
-function ISChat.onMessagePacket(type, author, message, color, hideInChat, target)
+function ISChat.onMessagePacket(type, author, message, color, hideInChat, target, isFromDiscord)
     if author ~= getPlayer():getUsername() then
         ReduceBoredom()
     end
@@ -744,7 +728,9 @@ function ISChat.onMessagePacket(type, author, message, color, hideInChat, target
         ISChat.instance.lastPrivateMessageAuthor = author
     end
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
-    CreatePlayerBubble(author, parsedMessage['bubble'], parsedMessage['rawMessage'])
+    if not isFromDiscord then
+        CreatePlayerBubble(author, parsedMessage['bubble'], parsedMessage['rawMessage'])
+    end
     local time = Calendar.getInstance():getTimeInMillis()
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
         formattedMessage, time, type)
@@ -794,6 +780,23 @@ local function CreateVehiclesRadiosBubbles(parsedMessages, vehiclesKeyIds)
     end
 end
 
+function ISChat.onDiscordPacket(message)
+    processGeneralMessage(message)
+end
+
+function ISChat.onRadioEmittingPacket(type, author, message, color, frequency)
+    local time = Calendar.getInstance():getTimeInMillis()
+    local stream = GetStreamFromType(type)
+    if stream == nil then
+        print('yacm error: onRadioEmittingPacket: stream not found')
+        return
+    end
+    local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency)
+    local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
+        formattedMessage, time, type)
+    AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
+end
+
 function ISChat.onRadioPacket(type, author, message, color, radiosInfo)
     local time = Calendar.getInstance():getTimeInMillis()
     local stream = GetStreamFromType(type)
@@ -802,7 +805,8 @@ function ISChat.onRadioPacket(type, author, message, color, radiosInfo)
         return
     end
 
-    if author ~= getPlayer():getUsername() then
+    local playerName = getPlayer():getUsername()
+    if author ~= playerName then
         ReduceBoredom()
     end
     for frequency, radios in pairs(radiosInfo) do
@@ -812,7 +816,12 @@ function ISChat.onRadioPacket(type, author, message, color, radiosInfo)
         CreateSquaresRadiosBubbles(parsedMessages, radios['squares'])
         CreatePlayersRadiosBubbles(parsedMessages, radios['players'])
         CreateVehiclesRadiosBubbles(parsedMessages, radios['vehicles'])
-        AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
+        -- a special packet is making sure the author always has a radio feedback in the chat
+        -- useful in case the listening range and emitting range of the radio differs
+        -- this is to avoid any confusion from players thinking the radios mights not work
+        if author ~= playerName then
+            AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
+        end
     end
 end
 
@@ -849,11 +858,26 @@ local function GetMessageType(message)
     return stringRep:match('^ChatMessage{chat=(%a*),')
 end
 
+local function GenerateRadiosPacketFromListeningRadiosInRange(frequency)
+    local radios = World.getListeningRadios(getPlayer(), YacmServerSettings['say']['range'], frequency)
+    if radios == nil then
+        return nil
+    end
+    return {
+        [frequency] = radios
+    }
+end
+
+local function RemoveDiscordMessagePrefix(message)
+    local regex = '<@%d*>(.*)'
+    return message:match(regex)
+end
+
 -- TODO: try to clean this mess copied from the base game
 ISChat.addLineInChat = function(message, tabID)
     local line = message:getText()
     local messageType = GetMessageType(message)
-    if message:getRadioChannel() ~= -1 then
+    if message:getRadioChannel() ~= -1 then -- scripted radio message
         local messageWithoutColorPrefix = message:getText():gsub('*%d+,%d+,%d+*', '')
         message:setText(messageWithoutColorPrefix)
         local color = (YacmServerSettings and YacmServerSettings['options']['radio']['color']) or {
@@ -882,7 +906,47 @@ ISChat.addLineInChat = function(message, tabID)
         )
     end
 
-    if message:isServerAlert() then
+    if message:isFromDiscord() then
+        local discordColor = { 88, 101, 242 } -- discord logo color
+        local messageWithoutPrefix = RemoveDiscordMessagePrefix(line)
+        if messageWithoutPrefix == nil then
+            print('yacm error: failed to remove discord message prefix for message: "' .. line .. '"')
+            return
+        end
+        if YacmServerSettings and YacmServerSettings['general']
+            and YacmServerSettings['general']['discord']
+            and YacmServerSettings['general']['enabled']
+        then
+            ISChat.onMessagePacket(
+                'general',
+                message:getAuthor(),
+                messageWithoutPrefix,
+                discordColor,
+                nil,
+                nil,
+                true
+            )
+        end
+        if YacmServerSettings and YacmServerSettings['options']
+            and YacmServerSettings['options']['radio']
+            and YacmServerSettings['options']['radio']['discord']
+        then
+            local frequency = YacmServerSettings['options']['radio']['frequency']
+            if frequency then
+                local radiosInfo = GenerateRadiosPacketFromListeningRadiosInRange(frequency)
+                if radiosInfo ~= nil then
+                    ISChat.onRadioPacket(
+                        'say',
+                        message:getAuthor(),
+                        messageWithoutPrefix,
+                        discordColor,
+                        radiosInfo
+                    )
+                end
+            end
+        end
+        return
+    elseif message:isServerAlert() then
         ISChat.instance.servermsg = ''
         if message:isShowAuthor() then
             ISChat.instance.servermsg = message:getAuthor() .. ': '
@@ -975,10 +1039,11 @@ function ISChat:render()
         for index, bubble in pairs(bubbles) do
             if bubble.dead then
                 table.insert(indexToDelete, index)
+            else
+                bubble:render()
             end
         end
         for _, index in pairs(indexToDelete) do
-            bubbles[index]:unsubscribe()
             bubbles[index] = nil
         end
     end
