@@ -24,7 +24,7 @@ option YetAnotherChatMod.BubbleOpacity
 option YetAnotherChatMod.VerbEnabled
 {
 	type = boolean,
-	default = true,
+	default = false,
 
 	page = YetAnotherChatMod,
 	translation = YetAnotherChatMod_VerbEnabled
