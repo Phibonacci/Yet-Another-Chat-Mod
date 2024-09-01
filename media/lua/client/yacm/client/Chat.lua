@@ -199,7 +199,19 @@ local function InitGlobalModData()
     ISChat.instance.yacmModData = yacmModData
 end
 
+local lastAskedDataTime = Calendar.getInstance():getTimeInMillis() - 2000
+local function AskServerData()
+    local delta = Calendar.getInstance():getTimeInMillis() - lastAskedDataTime
+    if delta < 2000 then
+        return
+    end
+    lastAskedDataTime = Calendar.getInstance():getTimeInMillis()
+
+    YacmClientSendCommands.sendAskSandboxVars()
+end
+
 ISChat.initChat = function()
+    YacmServerSettings = nil
     local instance = ISChat.instance
     if instance.tabCnt == 1 then
         instance.chatText:setVisible(false)
@@ -217,6 +229,7 @@ ISChat.initChat = function()
     instance.rangeIndicatorState = false
     InitGlobalModData()
     AddTab('General', 1)
+    Events.OnPostRender.Add(AskServerData)
 end
 
 Events.OnGameStart.Remove(ISChat.createChat)
@@ -997,17 +1010,6 @@ local function GetFirstTab()
     end
 end
 
-local lastAskedDataTime = Calendar.getInstance():getTimeInMillis() - 2000
-local function AskServerData()
-    local delta = Calendar.getInstance():getTimeInMillis() - lastAskedDataTime
-    if delta < 2000 then
-        return
-    end
-    lastAskedDataTime = Calendar.getInstance():getTimeInMillis()
-
-    YacmClientSendCommands.sendAskSandboxVars()
-end
-
 local function UpdateInfoWindow()
     local info = getText('SurvivalGuide_YetAnotherChatMod', YET_ANOTHER_CHAT_MOD_VERSION)
     if YacmServerSettings['whisper']['enabled'] then
@@ -1524,4 +1526,3 @@ function ISChat:onGearButtonClick()
 end
 
 Events.OnChatWindowInit.Add(ISChat.initChat)
-Events.OnPostRender.Add(AskServerData)
