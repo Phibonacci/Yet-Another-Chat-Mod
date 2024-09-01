@@ -212,6 +212,7 @@ local function SetMessageTypeSettings()
                 ['color'] = GetColorFromString(SandboxVars.YetAnotherChatMod.RadioColor),
             },
             ['hideCallout'] = SandboxVars.YetAnotherChatMod.HideCallout,
+            ['isVoiceEnabled'] = SandboxVars.YetAnotherChatMod.VoiceEnabled,
         },
     }
 end

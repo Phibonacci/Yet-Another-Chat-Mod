@@ -21,6 +21,16 @@ option YetAnotherChatMod.BubbleOpacity
 	translation = YetAnotherChatMod_BubbleOpacity,
 }
 
+option YetAnotherChatMod.VoiceEnabled
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_VoiceEnabled
+}
+
+
 option YetAnotherChatMod.VerbEnabled
 {
 	type = boolean,

@@ -196,6 +196,12 @@ local function InitGlobalModData()
         yacmModData['playerColor'] = GenerateRandomColor()
         ModData.add('yacm', yacmModData)
     end
+    if yacmModData['isVoiceEnabled'] == nil and ISChat.instance.isVoiceEnabled == nil then
+        -- wait for the server settings to override this if voices are enabled by default
+        ISChat.instance.isVoiceEnabled = false
+    elseif yacmModData['isVoiceEnabled'] ~= nil then
+        ISChat.instance.isVoiceEnabled = yacmModData['isVoiceEnabled']
+    end
     ISChat.instance.yacmModData = yacmModData
 end
 
@@ -227,6 +233,7 @@ ISChat.initChat = function()
     instance.tabs = {}
     instance.currentTabID = 0
     instance.rangeIndicatorState = false
+
     InitGlobalModData()
     AddTab('General', 1)
     Events.OnPostRender.Add(AskServerData)
@@ -560,7 +567,7 @@ function CreatePlayerBubble(author, message, rawMessage)
         timer = YacmServerSettings['options']['bubble']['timer']
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
-    local bubble = PlayerBubble:new(authorObj, message, rawMessage, timer, opacity)
+    local bubble = PlayerBubble:new(authorObj, message, rawMessage, timer, opacity, ISChat.instance.isVoiceEnabled)
     ISChat.instance.bubble[author] = bubble
     -- the player is not typing anymore if his bubble appears
     if ISChat.instance.typingDots[author] ~= nil then
@@ -583,7 +590,9 @@ local function CreateSquareRadioBubble(position, bubbleMessage, rawTextMessage)
         local timer = 10
         local opacity = 70
         local square = getSquare(x, y, z)
-        local bubble = RadioBubble:new(square, bubbleMessage, rawTextMessage, timer, opacity, RadioBubble.types.square)
+        local bubble = RadioBubble:new(
+            square, bubbleMessage, rawTextMessage, timer, opacity, RadioBubble.types.square,
+            ISChat.instance.isVoiceEnabled)
         ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] = bubble
     end
 end
@@ -606,7 +615,8 @@ function CreatePlayerRadioBubble(author, message, rawMessage)
         timer = YacmServerSettings['options']['bubble']['timer']
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
-    local bubble = RadioBubble:new(authorObj, message, rawMessage, timer, opacity, RadioBubble.types.player)
+    local bubble = RadioBubble:new(authorObj, message, rawMessage, timer, opacity,
+        RadioBubble.types.player, ISChat.instance.isVoiceEnabled)
     ISChat.instance.playerRadioBubble[author] = bubble
 end
 
@@ -623,7 +633,8 @@ function CreateVehicleRadioBubble(vehicle, message, rawMessage)
         print('yacm error: CreateVehicleBubble: key id is null')
         return
     end
-    local bubble = RadioBubble:new(vehicle, message, rawMessage, timer, opacity, RadioBubble.types.vehicle)
+    local bubble = RadioBubble:new(vehicle, message, rawMessage, timer, opacity,
+        RadioBubble.types.vehicle, ISChat.instance.isVoiceEnabled)
     ISChat.instance.vehicleRadioBubble[keyId] = bubble
 end
 
@@ -1277,7 +1288,9 @@ ISChat.onRecvSandboxVars = function(messageTypeSettings)
         return
     end
     Events.OnPostRender.Remove(AskServerData)
-    YacmServerSettings = messageTypeSettings
+
+    YacmServerSettings = messageTypeSettings -- a global
+
     if HasAtLeastOneChanelEnabled(2) == true then
         AddTab('Out Of Character', 2)
     end
@@ -1295,6 +1308,10 @@ ISChat.onRecvSandboxVars = function(messageTypeSettings)
 
     UpdateRangeIndicator(ISChat.defaultTabStream[ISChat.instance.currentTabID])
     UpdateInfoWindow()
+    if ISChat.instance.yacmModData == nil or ISChat.instance.yacmModData['isVoiceEnabled'] == nil then
+        -- wait for the server settings to override this if voices are enabled by default
+        ISChat.instance.isVoiceEnabled = messageTypeSettings['options']['isVoiceEnabled']
+    end
 end
 
 ISChat.onTabRemoved = function(tabTitle, tabID)
@@ -1701,6 +1718,21 @@ function ISChat:onGearButtonClick()
     opaqueOnFocusSubMenu:addOption(getText("UI_chat_context_disable"), ISChat.instance, ISChat.onFocusOpaqueChange, false)
     opaqueOnFocusSubMenu:addOption(getText("UI_chat_context_enable"), ISChat.instance, ISChat.onFocusOpaqueChange, true)
     opaqueOnFocusSubMenu:setOptionChecked(opaqueOnFocusSubMenu.options[self.opaqueOnFocus and 2 or 1], true)
+
+    local voiceOptionName = getText("UI_YACM_chat_enable_voices")
+    if self.isVoiceEnabled then
+        voiceOptionName = getText("UI_YACM_chat_disable_voices")
+    end
+    context:addOption(voiceOptionName, ISChat.instance, ISChat.onToggleVoicePrefix)
+end
+
+function ISChat.onToggleVoicePrefix()
+    ISChat.instance.isVoiceEnabled = not ISChat.instance.isVoiceEnabled
+
+    -- the player has set this option at least once, that means he is aware of its existence
+    -- we'll use this settings in the future instead of the server default behavior
+    ISChat.instance.yacmModData['isVoiceEnabled'] = ISChat.instance.isVoiceEnabled
+    ModData.add('yacm', ISChat.instance.yacmModData)
 end
 
 Events.OnChatWindowInit.Add(ISChat.initChat)
