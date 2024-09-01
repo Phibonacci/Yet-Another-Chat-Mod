@@ -331,9 +331,6 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
             end
         end
         local radio = Character.getHandItemByGroup(player, 'Radio')
-        SendServer.Print(player, 'Radio in hand? ' .. (radio ~= nil and 'true' or 'false'))
-        local isoRadio = Character.getHandItemByGroup(player, 'IsoRadio')
-        SendServer.Print(player, 'IsoRadio in hand? ' .. (isoRadio ~= nil and 'true' or 'false'))
         local radioData = radio and radio:getDeviceData() or nil
         if radioData then
             local frequency = radioData:getChannel()
@@ -355,6 +352,7 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
         if IsAllowed(player, connectedPlayer, args)
         then
             SendServer.Print(player, 'found target player #' .. i)
+            SendServer.Print(player, PlayersDistance(player, connectedPlayer) .. ' < ' .. range)
             if connectedPlayer:getOnlineID() == player:getOnlineID()
                 or range == -1 or PlayersDistance(player, connectedPlayer) < range + 0.001
                 or Character.AreInSameVehicle(player, connectedPlayer)
