@@ -1,7 +1,7 @@
-local TokenBold = require 'yacm/lexer/TokenBold'
-local TokenItalic = require 'yacm/lexer/TokenItalic'
-local TokenRoot = require 'yacm/lexer/TokenRoot'
-local TokenString = require 'yacm/lexer/TokenString'
+local TokenBold = require 'yacm/client/lexer/TokenBold'
+local TokenItalic = require 'yacm/client/lexer/TokenItalic'
+local TokenRoot = require 'yacm/client/lexer/TokenRoot'
+local TokenString = require 'yacm/client/lexer/TokenString'
 
 local function GetTag(message, indexStart, tag)
     if string.len(message) - indexStart + 1 < string.len(tag) then

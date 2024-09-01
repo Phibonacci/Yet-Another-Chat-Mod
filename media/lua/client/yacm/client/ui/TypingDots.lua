@@ -1,4 +1,4 @@
-local coordinates = require('yacm/utils/coordinates')
+local Coordinates = require('yacm/client/utils/Coordinates')
 
 local TypingDots = ISUIElement:derive("TypingDots");
 
@@ -25,7 +25,7 @@ function TypingDots:render()
     else
         texture = typingDots3
     end
-    local x, y = coordinates.CenterTopOfPlayer(self.player, 20, 6)
+    local x, y = Coordinates.CenterTopOfPlayer(self.player, 20, 6)
     if x == nil then
         return
     end
@@ -40,7 +40,7 @@ end
 
 function TypingDots:new(player, timer)
     TypingDots.__index = self
-    local x, y = coordinates.CenterTopOfPlayer(player, 20, 6)
+    local x, y = Coordinates.CenterTopOfPlayer(player, 20, 6)
     if x == nil then
         x, y = 0, 0
     end

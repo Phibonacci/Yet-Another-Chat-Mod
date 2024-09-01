@@ -1,7 +1,7 @@
-require('yacm/parser/StringBuilder')
+require('yacm/client/parser/StringBuilder')
 
-local ABubble = require('yacm/ui/bubble/ABubble')
-local coordinates = require('yacm/utils/coordinates')
+local ABubble = require('yacm/client/ui/bubble/ABubble')
+local Coordinates = require('yacm/client/utils/Coordinates')
 
 local PlayerBubble = ISUIElement:derive("PlayerBubble")
 
@@ -9,7 +9,7 @@ function PlayerBubble:render()
     if self.dead then
         return
     end
-    local x, y = coordinates.CenterTopOfPlayer(self.player, self:getWidth(), self:getHeight())
+    local x, y = Coordinates.CenterTopOfPlayer(self.player, self:getWidth(), self:getHeight())
     if x == nil then
         return
     end
@@ -20,7 +20,7 @@ function PlayerBubble:new(player, text, rawText, timer, opacity)
     local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
     local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
-    local x, y = coordinates.CenterTopOfPlayer(player, width, height)
+    local x, y = Coordinates.CenterTopOfPlayer(player, width, height)
     if x == nil then
         x, y = 0, 0
     end

@@ -51,11 +51,11 @@ local function getSquareItemsByFilter(square, filterType, filterData)
 end
 
 function World.getSquareItemsBySprites(square, spriteList)
-    getSquareItemsByFilter(square, filterTypeEnum.sprite, spriteList)
+    return getSquareItemsByFilter(square, filterTypeEnum.sprite, spriteList)
 end
 
 function World.getSquareItemsByGroup(square, groupName)
-    getSquareItemsByFilter(square, filterTypeEnum.group, groupName)
+    return getSquareItemsByFilter(square, filterTypeEnum.group, groupName)
 end
 
 -- from nearest to further
@@ -96,6 +96,17 @@ end
 
 function World.getItemsInRangeByGroup(player, range, groupName)
     return getItemsInRangeByFilter(player, range, filterTypeEnum.group, groupName)
+end
+
+function World.getPlayerByUsername(username)
+    local connectedPlayers = getOnlinePlayers()
+    for i = 0, connectedPlayers:size() - 1 do
+        local connectedPlayer = connectedPlayers:get(i)
+        if username == connectedPlayer:getUsername() then
+            return connectedPlayer
+        end
+    end
+    return nil
 end
 
 return World

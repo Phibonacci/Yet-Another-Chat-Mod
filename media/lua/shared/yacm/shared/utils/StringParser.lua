@@ -1,6 +1,6 @@
-local utils = {}
+local StringParser = {}
 
-function utils.hexaToRGB(hexa)
+function StringParser.hexaStringToRGB(hexa)
     local regex = '#[abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d][abcdefABCDEF%d]'
     if hexa == nil or #hexa ~= 7
         or hexa:match(regex) == nil
@@ -14,4 +14,13 @@ function utils.hexaToRGB(hexa)
     }
 end
 
-return utils
+function StringParser.rgbStringToRGB(arguments)
+    for r, g, b in arguments:gmatch('(%d+), *(%d+), *(%d+)') do
+        if r == nil or g == nil or b == nil then
+            return nil
+        end
+        return { tonumber(r), tonumber(g), tonumber(b) }
+    end
+end
+
+return StringParser

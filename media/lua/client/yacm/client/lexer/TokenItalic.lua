@@ -1,4 +1,4 @@
-local AToken = require('yacm/lexer/AToken')
+local AToken = require('yacm/client/lexer/AToken')
 
 local TokenItalic = {}
 

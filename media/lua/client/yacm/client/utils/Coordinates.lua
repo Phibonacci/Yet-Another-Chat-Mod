@@ -1,18 +1,18 @@
-local coordinates = {}
+local Coordinates = {}
 
-function coordinates.CenterTopOfPlayer(player, width, height)
+function Coordinates.CenterTopOfPlayer(player, width, height)
     if player == nil then
         print('error: CenterTopOfPlayer: nil player parameter')
         return nil
     end
-    local x, y = coordinates.CenterTopOfObject(player, width, height)
-    local zoom = coordinates.GetZoom()
+    local x, y = Coordinates.CenterTopOfObject(player, width, height)
+    local zoom = Coordinates.GetZoom()
     local bodyHeight = 129 / zoom
     y = y - bodyHeight - 21
     return x, y
 end
 
-function coordinates.CenterTopOfObject(object, width, height)
+function Coordinates.CenterTopOfObject(object, width, height)
     if object == nil then
         print('error: CenterTopOfObject: nil player parameter')
         return nil
@@ -24,7 +24,7 @@ function coordinates.CenterTopOfObject(object, width, height)
     return x, y
 end
 
-function coordinates.CenterFeetOfPlayer(player, width, height)
+function Coordinates.CenterFeetOfPlayer(player, width, height)
     if player == nil then
         print('error: CenterFeetOfPlayer: nil player parameter')
         return nil
@@ -36,8 +36,8 @@ function coordinates.CenterFeetOfPlayer(player, width, height)
     return x, y
 end
 
-function coordinates.GetZoom()
+function Coordinates.GetZoom()
     return getCore():getZoom(getPlayer():getPlayerNum())
 end
 
-return coordinates
+return Coordinates

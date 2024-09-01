@@ -1,17 +1,17 @@
-local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/Version')
+local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/shared/Version')
 
-local ChatUI = require('yacm/ui/ChatUI')
+local ChatUI = require('yacm/client/ui/ChatUI')
 
-require('yacm/parser/Parser')
-require('yacm/parser/StringBuilder')
+require('yacm/client/parser/Parser')
+require('yacm/client/parser/StringBuilder')
 
-local PlayerBubble           = require('yacm/ui/bubble/PlayerBubble')
-local RadioBubble            = require('yacm/ui/bubble/RadioBubble')
-local RangeIndicator         = require('yacm/ui/RangeIndicator')
-local TypingDots             = require('yacm/ui/TypingDots')
-local YacmClientSendCommands = require('yacm/network/SendYacmClient.lua')
+local PlayerBubble           = require('yacm/client/ui/bubble/PlayerBubble')
+local RadioBubble            = require('yacm/client/ui/bubble/RadioBubble')
+local RangeIndicator         = require('yacm/client/ui/RangeIndicator')
+local TypingDots             = require('yacm/client/ui/TypingDots')
+local YacmClientSendCommands = require('yacm/client/network/SendYacmClient')
 
-local utils                  = require('yacm/utils')
+local StringParser           = require('yacm/client/utils/StringParser')
 
 
 ISChat.allChatStreams     = {}
@@ -323,17 +323,8 @@ local function GetArgumentsFromMessage(yacmCommand, message)
     return arguments
 end
 
-local function GetRGBFromString(arguments)
-    for r, g, b in arguments:gmatch('(%d+), *(%d+), *(%d+)') do
-        if r == nil or g == nil or b == nil then
-            return nil
-        end
-        return { tonumber(r), tonumber(g), tonumber(b) }
-    end
-end
-
 local function ProcessColorCommand(arguments)
-    local color = GetRGBFromString(arguments) or utils.hexaToRGB(arguments)
+    local color = StringParser.rgbStringToRGB(arguments) or StringParser.hexaStringToRGB(arguments)
     if color == nil then
         return false
     end

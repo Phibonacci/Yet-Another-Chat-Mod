@@ -1,4 +1,4 @@
-local coordinates = require('yacm/utils/coordinates')
+local coordinates = require('yacm/client/utils/coordinates')
 
 local RangeIndicator = ISUIElement:derive("RangeIndicator")
 

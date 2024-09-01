@@ -1,18 +1,9 @@
-local StringParser = require('yacm/utils/StringParser')
-local Character = require('yacm/utils/Character')
-local World = require('yacm/utils/World')
+local Character = require('yacm/shared/utils/Character')
+local SendServer = require('yacm/server/network/SendServer')
+local StringParser = require('yacm/shared/utils/StringParser')
+local World = require('yacm/shared/utils/World')
 
-local function SendYacmServerCommand(player, commandName, args)
-    sendServerCommand(player, 'YACM', commandName, args)
-end
-
-local function ServerPrint(player, message)
-    SendYacmServerCommand(player, 'ServerPrint', { message = message })
-end
-
-local function SendErrorMessage(player, type, message)
-    SendYacmServerCommand(player, 'ChatError', { message = message, type = type })
-end
+local ChatMessage = {}
 
 local function PlayersDistance(source, target)
     local stupidDistance = source:DistTo(target:getX(), target:getY())
@@ -55,7 +46,7 @@ local MessageHasAccessByType = {
 
 local function GetColorFromString(colorString)
     local defaultColor = { 255, 0, 255 }
-    local rgb = StringParser.hexaToRGB(colorString)
+    local rgb = StringParser.hexaStringToRGB(colorString)
     if rgb == nil then
         print('error: invalid string for Sandbox Variable: "' .. name .. '"')
         return defaultColor
@@ -68,10 +59,10 @@ local function GetColorSandbox(name)
     return GetColorFromString(colorString)
 end
 
-local MessageTypeSettings
+ChatMessage.MessageTypeSettings = nil
 
 local function SetMessageTypeSettings()
-    MessageTypeSettings = {
+    ChatMessage.MessageTypeSettings = {
         ['markdown'] = {
             ['italic'] = {
                 ['color'] = GetColorSandbox('MarkdownOneAsterisk')
@@ -171,7 +162,7 @@ end
 
 
 local function GetRangeForMessageType(type)
-    local messageSettings = MessageTypeSettings[type]
+    local messageSettings = ChatMessage.MessageTypeSettings[type]
     if messageSettings ~= nil then
         return messageSettings['range']
     end
@@ -191,67 +182,14 @@ local function GetConnectedPlayer(username)
 end
 
 local function IsAllowed(author, player, args)
-    if args.type == nil or MessageTypeSettings[args.type] == nil
-        or MessageTypeSettings[args.type]['enabled'] ~= true
+    if args.type == nil or ChatMessage.MessageTypeSettings[args.type] == nil
+        or ChatMessage.MessageTypeSettings[args.type]['enabled'] ~= true
         or MessageHasAccessByType[args.type] == nil
     then
         return false
     end
     return MessageHasAccessByType[args.type](author, player, args)
 end
-
-local ProcessYacmPackets = {}
-
-local radioSprites = {
-    'appliances_com_01_0', -- Premium Technologies Ham Radio
-    'appliances_com_01_1',
-    'appliances_com_01_2',
-    'appliances_com_01_3',
-    'appliances_com_01_4',
-    'appliances_com_01_5',
-    'appliances_com_01_6',
-    'appliances_com_01_7',
-    'appliances_com_01_8', -- US Army Ham Radio
-    'appliances_com_01_9',
-    'appliances_com_01_10',
-    'appliances_com_01_11',
-    'appliances_com_01_12',
-    'appliances_com_01_13',
-    'appliances_com_01_14',
-    'appliances_com_01_15',
-    'appliances_com_01_16', -- Toy-R-Mine Walkie Talkie
-    'appliances_com_01_17',
-    'appliances_com_01_18',
-    'appliances_com_01_19',
-    'appliances_com_01_24', -- ValueTech Walkie Talkie
-    'appliances_com_01_25',
-    'appliances_com_01_26',
-    'appliances_com_01_27',
-    'appliances_com_01_32', -- Premium Technologies Walkie Talkie
-    'appliances_com_01_33',
-    'appliances_com_01_34',
-    'appliances_com_01_35',
-    'appliances_com_01_40', -- Tactical Walkie Talkie
-    'appliances_com_01_41',
-    'appliances_com_01_42',
-    'appliances_com_01_43',
-    'appliances_com_01_48', -- US Army Walkie Talkie
-    'appliances_com_01_49',
-    'appliances_com_01_50',
-    'appliances_com_01_51',
-    'appliances_com_01_56', -- Makeshift Ham Radio
-    'appliances_com_01_57',
-    'appliances_com_01_58',
-    'appliances_com_01_59',
-    'appliances_com_01_60',
-    'appliances_com_01_61',
-    'appliances_com_01_62',
-    'appliances_com_01_63',
-    'appliances_com_01_64', -- Makeshift Walkie Talkie
-    'appliances_com_01_65',
-    'appliances_com_01_66',
-    'appliances_com_01_67',
-}
 
 local function IsInRadioEmittingRange(radioEmitters, receiver)
     if radioEmitters == nil then
@@ -312,7 +250,7 @@ local function SendRadioPackets(author, player, args, radioFrequencies)
     local radio = Character.getHandItemByGroup(player, 'Radio')
     local radioData = radio and radio:getDeviceData() or nil
     if radioData then
-        ServerPrint(player, 'target radioData found')
+        SendServer.Print(player, 'target radioData found')
         local frequency = radioData:getChannel()
         if radioData and radioData:getIsTwoWay() and radioData:getIsTurnedOn()
             and frequency ~= nil and radioFrequencies[frequency] ~= nil
@@ -321,11 +259,11 @@ local function SendRadioPackets(author, player, args, radioFrequencies)
             if radiosByFrequency[frequency] == nil then
                 radiosByFrequency[frequency] = {}
             end
-            ServerPrint(player, 'radio added to command')
+            SendServer.Print(player, 'radio added to command')
             table.insert(radiosByFrequency[frequency], radio)
         end
     end
-    SendYacmServerCommand(player, 'RadioMessage', {
+    SendServer.Command(player, 'RadioMessage', {
         author = args.author,
         message = args.message,
         color = args.color,
@@ -334,7 +272,7 @@ local function SendRadioPackets(author, player, args, radioFrequencies)
     })
 end
 
-local function ProcessYacmPacket(player, args, packetType, sendError)
+function ChatMessage.ProcessMessage(player, args, packetType, sendError)
     if args.type == nil then
         error('error: YACM: Received a message from "' .. player:getUsername() .. '" with no type')
         return
@@ -342,14 +280,14 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
     if args.type == "faction" then
         if Faction.getPlayerFaction(player) == nil then
             if sendError then
-                SendErrorMessage(player, args.type, 'you are not part of a faction.')
+                SendServer.ChatErrorMessage(player, args.type, 'you are not part of a faction.')
             end
             return
         end
     elseif args.type == 'safehouse' then
         if SafeHouse.hasSafehouse(player) == nil then
             if sendError then
-                SendErrorMessage(player, args.type, 'you are not part of a safe house.')
+                SendServer.ChatErrorMessage(player, args.type, 'you are not part of a safe house.')
             end
             return
         end
@@ -357,7 +295,7 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
         if args.target == nil or GetConnectedPlayer(args.target) == nil then
             if args.target ~= nil then
                 if sendError then
-                    SendErrorMessage(player, args.type, 'unknown player "' .. args.target .. '".')
+                    SendServer.ChatErrorMessage(player, args.type, 'unknown player "' .. args.target .. '".')
                 end
             else
                 error('error: YACM: Received a private message from "' .. player:getUsername() .. '" without a contact.')
@@ -372,7 +310,7 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
     end
     local radioEmission = false
     local radioFrequencies = {}
-    if MessageTypeSettings[args.type] and MessageTypeSettings[args.type]['radio'] == true
+    if ChatMessage.MessageTypeSettings[args.type] and ChatMessage.MessageTypeSettings[args.type]['radio'] == true
         and packetType == 'ChatMessage' and range > 0
     then
         local radios = World.getItemsInRangeByGroup(player, range, 'IsoRadio')
@@ -380,7 +318,7 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
             local radioData = radio:getDeviceData()
             if radioData ~= nil then
                 local frequency = radioData:getChannel()
-                ServerPrint(player, 'radio is muted: ' .. (radioData:getMicIsMuted() and 'true' or 'false'))
+                SendServer.Print(player, 'radio is muted: ' .. (radioData:getMicIsMuted() and 'true' or 'false'))
                 if radioData:getIsTwoWay() and radioData:getIsTurnedOn()
                     and not radioData:getMicIsMuted() and frequency ~= nil
                 then
@@ -393,9 +331,9 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
             end
         end
         local radio = Character.getHandItemByGroup(player, 'Radio')
-        ServerPrint(player, 'Radio in hand? ' .. (radio ~= nil and 'true' or 'false'))
+        SendServer.Print(player, 'Radio in hand? ' .. (radio ~= nil and 'true' or 'false'))
         local isoRadio = Character.getHandItemByGroup(player, 'IsoRadio')
-        ServerPrint(player, 'IsoRadio in hand? ' .. (isoRadio ~= nil and 'true' or 'false'))
+        SendServer.Print(player, 'IsoRadio in hand? ' .. (isoRadio ~= nil and 'true' or 'false'))
         local radioData = radio and radio:getDeviceData() or nil
         if radioData then
             local frequency = radioData:getChannel()
@@ -405,7 +343,7 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
                 if radioFrequencies[frequency] == nil then
                     radioFrequencies[frequency] = {}
                 end
-                ServerPrint(player, 'Radio found on author')
+                SendServer.Print(player, 'Radio found on author')
                 table.insert(radioFrequencies[frequency], radio)
                 radioEmission = true
             end
@@ -416,11 +354,11 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
         local connectedPlayer = connectedPlayers:get(i)
         if IsAllowed(player, connectedPlayer, args)
         then
-            ServerPrint(player, 'found target player #' .. i)
+            SendServer.Print(player, 'found target player #' .. i)
             if (connectedPlayer:getOnlineID() == player:getOnlineID()
                     or range == -1 or PlayersDistance(player, connectedPlayer) < range + 0.001)
             then
-                SendYacmServerCommand(connectedPlayer, packetType, args)
+                SendServer.Command(connectedPlayer, packetType, args)
             end
             if radioEmission then
                 SendRadioPackets(player, connectedPlayer, args, radioFrequencies)
@@ -429,23 +367,6 @@ local function ProcessYacmPacket(player, args, packetType, sendError)
     end
 end
 
-ProcessYacmPackets['ChatMessage'] = function(player, args)
-    ProcessYacmPacket(player, args, 'ChatMessage', true)
-end
-
-ProcessYacmPackets['Typing'] = function(player, args)
-    ProcessYacmPacket(player, args, 'Typing', false)
-end
-
-ProcessYacmPackets['AskSandboxVars'] = function(player, args)
-    SendYacmServerCommand(player, 'SendSandboxVars', MessageTypeSettings)
-end
-
-local function OnClientCommand(module, command, player, args)
-    if module == 'YACM' and ProcessYacmPackets[command] then
-        ProcessYacmPackets[command](player, args)
-    end
-end
-
-Events.OnClientCommand.Add(OnClientCommand)
 Events.OnServerStarted.Add(SetMessageTypeSettings)
+
+return ChatMessage

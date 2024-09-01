@@ -1,3 +1,5 @@
+local Radio = require('yacm/client/Radio')
+
 local YacmClientRecvCommands = {}
 
 YacmClientRecvCommands['ChatMessage'] = function(args)
@@ -23,6 +25,18 @@ end
 
 YacmClientRecvCommands['SendSandboxVars'] = function(args)
     ISChat.onRecvSandboxVars(args)
+end
+
+YacmClientRecvCommands['RadioSquareState'] = function(args)
+    Radio.SyncSquare(
+        args.turnedOn, args.mute, args.power, args.volume,
+        args.frequency, args.x, args.y, args.z)
+end
+
+YacmClientRecvCommands['RadioInHandState'] = function(args)
+    Radio.SyncInHand(
+        args.id, args.turnedOn, args.mute, args.power, args.volume,
+        args.frequency)
 end
 
 function OnServerCommand(module, command, args)

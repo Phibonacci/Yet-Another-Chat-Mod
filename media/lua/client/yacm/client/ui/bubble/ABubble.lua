@@ -1,4 +1,4 @@
-require('yacm/parser/StringBuilder')
+require('yacm/client/parser/StringBuilder')
 
 local ABubble = ISUIElement:derive("ABubble")
 

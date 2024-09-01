@@ -1,7 +1,7 @@
-require('yacm/parser/StringBuilder')
+require('yacm/client/parser/StringBuilder')
 
-local ABubble = require('yacm/ui/bubble/ABubble')
-local coordinates = require('yacm/utils/coordinates')
+local ABubble = require('yacm/client/ui/bubble/ABubble')
+local Coordinates = require('yacm/client/utils/Coordinates')
 
 local RadioBubble = ISUIElement:derive("RadioBubble")
 
@@ -9,7 +9,7 @@ function RadioBubble:render()
     if self.dead then
         return
     end
-    local x, y = coordinates.CenterTopOfObject(self.square, self:getWidth(), self:getHeight())
+    local x, y = Coordinates.CenterTopOfObject(self.square, self:getWidth(), self:getHeight())
     if x == nil then
         return
     end
@@ -20,7 +20,7 @@ function RadioBubble:new(square, text, rawText, timer, opacity)
     local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
     local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
-    local x, y = coordinates.CenterTopOfObject(square, width, height)
+    local x, y = Coordinates.CenterTopOfObject(square, width, height)
     if x == nil then
         x, y = 0, 0
     end
