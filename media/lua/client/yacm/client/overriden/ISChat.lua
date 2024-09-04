@@ -382,7 +382,6 @@ local function ProcessPitchCommand(arguments)
     end
     local regex = '^(%d+.?%d*) *$'
     local valueAsText = arguments:match(regex)
-    print('"' .. arguments .. '"')
     if valueAsText then
         local value = tonumber(valueAsText)
         if value ~= nil and value >= 0.85 and value <= 1.45 then

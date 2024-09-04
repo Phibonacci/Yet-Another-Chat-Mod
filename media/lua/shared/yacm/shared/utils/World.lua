@@ -151,10 +151,16 @@ function World.getPlayerByUsername(username)
     return nil
 end
 
-local function PlayersDistance(source, target)
-    local stupidDistance = source:DistTo(target:getX(), target:getY())
-    local accurateDistance = math.max(stupidDistance - 1, 0)
-    return math.floor(accurateDistance + 0.5)
+function World.forAllPlayers(action)
+    local result = false
+    local connectedPlayers = getOnlinePlayers()
+    for i = 0, connectedPlayers:size() - 1 do
+        local connectedPlayer = connectedPlayers:get(i)
+        if action(connectedPlayer) == true then
+            result = true
+        end
+    end
+    return result
 end
 
 local function GetSquaresRadios(player, range, frequency)
@@ -168,14 +174,15 @@ local function GetSquaresRadios(player, range, frequency)
             y = radio:getY(),
             z = radio:getZ(),
         }
+        -- radio:getSquare() is unreliable
+        local radioSquare = getSquare(radio:getX(), radio:getY(), radio:getZ())
+        RadioManager.subscribeSquare(radioSquare)
         local radioData = radio:getDeviceData()
         if radioData ~= nil then
             local radioFrequency = radioData:getChannel()
             local turnedOn = radioData:getIsTurnedOn()
+            -- TODO
             local volume = radioData:getDeviceVolume()
-            if volume == nil then
-                volume = 0
-            end
             if turnedOn and radioFrequency == frequency
             then
                 table.insert(radiosResult, pos)
@@ -214,6 +221,7 @@ local function GetVehiclesRadios(player, range, frequency)
     for _, vehicle in pairs(vehicles) do
         local radio = vehicle:getPartById('Radio')
         if radio ~= nil then
+            RadioManager.subscribeVehicle(vehicle)
             local radioData = radio:getDeviceData()
             if radioData ~= nil then
                 local radioFrequency = radioData:getChannel()
@@ -255,6 +263,20 @@ function World.getListeningRadios(player, range, frequency)
         players = playersRadios or {},
         vehicles = vehiclesRadios or {},
     }
+end
+
+function World.getFirstSquareItem(square, category)
+    if square == nil then
+        return nil
+    end
+    local itemList = square:getObjects()
+    for i = 0, square:getObjects():size() - 1 do
+        local item = itemList:get(i)
+        if item ~= nil and instanceof(item, category) then
+            return item
+        end
+    end
+    return nil
 end
 
 return World

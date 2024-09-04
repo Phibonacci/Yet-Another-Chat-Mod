@@ -1,4 +1,5 @@
 local Character = require('yacm/shared/utils/Character')
+local RadioManager = require('yacm/server/RadioManager')
 local SendServer = require('yacm/server/network/SendServer')
 local StringParser = require('yacm/shared/utils/StringParser')
 local World = require('yacm/shared/utils/World')
@@ -280,6 +281,9 @@ local function GetSquaresRadios(player, args, radioFrequencies, range)
             y = radio:getY(),
             z = radio:getZ(),
         }
+        -- radio:getSquare() is unreliable
+        local radioSquare = getSquare(radio:getX(), radio:getY(), radio:getZ())
+        RadioManager:subscribeSquare(radioSquare)
         local radioData = radio:getDeviceData()
         if radioData ~= nil then
             local frequency = radioData:getChannel()
@@ -339,6 +343,7 @@ local function GetVehiclesRadios(player, args, radioFrequencies, range)
     for _, vehicle in pairs(vehicles) do
         local radio = vehicle:getPartById('Radio')
         if radio ~= nil then
+            RadioManager:subscribeVehicle(vehicle)
             local radioData = radio:getDeviceData()
             if radioData ~= nil then
                 local frequency = radioData:getChannel()
@@ -383,6 +388,7 @@ local function SendRadioPackets(author, player, args, sourceRadioByFrequencies)
             players = playersRadios[frequency] or {},
             vehicles = vehiclesRadios[frequency] or {},
         }
+        RadioManager:makeNoise(frequency, range)
     end
 
     SendServer.Command(player, 'RadioMessage', {

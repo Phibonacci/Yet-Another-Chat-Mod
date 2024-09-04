@@ -1,3 +1,4 @@
+local RadioManager = require('yacm/server/RadioManager')
 local SendServer = require('yacm/server/network/SendServer')
 
 local Radio = {}
@@ -20,6 +21,7 @@ function Radio.SyncSquare(radio, player)
         print('yacm error: Radio.SyncSquare: radio is nil')
         return
     end
+    RadioManager:subscribeSquare(radio)
     local radioData = radio:getDeviceData()
     if radioData == nil or radioData:isIsoDevice() ~= true then
         print('yacm error: Radio.SyncSquare: radio is not on a square')
