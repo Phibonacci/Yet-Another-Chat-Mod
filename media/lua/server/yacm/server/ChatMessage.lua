@@ -272,8 +272,7 @@ end
 
 local function GetSquaresRadios(player, args, radioFrequencies, range)
     local radiosByFrequency = {}
-    local radioMaxRange = range
-    local radios = World.getItemsInRangeByGroup(player, radioMaxRange, 'IsoRadio')
+    local radios = World.getItemsInRangeByGroup(player, range, 'IsoRadio')
     local found = false
     for _, radio in pairs(radios) do
         local pos = {
@@ -337,8 +336,7 @@ end
 
 local function GetVehiclesRadios(player, args, radioFrequencies, range)
     local vehiclesByFrequency = {}
-    local radioMaxRange = range
-    local vehicles = World.getVehiclesInRange(player, radioMaxRange)
+    local vehicles = World.getVehiclesInRange(player, range)
     local found = false
     for _, vehicle in pairs(vehicles) do
         local radio = vehicle:getPartById('Radio')

@@ -21,7 +21,7 @@ function Radio.SyncSquare(radio, player)
         print('yacm error: Radio.SyncSquare: radio is nil')
         return
     end
-    RadioManager:subscribeSquare(radio)
+    RadioManager:subscribeSquare(radio:getSquare())
     local radioData = radio:getDeviceData()
     if radioData == nil or radioData:isIsoDevice() ~= true then
         print('yacm error: Radio.SyncSquare: radio is not on a square')
