@@ -857,7 +857,8 @@ local function CreateVehiclesRadiosBubbles(parsedMessages, vehiclesKeyIds, voice
         print('yacm error: CreateVehiclesRadiosBubbles: vehiclesKeyIds table is null')
         return
     end
-    local vehicles = World.getVehiclesInRange(getPlayer(), 10)
+    local range = (YacmServerSettings and YacmServerSettings['say']['range']) or 15
+    local vehicles = World.getVehiclesInRange(getPlayer(), range)
     for _, vehicleKeyId in pairs(vehiclesKeyIds) do
         local vehicle = vehicles[vehicleKeyId]
         if vehicle == nil then
