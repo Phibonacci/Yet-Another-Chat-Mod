@@ -36,11 +36,13 @@ function TokenString:formatCustom(wrapWords, _, _, lengthLeft)
         end
         newMessage = newMessage .. c
     end
-    if lengthLeft - #newMessage < 0 then
-        newMessage = newMessage:sub(1, lengthLeft)
-        newMessage = newMessage .. '...'
+    if lengthLeft ~= nil then
+        if lengthLeft - #newMessage < 0 then
+            newMessage = newMessage:sub(1, lengthLeft)
+            newMessage = newMessage .. '...'
+        end
+        lengthLeft = lengthLeft - #newMessage
     end
-    lengthLeft = lengthLeft - #newMessage
     return newMessage, newMessage, lengthLeft
 end
 
