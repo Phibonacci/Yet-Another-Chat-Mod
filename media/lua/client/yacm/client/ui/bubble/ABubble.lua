@@ -31,9 +31,21 @@ function ABubble:drawBubble(x, y)
         return
     end
 
+    local time = Calendar.getInstance():getTimeInMillis()
+    local elapsedTime = time - self.startTime
+    local delta = time - self.previousTime
+
     local length = nil
     if self.voice ~= nil then
         length = self.voice:currentMessageIndex()
+        if not self.messageFinishedScrolling and length == self.fullMessageLength then
+            self.messageFinishedScrolling = true
+            -- if the bubble is following the voice speed we want it to stay alive at least
+            -- until 2s after all the text appeared
+            self.timer = elapsedTime + 2000
+        end
+    else
+        self.messageFinishedScrolling = true
     end
     local parsedMessages = Parser.ParseYacmMessage(self.message, self.color, 20, length)
     self.text = StringBuilder.BuildFontSizeString('medium') .. parsedMessages['bubble']
@@ -46,10 +58,6 @@ function ABubble:drawBubble(x, y)
         self:loadTextures()
         self.texturesLoaded = true
     end
-
-    local time = Calendar.getInstance():getTimeInMillis()
-    local elapsedTime = time - self.startTime
-    local delta = time - self.previousTime
 
     if self.currentProgression >= 1 then
         self.currentProgression = 1
@@ -68,7 +76,7 @@ function ABubble:drawBubble(x, y)
     local zoom = getCore():getZoom(getPlayer():getPlayerNum())
     local scale = 1
     local alpha
-    if self.timer - elapsedTime > 1000 then
+    if self.timer - elapsedTime > 1000 or not self.messageFinishedScrolling then
         alpha = self.opacity
     elseif self.timer - elapsedTime > 0 then
         local fadingTime = elapsedTime - (self.timer - 1000)
@@ -130,6 +138,8 @@ function ABubble:new(x, y, text, rawText, message, messageColor, timer, opacity,
     o.opacity = opacity / 100
     o.message = message
     o.color = messageColor
+    o.fullMessageLength = #rawText
+    o.messageFinishedScrolling = false
     o.background = true
     o.backgroundColor = { r = 0, g = 0, b = 0, a = 0.5 }
     o.borderColor = { r = 0.4, g = 0.4, b = 0.4, a = 1 }
