@@ -191,8 +191,15 @@ function RadioManager:makeNoise(frequency, range)
             local radioData = radio:getDeviceData()
             if radioData ~= nil then
                 local radioFrequency = radioData:getChannel()
+
+                -- -1 nothing
+                --  0 headphones
+                --  1 earbuds
+                local hasHeadphones = radioData:getHeadphoneType() >= 0
+
                 if radioData:getIsTurnedOn()
                     and radioFrequency == frequency
+                    and not hasHeadphones
                 then
                     addSound(source, source:getX(), source:getY(), source:getZ(), range, range)
                 end
@@ -209,8 +216,13 @@ function RadioManager:makeNoise(frequency, range)
                     local turnedOn = radioData:getIsTurnedOn()
                     -- TODO
                     -- local volume = radioData:getDeviceVolume()
-                    if turnedOn and radioFrequency == frequency
-                    then
+
+                    -- -1 nothing
+                    --  0 headphones
+                    --  1 earbuds
+                    local hasHeadphones = radioData:getHeadphoneType() >= 0
+
+                    if turnedOn and radioFrequency == frequency and not hasHeadphones then
                         addSound(player, player:getX(), player:getY(), player:getZ(), range, range)
                     end
                 end
