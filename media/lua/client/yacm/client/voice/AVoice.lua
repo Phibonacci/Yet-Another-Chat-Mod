@@ -232,12 +232,20 @@ function AVoice:createSoundTable(soundPrefix)
             table.insert(soundTable, {
                 time = time,
                 sound = soundFile,
+                characterIndex = index - 1,
             })
             size = size + 1
             time = time + self.phonemeDuration
         end
     end
     return soundTable, size
+end
+
+function AVoice:currentMessageIndex()
+    if self.soundTableSize < 1 or self.soundTableSize <= self.nextSoundTableIndex then
+        return #self.message
+    end
+    return self.soundTable[self.nextSoundTableIndex].characterIndex
 end
 
 function AVoice:new(message, object, soundPrefix, voicePitch)

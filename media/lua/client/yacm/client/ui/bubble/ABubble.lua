@@ -1,6 +1,7 @@
+local Parser        = require('yacm/client/parser/Parser')
 local StringBuilder = require('yacm/client/parser/StringBuilder')
 
-local ABubble = ISUIElement:derive("ABubble")
+local ABubble       = ISUIElement:derive("ABubble")
 
 function ABubble:loadTextures()
     error('loadTextures not implemented in child class')
@@ -29,6 +30,15 @@ function ABubble:drawBubble(x, y)
     if self.dead then
         return
     end
+
+    local length = nil
+    if self.voice ~= nil then
+        length = self.voice:currentMessageIndex()
+    end
+    local parsedMessages = Parser.ParseYacmMessage(self.message, self.color, 20, length)
+    self.text = StringBuilder.BuildFontSizeString('medium') .. parsedMessages['bubble']
+    self:paginate()
+
     if self.voice then
         self.voice:subscribe()
     end
@@ -107,7 +117,7 @@ function ABubble:drawBubble(x, y)
     self.previousTime = time
 end
 
-function ABubble:new(x, y, text, rawText, timer, opacity, heightOffsetStart)
+function ABubble:new(x, y, text, rawText, message, messageColor, timer, opacity, heightOffsetStart)
     local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
     local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
@@ -118,6 +128,8 @@ function ABubble:new(x, y, text, rawText, timer, opacity, heightOffsetStart)
     o.text = StringBuilder.BuildFontSizeString('medium') .. text
     o.timer = timer * 1000
     o.opacity = opacity / 100
+    o.message = message
+    o.color = messageColor
     o.background = true
     o.backgroundColor = { r = 0, g = 0, b = 0, a = 0.5 }
     o.borderColor = { r = 0.4, g = 0.4, b = 0.4, a = 1 }

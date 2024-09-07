@@ -1,6 +1,7 @@
-local ABubble = require('yacm/client/ui/bubble/ABubble')
+local ABubble     = require('yacm/client/ui/bubble/ABubble')
 local Coordinates = require('yacm/client/utils/Coordinates')
-local RadioVoice = require('yacm/client/voice/RadioVoice')
+local Parser      = require('yacm/client/parser/Parser')
+local RadioVoice  = require('yacm/client/voice/RadioVoice')
 
 local RadioBubble = ISUIElement:derive("RadioBubble")
 
@@ -49,8 +50,9 @@ RadioBubble.types = {
     vehicle = 3,
 }
 
-function RadioBubble:new(object, text, rawText, timer, opacity, type, isVoicesEnabled, voicePitch)
-    local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
+function RadioBubble:new(object, message, messageColor, timer, opacity, type, isVoicesEnabled, voicePitch)
+    local parsedMessages = Parser.ParseYacmMessage(message, messageColor, 20, 200)
+    local textLength = getTextManager():MeasureStringX(UIFont.medium, parsedMessages['rawMessage'])
     local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
     local x, y = RadioBubble.CenterTop(type, object, width, height)
@@ -59,7 +61,9 @@ function RadioBubble:new(object, text, rawText, timer, opacity, type, isVoicesEn
     end
     RadioBubble.__index = self
     setmetatable(RadioBubble, { __index = ABubble })
-    local o = ABubble:new(x, y, text, rawText, timer, opacity, 20)
+    local o = ABubble:new(
+        x, y, parsedMessages['bubble'], parsedMessages['rawMessage'],
+        message, messageColor, timer, opacity, 20)
     if x == nil then
         self.dead = true
     end
@@ -67,8 +71,10 @@ function RadioBubble:new(object, text, rawText, timer, opacity, type, isVoicesEn
     o.type = type
     o.object = object
     if isVoicesEnabled then
-        o.voice = RadioVoice:new(rawText, object, voicePitch)
+        o.voice = RadioVoice:new(parsedMessages['rawMessage'], object, voicePitch)
     end
+    o.message = message
+    o.color = messageColor
     return o
 end
 

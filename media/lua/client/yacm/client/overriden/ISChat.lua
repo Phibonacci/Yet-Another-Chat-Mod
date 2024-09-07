@@ -597,7 +597,7 @@ function BuildChatMessage(fontSize, showTimestamp, showTitle, rawMessage, time, 
     return line
 end
 
-function CreatePlayerBubble(author, message, rawMessage, voicePitch)
+function CreatePlayerBubble(author, message, color, voicePitch)
     ISChat.instance.bubble = ISChat.instance.bubble or {}
     ISChat.instance.typingDots = ISChat.instance.typingDots or {}
     local onlineUsers = getOnlinePlayers()
@@ -617,7 +617,7 @@ function CreatePlayerBubble(author, message, rawMessage, voicePitch)
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
     local bubble = PlayerBubble:new(
-        authorObj, message, rawMessage, timer, opacity, ISChat.instance.isVoiceEnabled, voicePitch)
+        authorObj, message, color, timer, opacity, ISChat.instance.isVoiceEnabled, voicePitch)
     ISChat.instance.bubble[author] = bubble
     -- the player is not typing anymore if his bubble appears
     if ISChat.instance.typingDots[author] ~= nil then
@@ -625,7 +625,7 @@ function CreatePlayerBubble(author, message, rawMessage, voicePitch)
     end
 end
 
-local function CreateSquareRadioBubble(position, bubbleMessage, rawTextMessage, voicePitch)
+local function CreateSquareRadioBubble(position, message, messageColor, voicePitch)
     ISChat.instance.radioBubble = ISChat.instance.radioBubble or {}
     if position ~= nil then
         local x, y, z = position['x'], position['y'], position['z']
@@ -641,22 +641,22 @@ local function CreateSquareRadioBubble(position, bubbleMessage, rawTextMessage, 
         local opacity = 70
         local square = getSquare(x, y, z)
         local bubble = RadioBubble:new(
-            square, bubbleMessage, rawTextMessage, timer, opacity, RadioBubble.types.square,
+            square, message, messageColor, timer, opacity, RadioBubble.types.square,
             ISChat.instance.isVoiceEnabled, voicePitch)
         ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] = bubble
     end
 end
 
-function CreatePlayerRadioBubble(author, message, rawMessage, voicePitch)
+function CreatePlayerRadioBubble(author, message, messageColor, voicePitch)
     ISChat.instance.playerRadioBubble = ISChat.instance.playerRadioBubble or {}
     local onlineUsers = getOnlinePlayers()
     if author == nil then
-        print('yacm error: CreatePlayerBubble: author is null')
+        print('yacm error: CreatePlayerRadioBubble: author is null')
         return
     end
     local authorObj = World.getPlayerByUsername(author)
     if authorObj == nil then
-        print('yacm error: CreatePlayerBubble: author not found ' .. author)
+        print('yacm error: CreatePlayerRadioBubble: author not found ' .. author)
         return
     end
     local timer = 10
@@ -665,12 +665,12 @@ function CreatePlayerRadioBubble(author, message, rawMessage, voicePitch)
         timer = YacmServerSettings['options']['bubble']['timer']
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
-    local bubble = RadioBubble:new(authorObj, message, rawMessage, timer, opacity,
+    local bubble = RadioBubble:new(authorObj, message, messageColor, timer, opacity,
         RadioBubble.types.player, ISChat.instance.isVoiceEnabled, voicePitch)
     ISChat.instance.playerRadioBubble[author] = bubble
 end
 
-function CreateVehicleRadioBubble(vehicle, message, rawMessage, voicePitch)
+function CreateVehicleRadioBubble(vehicle, message, messageColor, voicePitch)
     ISChat.instance.vehicleRadioBubble = ISChat.instance.vehicleRadioBubble or {}
     local timer = 10
     local opacity = 70
@@ -683,7 +683,7 @@ function CreateVehicleRadioBubble(vehicle, message, rawMessage, voicePitch)
         print('yacm error: CreateVehicleBubble: key id is null')
         return
     end
-    local bubble = RadioBubble:new(vehicle, message, rawMessage, timer, opacity,
+    local bubble = RadioBubble:new(vehicle, message, messageColor, timer, opacity,
         RadioBubble.types.vehicle, ISChat.instance.isVoiceEnabled, voicePitch)
     ISChat.instance.vehicleRadioBubble[keyId] = bubble
 end
@@ -783,14 +783,13 @@ function ISChat.onMessagePacket(type, author, message, color, hideInChat, target
     if author ~= getPlayer():getUsername() then
         ReduceBoredom()
     end
-    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, author,
-        color)
+    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, author, color)
     if type == 'pm' and target:lower() == getPlayer():getUsername():lower() then
         ISChat.instance.lastPrivateMessageAuthor = author
     end
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
     if not isFromDiscord and voicePitch ~= nil then
-        CreatePlayerBubble(author, parsedMessage['bubble'], parsedMessage['rawMessage'], voicePitch)
+        CreatePlayerBubble(author, message, BuildColorFromMessageType(type), voicePitch)
     end
     local time = Calendar.getInstance():getTimeInMillis()
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
@@ -831,28 +830,28 @@ function ISChat.onServerMessage(message)
     AddMessageToTab(stream['tabID'], time, parsedMessage.body, line, 'server')
 end
 
-local function CreateSquaresRadiosBubbles(parsedMessages, squaresPos, voicePitch)
+local function CreateSquaresRadiosBubbles(message, messageColor, squaresPos, voicePitch)
     if squaresPos == nil then
         print('yacm error: CreateSquaresRadiosBubbles: squaresPos table is null')
         return
     end
     for _, position in pairs(squaresPos) do
-        CreateSquareRadioBubble(position, parsedMessages['bubble'], parsedMessages['rawMessage'], voicePitch)
+        CreateSquareRadioBubble(position, message, messageColor, voicePitch)
     end
 end
 
-local function CreatePlayersRadiosBubbles(parsedMessages, playersUsernames, voicePitch)
+local function CreatePlayersRadiosBubbles(message, messageColor, playersUsernames, voicePitch)
     if playersUsernames == nil then
         print('yacm error: CreatePlayersRadiosBubbles: playersUsernames table is null')
         return
     end
     for _, username in pairs(playersUsernames) do
         CreatePlayerRadioBubble(
-            getPlayer():getUsername(), parsedMessages['bubble'], parsedMessages['rawMessage'], voicePitch)
+            getPlayer():getUsername(), message, messageColor, voicePitch)
     end
 end
 
-local function CreateVehiclesRadiosBubbles(parsedMessages, vehiclesKeyIds, voicePitch)
+local function CreateVehiclesRadiosBubbles(message, messageColor, vehiclesKeyIds, voicePitch)
     if vehiclesKeyIds == nil then
         print('yacm error: CreateVehiclesRadiosBubbles: vehiclesKeyIds table is null')
         return
@@ -864,7 +863,7 @@ local function CreateVehiclesRadiosBubbles(parsedMessages, vehiclesKeyIds, voice
         if vehicle == nil then
             print('yacm error: CreateVehiclesRadiosBubble: vehicle not found for key id ' .. vehicleKeyId)
         else
-            CreateVehicleRadioBubble(vehicle, parsedMessages['bubble'], parsedMessages['rawMessage'], voicePitch)
+            CreateVehicleRadioBubble(vehicle, message, messageColor, voicePitch)
         end
     end
 end
@@ -902,9 +901,10 @@ function ISChat.onRadioPacket(type, author, message, color, radiosInfo, voicePit
         local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency)
         local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
             formattedMessage, time, type)
-        CreateSquaresRadiosBubbles(parsedMessages, radios['squares'], voicePitch)
-        CreatePlayersRadiosBubbles(parsedMessages, radios['players'], voicePitch)
-        CreateVehiclesRadiosBubbles(parsedMessages, radios['vehicles'], voicePitch)
+        local messageColor = BuildColorFromMessageType(type)
+        CreateSquaresRadiosBubbles(message, messageColor, radios['squares'], voicePitch)
+        CreatePlayersRadiosBubbles(message, messageColor, radios['players'], voicePitch)
+        CreateVehiclesRadiosBubbles(message, messageColor, radios['vehicles'], voicePitch)
         -- a special packet is making sure the author always has a radio feedback in the chat
         -- useful in case the listening range and emitting range of the radio differs
         -- this is to avoid any confusion from players thinking the radios mights not work

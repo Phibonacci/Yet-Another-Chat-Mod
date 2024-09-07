@@ -1,6 +1,7 @@
-local ABubble = require('yacm/client/ui/bubble/ABubble')
-local Coordinates = require('yacm/client/utils/Coordinates')
-local PlayerVoice = require('yacm/client/voice/PlayerVoice')
+local ABubble      = require('yacm/client/ui/bubble/ABubble')
+local Coordinates  = require('yacm/client/utils/Coordinates')
+local Parser       = require('yacm/client/parser/Parser')
+local PlayerVoice  = require('yacm/client/voice/PlayerVoice')
 
 local PlayerBubble = ISUIElement:derive("PlayerBubble")
 
@@ -28,8 +29,9 @@ function PlayerBubble:render()
     self:drawBubble(x, y)
 end
 
-function PlayerBubble:new(player, text, rawText, timer, opacity, isVoicesEnabled, voicePitch)
-    local textLength = getTextManager():MeasureStringX(UIFont.medium, rawText)
+function PlayerBubble:new(player, message, messageColor, timer, opacity, isVoicesEnabled, voicePitch)
+    local parsedMessages = Parser.ParseYacmMessage(message, messageColor, 20, 200)
+    local textLength = getTextManager():MeasureStringX(UIFont.medium, parsedMessages['rawMessage'])
     local width = math.min(textLength * 1.25, 162) + 40
     local height = 0
     local x, y = Coordinates.CenterTopOfPlayer(player, width, height)
@@ -38,14 +40,16 @@ function PlayerBubble:new(player, text, rawText, timer, opacity, isVoicesEnabled
     end
     PlayerBubble.__index = self
     setmetatable(PlayerBubble, { __index = ABubble })
-    local o = ABubble:new(x, y, text, rawText, timer, opacity, 20)
+    local o = ABubble:new(
+        x, y, parsedMessages['bubble'], parsedMessages['rawMessage'],
+        message, messageColor, timer, opacity, 20)
     if x == nil then
         self.dead = true
     end
     setmetatable(o, PlayerBubble)
     o.player = player
     if isVoicesEnabled then
-        o.voice = PlayerVoice:new(rawText, player, voicePitch)
+        o.voice = PlayerVoice:new(parsedMessages['rawMessage'], player, voicePitch)
     end
     return o
 end
