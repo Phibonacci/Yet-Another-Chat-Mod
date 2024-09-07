@@ -174,9 +174,6 @@ local function GetSquaresRadios(player, range, frequency)
             y = radio:getY(),
             z = radio:getZ(),
         }
-        -- radio:getSquare() is unreliable
-        local radioSquare = getSquare(radio:getX(), radio:getY(), radio:getZ())
-        RadioManager.subscribeSquare(radioSquare)
         local radioData = radio:getDeviceData()
         if radioData ~= nil then
             local radioFrequency = radioData:getChannel()
@@ -221,7 +218,6 @@ local function GetVehiclesRadios(player, range, frequency)
     for _, vehicle in pairs(vehicles) do
         local radio = vehicle:getPartById('Radio')
         if radio ~= nil then
-            RadioManager.subscribeVehicle(vehicle)
             local radioData = radio:getDeviceData()
             if radioData ~= nil then
                 local radioFrequency = radioData:getChannel()
