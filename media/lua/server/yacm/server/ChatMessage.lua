@@ -255,7 +255,7 @@ end
 
 local function IsInRadioEmittingRange(radioEmitters, receiver)
     if radioEmitters == nil then
-        return false
+        return false, -1
     end
     for _, radioEmitter in pairs(radioEmitters) do
         local radioData = radioEmitter:getDeviceData()
@@ -263,11 +263,11 @@ local function IsInRadioEmittingRange(radioEmitters, receiver)
             local transmitRange = radioData:getTransmitRange()
             local distance = DistanceManhatten(radioEmitter, receiver)
             if distance <= transmitRange then
-                return true
+                return true, distance
             end
         end
     end
-    return false
+    return false, -1
 end
 
 local function GetSquaresRadios(player, args, radioFrequencies, range)
@@ -295,14 +295,18 @@ local function GetSquaresRadios(player, args, radioFrequencies, range)
             -- TODO find a way to use volume in a non confusing way
             -- local radioRange = math.abs(volume * radioMaxRange + 0.5)
             -- local playerDistance = PlayersDistance(player, radio)
+            local isInRange, distance = IsInRadioEmittingRange(radioFrequencies[frequency], radio)
             if turnedOn and frequency ~= nil and radioFrequencies[frequency] ~= nil
                 -- and playerDistance <= radioRange
-                and IsInRadioEmittingRange(radioFrequencies[frequency], radio)
+                and isInRange
             then
                 if radiosByFrequency[frequency] == nil then
                     radiosByFrequency[frequency] = {}
                 end
-                table.insert(radiosByFrequency[frequency], pos)
+                table.insert(radiosByFrequency[frequency], {
+                    position = pos,
+                    distance = distance
+                })
                 found = true
             end
         end
@@ -320,14 +324,18 @@ local function GetPlayerRadios(player, args, radioFrequencies, range)
     local radioData = radio and radio:getDeviceData() or nil
     if radioData then
         local frequency = radioData:getChannel()
+        local isInRange, distance = IsInRadioEmittingRange(radioFrequencies[frequency], radio)
         if radioData:getIsTurnedOn()
             and frequency ~= nil and radioFrequencies[frequency] ~= nil
-            and IsInRadioEmittingRange(radioFrequencies[frequency], radio)
+            and isInRange
         then
             if radiosByFrequency[frequency] == nil then
                 radiosByFrequency[frequency] = {}
             end
-            table.insert(radiosByFrequency[frequency], player:getUsername())
+            table.insert(radiosByFrequency[frequency], {
+                username = player:getUsername(),
+                distance = distance
+            })
             found = true
         end
     end
@@ -345,14 +353,18 @@ local function GetVehiclesRadios(player, args, radioFrequencies, range)
             local radioData = radio:getDeviceData()
             if radioData ~= nil then
                 local frequency = radioData:getChannel()
+                local isInRange, distance = IsInRadioEmittingRange(radioFrequencies[frequency], radio)
                 if radioData:getIsTurnedOn()
                     and frequency ~= nil and radioFrequencies[frequency] ~= nil
-                    and IsInRadioEmittingRange(radioFrequencies[frequency], radio)
+                    and isInRange
                 then
                     if vehiclesByFrequency[frequency] == nil then
                         vehiclesByFrequency[frequency] = {}
                     end
-                    table.insert(vehiclesByFrequency[frequency], vehicle:getKeyId())
+                    table.insert(vehiclesByFrequency[frequency], {
+                        key = vehicle:getKeyId(),
+                        distance = distance
+                    })
                     found = true
                 end
             end

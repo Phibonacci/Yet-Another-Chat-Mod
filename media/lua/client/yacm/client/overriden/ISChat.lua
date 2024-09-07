@@ -3,6 +3,7 @@ local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/shared/Version')
 local ChatUI = require('yacm/client/ui/ChatUI')
 
 
+local Character              = require('yacm/shared/utils/Character')
 local Parser                 = require('yacm/client/parser/Parser')
 local PlayerBubble           = require('yacm/client/ui/bubble/PlayerBubble')
 local RadioBubble            = require('yacm/client/ui/bubble/RadioBubble')
@@ -822,40 +823,110 @@ function ISChat.onServerMessage(message)
     AddMessageToTab(stream['tabID'], time, parsedMessage.body, line, 'server')
 end
 
-local function CreateSquaresRadiosBubbles(message, messageColor, squaresPos, voicePitch)
-    if squaresPos == nil then
-        print('yacm error: CreateSquaresRadiosBubbles: squaresPos table is null')
+local function CreateSquaresRadiosBubbles(message, messageColor, squaresInfo, voicePitch)
+    if squaresInfo == nil then
+        print('yacm error: CreateSquaresRadiosBubbles: squaresInfo table is null')
         return
     end
-    for _, position in pairs(squaresPos) do
-        CreateSquareRadioBubble(position, message, messageColor, voicePitch)
+    for _, info in pairs(squaresInfo) do
+        local position = info['position']
+        if position ~= nil then
+            CreateSquareRadioBubble(position, message, messageColor, voicePitch)
+            local square = getSquare(position['x'], position['y'], position['z'])
+            if square ~= nil then
+                local radio = World.getFirstSquareItem(square, 'IsoRadio')
+                if radio ~= nil then
+                    local radioData = radio:getDeviceData()
+                    if radioData ~= nil then
+                        local distance = info['distance']
+                        if distance ~= nil then
+                            radioData:doReceiveSignal(distance)
+                        else
+                            print('yacm error: received radio packet for a square radio without distance')
+                        end
+                    else
+                        print('yacm error: received radio packet for a square radio without data')
+                    end
+                else
+                    print('yacm error: received radio packet for a square with no radio')
+                end
+            else
+                print('yacm error: received radio packet for a null square')
+            end
+        else
+            print('yacm error: received radio packet for a square without position')
+        end
     end
 end
 
-local function CreatePlayersRadiosBubbles(message, messageColor, playersUsernames, voicePitch)
-    if playersUsernames == nil then
-        print('yacm error: CreatePlayersRadiosBubbles: playersUsernames table is null')
+local function CreatePlayersRadiosBubbles(message, messageColor, playersInfo, voicePitch)
+    if playersInfo == nil then
+        print('yacm error: CreatePlayersRadiosBubbles: playersInfo table is null')
         return
     end
-    for _, username in pairs(playersUsernames) do
-        CreatePlayerRadioBubble(
-            getPlayer():getUsername(), message, messageColor, voicePitch)
+    for _, info in pairs(playersInfo) do
+        local username = info['username']
+        if username ~= nil then
+            CreatePlayerRadioBubble(
+                getPlayer():getUsername(), message, messageColor, voicePitch)
+            if username:upper() == getPlayer():getUsername():upper() then
+                local radio = Character.getHandItemByGroup(getPlayer(), 'Radio')
+                if radio ~= nil then
+                    local radioData = radio:getDeviceData()
+                    if radioData ~= nil then
+                        local distance = info['distance']
+                        if distance ~= nil then
+                            radioData:doReceiveSignal(distance)
+                        else
+                            print('yacm error: received radio packet for a player radio without distance')
+                        end
+                    else
+                        print('yacm error: received radio packet for a player radio without data')
+                    end
+                else
+                    print('yacm error: received radio packet for a player with no radio in hand')
+                end
+            end
+        else
+            print('yacm error: received radio packet for a player without username')
+        end
     end
 end
 
-local function CreateVehiclesRadiosBubbles(message, messageColor, vehiclesKeyIds, voicePitch)
-    if vehiclesKeyIds == nil then
+local function CreateVehiclesRadiosBubbles(message, messageColor, vehiclesInfo, voicePitch)
+    if vehiclesInfo == nil then
         print('yacm error: CreateVehiclesRadiosBubbles: vehiclesKeyIds table is null')
         return
     end
     local range = (YacmServerSettings and YacmServerSettings['say']['range']) or 15
     local vehicles = World.getVehiclesInRange(getPlayer(), range)
-    for _, vehicleKeyId in pairs(vehiclesKeyIds) do
-        local vehicle = vehicles[vehicleKeyId]
-        if vehicle == nil then
-            print('yacm error: CreateVehiclesRadiosBubble: vehicle not found for key id ' .. vehicleKeyId)
+    for _, info in pairs(vehiclesInfo) do
+        local vehicleKeyId = info['key']
+        if vehicleKeyId ~= nil then
+            local vehicle = vehicles[vehicleKeyId]
+            if vehicle ~= nil then
+                CreateVehicleRadioBubble(vehicle, message, messageColor, voicePitch)
+                local radio = vehicle:getPartById('Radio')
+                if radio ~= nil then
+                    local radioData = radio:getDeviceData()
+                    if radioData ~= nil then
+                        local distance = info['distance']
+                        if distance ~= nil then
+                            radioData:doReceiveSignal(distance)
+                        else
+                            print('yacm error: received radio packet for a vehicle radio without distance')
+                        end
+                    else
+                        print('yacm error: received radio packet for a vehicle radio without data')
+                    end
+                else
+                    print('yacm error: received radio packet for a vehicle with no radio')
+                end
+            else
+                print('yacm error: CreateVehiclesRadiosBubble: vehicle not found for key id ' .. vehicleKeyId)
+            end
         else
-            CreateVehicleRadioBubble(vehicle, message, messageColor, voicePitch)
+            print('yacm error: received vehicle packet for a vehicle with no key')
         end
     end
 end
