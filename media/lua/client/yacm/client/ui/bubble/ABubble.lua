@@ -42,7 +42,7 @@ function ABubble:drawBubble(x, y)
             self.messageFinishedScrolling = true
             -- if the bubble is following the voice speed we want it to stay alive at least
             -- until 2s after all the text appeared
-            self.timer = elapsedTime + 2000
+            self.timer = math.max(elapsedTime + 2000, self.timer)
         end
     else
         self.messageFinishedScrolling = true
