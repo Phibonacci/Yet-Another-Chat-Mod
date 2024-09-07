@@ -422,25 +422,18 @@ function ISChat:onCommandEntered()
     local stream, commandName = GetCommandFromMessage(command)
     local yacmCommand = GetYacmCommandFromMessage(command)
     if stream then -- chat message
-        if chat.currentTabID ~= stream.tabID then
-            -- from one-based to zero-based
-            print('user error: tried to send command ' ..
-                stream['name'] .. ' from TabID ' .. chat.currentTabID ..
-                ' but TabID ' .. stream.tabID .. ' was expected')
-        else
-            if #commandName > 0 and #command >= #commandName then
-                -- removing the command and trailing space '/command '
-                command = string.sub(command, #commandName + 1)
-            end
-            if IsOnlySpacesOrEmpty(command) then
-                return
-            end
-            if not ProcessChatCommand(stream, command) then
-                return
-            end
-            chat.chatText.lastChatCommand = commandName
-            chat:logChatCommand(command)
+        if #commandName > 0 and #command >= #commandName then
+            -- removing the command and trailing space '/command '
+            command = string.sub(command, #commandName + 1)
         end
+        if IsOnlySpacesOrEmpty(command) then
+            return
+        end
+        if not ProcessChatCommand(stream, command) then
+            return
+        end
+        chat.chatText.lastChatCommand = commandName
+        chat:logChatCommand(command)
     elseif yacmCommand ~= nil then
         ProcessYacmCommand(yacmCommand, command)
     elseif luautils.stringStarts(command, '/') then -- server command
