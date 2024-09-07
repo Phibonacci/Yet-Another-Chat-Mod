@@ -642,7 +642,6 @@ end
 
 function CreatePlayerRadioBubble(author, message, messageColor, voicePitch)
     ISChat.instance.playerRadioBubble = ISChat.instance.playerRadioBubble or {}
-    local onlineUsers = getOnlinePlayers()
     if author == nil then
         print('yacm error: CreatePlayerRadioBubble: author is null')
         return
