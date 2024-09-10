@@ -25,6 +25,19 @@ function Coordinates.CenterTopOfObject(object, width, height)
     return x, y
 end
 
+function Coordinates.CenterBaseOfObjectNoZoom(object, width, height)
+    if object == nil then
+        print('yacm error: CenterBaseOfObjectNoZoom: nil object parameter')
+        return nil
+    end
+    local x, y = ISCoordConversion.ToScreen(object:getX(), object:getY(), object:getZ(), nil)
+    if width ~= nil and height ~= nil then
+        x = x - width / 2
+        y = y - height / 2
+    end
+    return x, y
+end
+
 function Coordinates.CenterFeetOfPlayer(player, width, height)
     if player == nil then
         print('yacm error: CenterFeetOfPlayer: nil player parameter')

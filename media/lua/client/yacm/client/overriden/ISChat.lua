@@ -102,10 +102,20 @@ local function UpdateRangeIndicator(stream)
         and YacmServerSettings[stream.name]['range'] ~= -1
         and YacmServerSettings[stream.name]['color'] ~= nil
     then
+        if ISChat.instance.rangeIndicator then
+            ISChat.instance.rangeIndicator:unsubscribe()
+        end
         local range = YacmServerSettings[stream.name]['range']
         ISChat.instance.rangeIndicator = RangeIndicator:new(range,
             YacmServerSettings[stream.name]['color'])
+        ISChat.instance.rangeIndicator:subscribe()
+        if ISChat.instance.rangeIndicatorState then
+            ISChat.instance.rangeIndicator.enabled = true
+        end
     else
+        if ISChat.instance.rangeIndicator then
+            ISChat.instance.rangeIndicator:unsubscribe()
+        end
         ISChat.instance.rangeIndicator = nil
     end
 end
@@ -1125,11 +1135,13 @@ end
 
 function ISChat:render()
     local instance = ISChat.instance
-    if instance.rangeIndicator ~= nil
-        and instance.rangeIndicatorState == true
-        and ISChat.focused == true
-    then
-        instance.rangeIndicator:render()
+    if instance.rangeIndicator ~= nil then
+        if instance.rangeIndicatorState == true
+        then
+            instance.rangeIndicator.enabled = true
+        else
+            instance.rangeIndicator.enabled = false
+        end
     end
 
     local allBubbles = {
@@ -1171,6 +1183,9 @@ function ISChat.onTextChange()
         and internalText:sub(#internalText) == '/'
     then
         t:setText("/")
+        if ISChat.instance.rangeIndicator then
+            ISChat.instance.rangeIndicator:unsubscribe()
+        end
         ISChat.instance.rangeIndicator = nil
         ISChat.instance.lastStream = nil
         return
@@ -1187,6 +1202,9 @@ function ISChat.onTextChange()
         end
         YacmClientSendCommands.sendTyping(getPlayer():getUsername(), stream['name'])
     else
+        if ISChat.instance.rangeIndicator then
+            ISChat.instance.rangeIndicator:unsubscribe()
+        end
         ISChat.instance.rangeIndicator = nil
     end
     ISChat.instance.lastStream = stream
@@ -1466,8 +1484,14 @@ end
 local function OnRangeButtonClick()
     ISChat.instance.rangeIndicatorState = not ISChat.instance.rangeIndicatorState
     if ISChat.instance.rangeIndicatorState == true then
+        if ISChat.instance.rangeIndicator then
+            ISChat.instance.rangeIndicator.enabled = true
+        end
         ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-on.png"))
     else
+        if ISChat.instance.rangeIndicator then
+            ISChat.instance.rangeIndicator.enabled = false
+        end
         ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-off.png"))
     end
 end
@@ -1681,6 +1705,9 @@ function ISChat:focus()
             UpdateRangeIndicator(stream)
         end
     else
+        if ISChat.instance.rangeIndicator then
+            ISChat.instance.rangeIndicator:unsubscribe()
+        end
         ISChat.instance.rangeIndicator = nil
     end
     self.fade:reset()

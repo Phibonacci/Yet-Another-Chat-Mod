@@ -2,80 +2,117 @@ local coordinates = require('yacm/client/utils/coordinates')
 
 local RangeIndicator = ISUIElement:derive("RangeIndicator")
 
+local RectTexturePath = 'media/ui/yacm/indicator/white-rectangle.png'
+local function PreLoadTextures()
+    getTexture(RectTexturePath)
+end
+
 -- draw a square at the center and parts of losanges on the borders to avoid
 -- drawing too many losanges and hurt the performances
-function RangeIndicator:render()
-    local zoom = coordinates.GetZoom()
-    local width = 128 / zoom
-    local height = 64 / zoom
-    local alpha = 0.20
-    local x, y = coordinates.CenterFeetOfPlayer(getPlayer(), width, height)
+function RangeIndicator:render(z)
+    if not self.enabled or (z ~= nil and z ~= 0) then
+        return
+    end
+    local width         = 128
+    local height        = 64
+    local alpha         = 0.02
     local squareOffsetX = getPlayer():getX() - math.floor(getPlayer():getX())
     local squareOffsetY = getPlayer():getY() - math.floor(getPlayer():getY())
+
 
     local xOffset = (squareOffsetX - squareOffsetY) * (width / 2)
     local yOffset = (squareOffsetX + squareOffsetY) * (height / 2) - (height / 2)
 
-    x = x - xOffset
-    y = y - yOffset
 
-    self:setX(x)
-    self:setY(y)
+    local rectTexture = getTexture(RectTexturePath)
 
-    local tileTextureTop = getTexture('media/ui/yacm/indicator/white-tile-top.png')
-    local tileTextureTopLeft = getTexture('media/ui/yacm/indicator/white-tile-top-left.png')
-    local tileTextureTopRight = getTexture('media/ui/yacm/indicator/white-tile-top-right.png')
-    local tileTextureBot = getTexture('media/ui/yacm/indicator/white-tile-bot.png')
-    local tileTextureBotLeft = getTexture('media/ui/yacm/indicator/white-tile-bot-left.png')
-    local tileTextureBotRight = getTexture('media/ui/yacm/indicator/white-tile-bot-right.png')
-    local tileTextureLeft = getTexture('media/ui/yacm/indicator/white-tile-left.png')
-    local tileTextureRight = getTexture('media/ui/yacm/indicator/white-tile-right.png')
 
+    local x, y = coordinates.CenterBaseOfObjectNoZoom(getPlayer())
+    x          = math.floor(x - xOffset)
+    y          = math.floor(y - yOffset)
     if self.range <= 120 then
-        for j = -self.range, self.range do
+        for j = 0, self.range do
             local i = -self.range + math.abs(j)
-            local xTile = j * width / 2 + i * width / 2
-            local yTile = -j * height / 2 + i * height / 2
-            local texture
-            if j == -self.range then
-                texture = tileTextureBotLeft
-            elseif j < 0 then
-                texture = tileTextureLeft
-            elseif j == 0 then
-                texture = tileTextureTopLeft
-            elseif j == self.range then
-                texture = tileTextureTopRight
-            else
-                texture = tileTextureTop
-            end
-            self:drawTextureScaled(texture, xTile, yTile,
-                width, height, alpha,
-                self.color[1] / 255, self.color[2] / 255, self.color[3] / 255)
-            if i ~= self.range - math.abs(j) then
-                i = self.range - math.abs(j)
-                xTile = j * width / 2 + i * width / 2
-                yTile = -j * height / 2 + i * height / 2
-                if j == 0 then
-                    texture = tileTextureBotRight
-                elseif j > 0 then
-                    texture = tileTextureRight
-                else
-                    texture = tileTextureBot
-                end
-                self:drawTextureScaled(texture, xTile, yTile,
-                    width, height, alpha,
-                    self.color[1] / 255, self.color[2] / 255, self.color[3] / 255)
-            end
+            local xTTile = j * width / 2 + i * width / 2
+            local yTTile = -j * height / 2 + i * height / 2
+
+            i = self.range - math.abs(j)
+            local xBTile = j * width / 2 + i * width / 2
+            local yBTile = -j * height / 2 + i * height / 2
+
+            self:drawTextureAllPoint(rectTexture,
+                x + xTTile - 2,
+                y + yTTile - height / 2,
+                x + xTTile + 2,
+                y + yTTile - height / 2 - 2,
+
+                x + xBTile + width / 2 + 4,
+                y + yBTile - 1,
+                x + xBTile + width / 2,
+                y + yBTile + 1,
+                self.color[1] / 255, self.color[2] / 255, self.color[3] / 255,
+                alpha)
+            self:drawTextureAllPoint(rectTexture,
+                x - (xTTile - 2),
+                y - (yTTile - height / 2),
+                x - (xTTile + 2),
+                y - (yTTile - height / 2 - 2),
+
+                x - (xBTile + width / 2 + 2),
+                y - (yBTile - 1),
+                x - (xBTile + width / 2),
+                y - (yBTile + 1),
+                self.color[1] / 255, self.color[2] / 255, self.color[3] / 255,
+                alpha)
+            self:drawTextureAllPoint(rectTexture,
+                x + xTTile - 2,
+                y - (yTTile - height / 2),
+                x + xTTile + 2,
+                y - (yTTile - height / 2 - 2),
+
+                x + xBTile + width / 2 + 4,
+                y - (yBTile - 1),
+                x + xBTile + width / 2,
+                y - (yBTile + 1),
+                self.color[1] / 255, self.color[2] / 255, self.color[3] / 255,
+                alpha)
+            self:drawTextureAllPoint(rectTexture,
+                x - (xTTile - 2),
+                y + yTTile - height / 2,
+                x - (xTTile + 2),
+                y + yTTile - height / 2 - 2,
+
+                x - (xBTile + width / 2 + 4),
+                y + yBTile - 1,
+                x - (xBTile + width / 2),
+                y + yBTile + 1,
+                self.color[1] / 255, self.color[2] / 255, self.color[3] / 255,
+                alpha)
         end
     end
-    local range = math.min(120, self.range)
-    local xTile, yTile = coordinates.CenterFeetOfPlayer(getPlayer(),
-        width * range, height * range)
-    self:setX(xTile - xOffset)
-    self:setY(yTile - yOffset)
-    self:drawRectStatic(0, 0,
-        width * range, height * range, alpha,
-        self.color[1] / 255, self.color[2] / 255, self.color[3] / 255)
+end
+
+function RangeIndicator:subscribe()
+    if self.event ~= nil then
+        return
+    end
+    self.event = function()
+        self:render()
+    end
+    -- OnPostRender is buggy and will sometimes fail to draw at the right coordinates
+    -- The UI drawing events are limited to 10FPS
+    -- OnPostFloorLayerDraw is called once for every layer, contrary to
+    -- OnPostRender it does not allow us to draw over the squares before the
+    -- character is drawn but it looks that's the most PZ has to offer to us.
+    Events.OnPostFloorLayerDraw.Add(self.event)
+end
+
+function RangeIndicator:unsubscribe()
+    if self.event == nil then
+        return
+    end
+    Events.OnPostFloorLayerDraw.Remove(self.event)
+    self.event = nil
 end
 
 function RangeIndicator:new(range, color)
@@ -88,11 +125,16 @@ function RangeIndicator:new(range, color)
     local o = ISUIElement:new(x, y, 20, 6)
     setmetatable(o, RangeIndicator)
 
+    o:setX(0)
+    o:setY(0)
     o.range = range
     o.color = color
-    o.indicator = nil
     o.keepOnScreen = false
+    o.enabled = false
     o:instantiate()
+
+    -- TODO: try to use of the non documented events with missleading names to do that
+    PreLoadTextures()
     return o
 end
 
