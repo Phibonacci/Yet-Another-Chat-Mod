@@ -325,9 +325,11 @@ local function GetPlayerRadios(player, args, radioFrequencies, range)
     if radioData then
         local frequency = radioData:getChannel()
         local isInRange, distance = IsInRadioEmittingRange(radioFrequencies[frequency], radio)
+        local hasHeadphones = radioData:getHeadphoneType() >= 0
         if radioData:getIsTurnedOn()
             and frequency ~= nil and radioFrequencies[frequency] ~= nil
             and isInRange
+            and (not hasHeadphones or getPlayer():getUsername() == player:getUsername())
         then
             if radiosByFrequency[frequency] == nil then
                 radiosByFrequency[frequency] = {}

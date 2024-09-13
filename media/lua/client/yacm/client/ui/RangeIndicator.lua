@@ -16,8 +16,8 @@ function RangeIndicator:render(z)
     local width         = 128
     local height        = 64
     local alpha         = 0.02
-    local squareOffsetX = getPlayer():getX() - math.floor(getPlayer():getX())
-    local squareOffsetY = getPlayer():getY() - math.floor(getPlayer():getY())
+    local squareOffsetX = self.object:getX() - math.floor(self.object:getX())
+    local squareOffsetY = self.object:getY() - math.floor(self.object:getY())
 
 
     local xOffset = (squareOffsetX - squareOffsetY) * (width / 2)
@@ -27,7 +27,7 @@ function RangeIndicator:render(z)
     local rectTexture = getTexture(RectTexturePath)
 
 
-    local x, y = coordinates.CenterBaseOfObjectNoZoom(getPlayer())
+    local x, y = coordinates.CenterBaseOfObjectNoZoom(self.object)
     x          = math.floor(x - xOffset)
     y          = math.floor(y - yOffset)
     if self.range <= 120 then
@@ -115,9 +115,9 @@ function RangeIndicator:unsubscribe()
     self.event = nil
 end
 
-function RangeIndicator:new(range, color)
+function RangeIndicator:new(object, range, color)
     RangeIndicator.__index = self
-    local x, y = coordinates.CenterTopOfPlayer(getPlayer(), 20, 6)
+    local x, y = coordinates.CenterBaseOfObjectNoZoom(self.object, 20, 6)
     if x == nil then
         x, y = 0, 0
     end
@@ -127,6 +127,7 @@ function RangeIndicator:new(range, color)
 
     o:setX(0)
     o:setY(0)
+    o.object = object
     o.range = range
     o.color = color
     o.keepOnScreen = false

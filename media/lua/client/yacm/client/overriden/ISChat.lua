@@ -1,19 +1,19 @@
 local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/shared/Version')
 
-local ChatUI = require('yacm/client/ui/ChatUI')
+local ChatUI                       = require('yacm/client/ui/ChatUI')
 
-
-local Character              = require('yacm/shared/utils/Character')
-local Parser                 = require('yacm/client/parser/Parser')
-local PlayerBubble           = require('yacm/client/ui/bubble/PlayerBubble')
-local RadioBubble            = require('yacm/client/ui/bubble/RadioBubble')
-local RangeIndicator         = require('yacm/client/ui/RangeIndicator')
-local StringFormat           = require('yacm/shared/utils/StringFormat')
-local StringParser           = require('yacm/shared/utils/StringParser')
-local TypingDots             = require('yacm/client/ui/TypingDots')
-local World                  = require('yacm/shared/utils/World')
-local StringBuilder          = require('yacm/client/parser/StringBuilder')
-local YacmClientSendCommands = require('yacm/client/network/SendYacmClient')
+local Character                    = require('yacm/shared/utils/Character')
+local Parser                       = require('yacm/client/parser/Parser')
+local PlayerBubble                 = require('yacm/client/ui/bubble/PlayerBubble')
+local RadioBubble                  = require('yacm/client/ui/bubble/RadioBubble')
+local RadioRangeIndicator          = require('yacm/client/ui/RadioRangeIndicator')
+local RangeIndicator               = require('yacm/client/ui/RangeIndicator')
+local StringFormat                 = require('yacm/shared/utils/StringFormat')
+local StringParser                 = require('yacm/shared/utils/StringParser')
+local TypingDots                   = require('yacm/client/ui/TypingDots')
+local World                        = require('yacm/shared/utils/World')
+local StringBuilder                = require('yacm/client/parser/StringBuilder')
+local YacmClientSendCommands       = require('yacm/client/network/SendYacmClient')
 
 
 ISChat.allChatStreams     = {}
@@ -96,6 +96,22 @@ local function UpdateTabStreams(newTab, tabID)
     end
 end
 
+local function UpdateRangeIndicatorVisibility()
+    if ISChat.instance.rangeButtonState == 'visible' then
+        if ISChat.instance.rangeIndicator and ISChat.instance.focused then
+            ISChat.instance.rangeIndicator.enabled = true
+        end
+    elseif ISChat.instance.rangeButtonState == 'hidden' then
+        if ISChat.instance.rangeIndicator then
+            ISChat.instance.rangeIndicator.enabled = false
+        end
+    else
+        if ISChat.instance.rangeIndicator then
+            ISChat.instance.rangeIndicator.enabled = true
+        end
+    end
+end
+
 local function UpdateRangeIndicator(stream)
     if YacmServerSettings ~= nil
         and YacmServerSettings[stream.name]['range'] ~= nil
@@ -106,12 +122,10 @@ local function UpdateRangeIndicator(stream)
             ISChat.instance.rangeIndicator:unsubscribe()
         end
         local range = YacmServerSettings[stream.name]['range']
-        ISChat.instance.rangeIndicator = RangeIndicator:new(range,
+        ISChat.instance.rangeIndicator = RangeIndicator:new(getPlayer(), range,
             YacmServerSettings[stream.name]['color'])
         ISChat.instance.rangeIndicator:subscribe()
-        if ISChat.instance.rangeIndicatorState then
-            ISChat.instance.rangeIndicator.enabled = true
-        end
+        UpdateRangeIndicatorVisibility()
     else
         if ISChat.instance.rangeIndicator then
             ISChat.instance.rangeIndicator:unsubscribe()
@@ -256,7 +270,7 @@ ISChat.initChat = function()
     instance.tabCnt = 0
     instance.tabs = {}
     instance.currentTabID = 0
-    instance.rangeIndicatorState = false
+    instance.rangeButtonState = 'hidden'
 
     InitGlobalModData()
     AddTab('General', 1)
@@ -1030,7 +1044,7 @@ local function GetMessageType(message)
 end
 
 local function GenerateRadiosPacketFromListeningRadiosInRange(frequency)
-    local radios = World.getListeningRadios(getPlayer(), YacmServerSettings['say']['range'], frequency)
+    local radios = World.getListeningRadiosPositions(getPlayer(), YacmServerSettings['say']['range'], frequency)
     if radios == nil then
         return nil
     end
@@ -1136,11 +1150,12 @@ end
 function ISChat:render()
     local instance = ISChat.instance
     if instance.rangeIndicator ~= nil then
-        if instance.rangeIndicatorState == true
-        then
-            instance.rangeIndicator.enabled = true
-        else
+        if instance.rangeButtonState == 'visible' then
+            instance.rangeIndicator.enabled = ISChat.instance.focused
+        elseif instance.rangeButtonState == 'hidden' then
             instance.rangeIndicator.enabled = false
+        else
+            instance.rangeIndicator.enabled = true
         end
     end
 
@@ -1482,17 +1497,39 @@ ISChat.ISTabPanelOnMouseDown = function(target, x, y)
 end
 
 local function OnRangeButtonClick()
-    ISChat.instance.rangeIndicatorState = not ISChat.instance.rangeIndicatorState
-    if ISChat.instance.rangeIndicatorState == true then
-        if ISChat.instance.rangeIndicator then
-            ISChat.instance.rangeIndicator.enabled = true
-        end
-        ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-on.png"))
-    else
-        if ISChat.instance.rangeIndicator then
-            ISChat.instance.rangeIndicator.enabled = false
-        end
+    if ISChat.instance.rangeButtonState == 'visible' then
+        ISChat.instance.rangeButtonState = 'always-visible'
+        ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-on-plus.png"))
+    elseif ISChat.instance.rangeButtonState == 'always-visible' then
+        ISChat.instance.rangeButtonState = 'hidden'
         ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-off.png"))
+    else
+        ISChat.instance.rangeButtonState = 'visible'
+        ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-on.png"))
+    end
+    local curTxtPanel = ISChat.instance.chatText
+    if curTxtPanel == nil then
+        return
+    end
+    UpdateRangeIndicator(curTxtPanel.chatStreams[curTxtPanel.streamID])
+end
+
+local function OnRadioButtonClick()
+    ISChat.instance.radioButtonState = not ISChat.instance.radioButtonState
+    if ISChat.instance.radioButtonState == true then
+        if ISChat.instance.radioRangeIndicator then
+            ISChat.instance.radioRangeIndicator:unsubscribe()
+            ISChat.instance.radioRangeIndicator = nil
+        end
+        ISChat.instance.radioRangeIndicator = RadioRangeIndicator:new(25)
+        ISChat.instance.radioRangeIndicator:subscribe()
+        ISChat.instance.radioButton:setImage(getTexture("media/ui/yacm/icons/mic-on.png"))
+    else
+        if ISChat.instance.radioRangeIndicator then
+            ISChat.instance.radioRangeIndicator:unsubscribe()
+            ISChat.instance.radioRangeIndicator = nil
+        end
+        ISChat.instance.radioButton:setImage(getTexture("media/ui/yacm/icons/mic-off.png"))
     end
 end
 
@@ -1615,6 +1652,20 @@ function ISChat:createChildren()
     self.rangeButton:setUIName(ISChat.rangeButtonName)
     self:addChild(self.rangeButton)
     self.rangeButton:setVisible(true)
+
+    --range button
+    ISChat.radioButtonName = "chat range button"
+    self.radioButton = ISButton:new(self.rangeButton:getX() - th / 2 - th, 1, th, th, "", self, OnRadioButtonClick)
+    self.radioButton.anchorRight = true
+    self.radioButton.anchorLeft = false
+    self.radioButton:initialise()
+    self.radioButton.borderColor.a = 0.0
+    self.radioButton.backgroundColor.a = 0
+    self.radioButton.backgroundColorMouseOver.a = 0.5
+    self.radioButton:setImage(getTexture("media/ui/yacm/icons/mic-off.png"))
+    self.radioButton:setUIName(ISChat.radioButtonName)
+    self:addChild(self.radioButton)
+    self.radioButton:setVisible(true)
 
     --general stuff
     self.minimumHeight = 90

@@ -3,7 +3,9 @@ SurvivalGuide_EN {
                                                 " <TEXT> <SIZE:small>" ..
                                                 " <CENTRE> %1 <BR>" ..
                                                 " <TEXT> <SIZE:medium>" ..
-                                                " <IMAGE:media/ui/yacm/icons/eye-on.png> Show the range of the current channel (120 range max) <BR>",
+                                                " <IMAGE:media/ui/yacm/icons/eye-on.png> Show the speaking range of the current channel when chat is focused <BR>" ..
+                                                " <IMAGE:media/ui/yacm/icons/eye-on-plus.png> Always show the speaking range of the current channel <BR>" ..
+                                                " <IMAGE:media/ui/yacm/icons/mic-on.png> Show the listening range of the surrounding radios <BR>",
     SurvivalGuide_YetAnotherChatMod_Whisper   = " /whisper or /w to whisper <BR>",
     SurvivalGuide_YetAnotherChatMod_Low       = " /low or /l to talk quietly <BR>",
     SurvivalGuide_YetAnotherChatMod_Say       = " /say or /s to speak at normal volume <BR>",

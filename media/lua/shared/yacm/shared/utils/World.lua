@@ -163,7 +163,7 @@ function World.forAllPlayers(action)
     return result
 end
 
-local function GetSquaresRadios(player, range, frequency)
+local function GetSquaresRadiosPositions(player, range, frequency)
     local radiosResult = {}
     local radioMaxRange = range
     local radios = World.getItemsInRangeByGroup(player, radioMaxRange, 'IsoRadio')
@@ -190,8 +190,7 @@ local function GetSquaresRadios(player, range, frequency)
     return radiosResult, found
 end
 
--- TODO check other player radio without headphones
-local function GetPlayerRadios(player, range, frequency)
+local function GetPlayerRadiosPositions(player, range, frequency)
     local radiosResult = {}
     local radio = Character.getHandItemByGroup(player, 'Radio')
     local found = false
@@ -200,8 +199,13 @@ local function GetPlayerRadios(player, range, frequency)
     end
     local radioData = radio and radio:getDeviceData() or nil
     if radioData then
+        -- -1 nothing
+        --  0 headphones
+        --  1 earbuds
+        local hasHeadphones = radioData:getHeadphoneType() >= 0
         local radioFrequency = radioData:getChannel()
         if radioData:getIsTurnedOn() and radioFrequency == frequency
+            and not hasHeadphones
         then
             table.insert(radiosResult, player:getUsername())
             found = true
@@ -210,7 +214,7 @@ local function GetPlayerRadios(player, range, frequency)
     return radiosResult, found
 end
 
-local function GetVehiclesRadios(player, range, frequency)
+local function GetVehiclesRadiosPositions(player, range, frequency)
     local radiosResult = {}
     local radioMaxRange = range
     local vehicles = World.getVehiclesInRange(player, radioMaxRange)
@@ -232,19 +236,122 @@ local function GetVehiclesRadios(player, range, frequency)
     return radiosResult, found
 end
 
+-- return positions of turned on radios in range
+-- this one is really only useful to create a fake radio packet in case of
+-- a discord message sent through the Java client
+function World.getListeningRadiosPositions(player, range, frequency)
+    local radios = {}
+    if player == nil then
+        print('yacm error: World.getListeningRadiosPositions: player is null')
+        return nil
+    end
+    if range == nil then
+        print('yacm error: World.getListeningRadiosPositions: range is null')
+        return nil
+    end
+    if frequency == nil then
+        print('yacm error: World.getListeningRadiosPositions: frequency is null')
+        return nil
+    end
+    local squaresRadios, squaresRadiosFound = GetSquaresRadiosPositions(player, range, frequency)
+    local playersRadios, playersRadiosFound = GetPlayerRadiosPositions(player, range, frequency)
+    local vehiclesRadios, vehiclesRadiosFound = GetVehiclesRadiosPositions(player, range, frequency)
+
+    if not squaresRadiosFound and not playersRadiosFound and not vehiclesRadiosFound then
+        return nil
+    end
+
+    return {
+        squares = squaresRadios or {},
+        players = playersRadios or {},
+        vehicles = vehiclesRadios or {},
+    }
+end
+
+local function GetSquaresRadios(player, range, frequency)
+    local radiosResult = {}
+    local radioMaxRange = range
+    local radios = World.getItemsInRangeByGroup(player, radioMaxRange, 'IsoRadio')
+    local found = false
+    for _, radio in pairs(radios) do
+        local radioData = radio:getDeviceData()
+        if radioData ~= nil then
+            local radioFrequency = radioData:getChannel()
+            local turnedOn = radioData:getIsTurnedOn()
+            -- TODO
+            local volume = radioData:getDeviceVolume()
+            if turnedOn and (frequency == nil or radioFrequency == frequency)
+            then
+                table.insert(radiosResult, radio)
+                found = true
+            end
+        end
+    end
+    return radiosResult, found
+end
+
+-- TODO check other player radio without headphones
+local function GetPlayerRadios(player, range, frequency)
+    local radiosResult = {}
+    local radio = Character.getHandItemByGroup(player, 'Radio')
+    local found = false
+    if radio == nil then
+        return radiosResult
+    end
+    local radioData = radio and radio:getDeviceData() or nil
+    if radioData then
+        -- -1 nothing
+        --  0 headphones
+        --  1 earbuds
+        local hasHeadphones = radioData:getHeadphoneType() >= 0
+        local radioFrequency = radioData:getChannel()
+        if radioData:getIsTurnedOn() and (frequency == nil or radioFrequency == frequency)
+            and (not hasHeadphones or getPlayer():getUsername() == player:getUsername())
+        then
+            table.insert(radiosResult, {
+                player = player,
+                radio = radio,
+            })
+            found = true
+        end
+    end
+    return radiosResult, found
+end
+
+local function GetVehiclesRadios(player, range, frequency)
+    local radiosResult = {}
+    local radioMaxRange = range
+    local vehicles = World.getVehiclesInRange(player, radioMaxRange)
+    local found = false
+    for _, vehicle in pairs(vehicles) do
+        local radio = vehicle:getPartById('Radio')
+        if radio ~= nil then
+            local radioData = radio:getDeviceData()
+            if radioData ~= nil then
+                local radioFrequency = radioData:getChannel()
+                if radioData:getIsTurnedOn() and (frequency == nil or radioFrequency == frequency)
+                then
+                    table.insert(radiosResult, {
+                        vehicle = vehicle,
+                        radio = radio
+                    })
+                    found = true
+                end
+            end
+        end
+    end
+    return radiosResult, found
+end
+
 function World.getListeningRadios(player, range, frequency)
     local radios = {}
     if player == nil then
         print('yacm error: World.getListeningRadios: player is null')
-        return radios
+        return nil
     end
     if range == nil then
         print('yacm error: World.getListeningRadios: range is null')
-        return radios
-    end
-    if frequency == nil then
-        print('yacm error: World.getListeningRadios: frequency is null')
-        return radios
+        return nil
     end
     local squaresRadios, squaresRadiosFound = GetSquaresRadios(player, range, frequency)
     local playersRadios, playersRadiosFound = GetPlayerRadios(player, range, frequency)
