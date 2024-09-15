@@ -118,11 +118,16 @@ local function Update()
                 return
             end
             local radioData = item:getDeviceData()
-            if radioData and radioData:getIsTurnedOn() then
-                local useDelta = radioData:getUseDelta()
-                local power = radioData:getPower()
-                power = math.max(0, power - useDelta)
-                radioData:setPower(power)
+            if radioData then
+                if radioData:getIsTurnedOn() then
+                    local useDelta = radioData:getUseDelta()
+                    local power = radioData:getPower()
+                    local newPower = math.max(0, power - useDelta)
+                    radioData:setPower(newPower)
+                    if newPower <= 0 and power > 0 and radioData:getIsTurnedOn() then
+                        radioData:setIsTurnedOn(false)
+                    end
+                end
                 -- we could only send it when the battery reach 0 but every 1 game-time minute
                 -- is really not that much and it will protect us from any sync error
                 YacmClientSendCommands.sendGiveRadioState(item)
