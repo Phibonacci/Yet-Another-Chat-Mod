@@ -1160,6 +1160,10 @@ ISChat.addLineInChat = function(message, tabID)
 end
 
 function ISChat:render()
+    ChatUI.render(self)
+end
+
+function ISChat:prerender()
     local instance = ISChat.instance
     if instance.rangeIndicator ~= nil then
         if instance.rangeButtonState == 'visible' then
@@ -1191,10 +1195,6 @@ function ISChat:render()
             bubbles[index] = nil
         end
     end
-    ChatUI.render(self)
-end
-
-function ISChat:prerender()
     ChatUI.prerender(self)
 end
 
