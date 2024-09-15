@@ -242,6 +242,11 @@ local function InitGlobalModData()
     elseif yacmModData['isVoiceEnabled'] ~= nil then
         ISChat.instance.isVoiceEnabled = yacmModData['isVoiceEnabled']
     end
+    if yacmModData['isRadioIconEnabled'] == nil and ISChat.instance.isRadioIconEnabled == nil then
+        ISChat.instance.isRadioIconEnabled = true
+    elseif yacmModData['isRadioIconEnabled'] ~= nil then
+        ISChat.instance.isRadioIconEnabled = yacmModData['isRadioIconEnabled']
+    end
     if yacmModData['voicePitch'] == nil then
         local randomPitch = ZombRandFloat(0.85, 1.15)
         if getPlayer():getVisual():isFemale() then
@@ -1428,6 +1433,9 @@ ISChat.onRecvSandboxVars = function(messageTypeSettings)
         -- wait for the server settings to override this if voices are enabled by default
         ISChat.instance.isVoiceEnabled = messageTypeSettings['options']['isVoiceEnabled']
     end
+    local radioMaxRange = YacmServerSettings['options']['radio']['soundMaxRange']
+    ISChat.instance.radioRangeIndicator = RadioRangeIndicator:new(25, radioMaxRange, ISChat.instance.isRadioIconEnabled)
+    ISChat.instance.radioRangeIndicator:subscribe()
 end
 
 ISChat.onTabRemoved = function(tabTitle, tabID)
@@ -1530,24 +1538,15 @@ local function OnRangeButtonClick()
 end
 
 local function OnRadioButtonClick()
-    if YacmServerSettings == nil then
+    if YacmServerSettings == nil or ISChat.instance.radioRangeIndicator == nil then
         return
     end
     ISChat.instance.radioButtonState = not ISChat.instance.radioButtonState
     if ISChat.instance.radioButtonState == true then
-        if ISChat.instance.radioRangeIndicator then
-            ISChat.instance.radioRangeIndicator:unsubscribe()
-            ISChat.instance.radioRangeIndicator = nil
-        end
-        local radioMaxRange = YacmServerSettings['options']['radio']['soundMaxRange']
-        ISChat.instance.radioRangeIndicator = RadioRangeIndicator:new(25, radioMaxRange)
-        ISChat.instance.radioRangeIndicator:subscribe()
+        ISChat.instance.radioRangeIndicator:enable()
         ISChat.instance.radioButton:setImage(getTexture("media/ui/yacm/icons/mic-on.png"))
     else
-        if ISChat.instance.radioRangeIndicator then
-            ISChat.instance.radioRangeIndicator:unsubscribe()
-            ISChat.instance.radioRangeIndicator = nil
-        end
+        ISChat.instance.radioRangeIndicator:disable()
         ISChat.instance.radioButton:setImage(getTexture("media/ui/yacm/icons/mic-off.png"))
     end
 end
@@ -1878,16 +1877,31 @@ function ISChat:onGearButtonClick()
     if self.isVoiceEnabled then
         voiceOptionName = getText("UI_YACM_chat_disable_voices")
     end
-    context:addOption(voiceOptionName, ISChat.instance, ISChat.onToggleVoicePrefix)
+    context:addOption(voiceOptionName, ISChat.instance, ISChat.onToggleVoice)
+
+    local radioIconOptionName = getText("UI_YACM_enable_radio_icon")
+    if self.isRadioIconEnabled then
+        radioIconOptionName = getText("UI_YACM_disable_radio_icon")
+    end
+    context:addOption(radioIconOptionName, ISChat.instance, ISChat.onToggleRadioIcon)
 end
 
-function ISChat.onToggleVoicePrefix()
+function ISChat.onToggleVoice()
     ISChat.instance.isVoiceEnabled = not ISChat.instance.isVoiceEnabled
 
     -- the player has set this option at least once, that means he is aware of its existence
     -- we'll use this settings in the future instead of the server default behavior
     ISChat.instance.yacmModData['isVoiceEnabled'] = ISChat.instance.isVoiceEnabled
     ModData.add('yacm', ISChat.instance.yacmModData)
+end
+
+function ISChat.onToggleRadioIcon()
+    ISChat.instance.isRadioIconEnabled = not ISChat.instance.isRadioIconEnabled
+    ISChat.instance.yacmModData['isRadioIconEnabled'] = ISChat.instance.isRadioIconEnabled
+    ModData.add('yacm', ISChat.instance.yacmModData)
+    if ISChat.instance.radioRangeIndicator then
+        ISChat.instance.radioRangeIndicator.showIcon = ISChat.instance.isRadioIconEnabled
+    end
 end
 
 Events.OnChatWindowInit.Add(ISChat.initChat)

@@ -12,6 +12,19 @@ function Coordinates.CenterTopOfPlayer(player, width, height)
     return x, y
 end
 
+function Coordinates.TopLeftOfPlayer(player, width, height)
+    if player == nil then
+        print('yacm error: CenterTopOfPlayer: nil player parameter')
+        return nil
+    end
+    local x, y = Coordinates.CenterTopOfObject(player, width, height)
+    local zoom = Coordinates.GetZoom()
+    local shoulderHeight = 116 / zoom
+    x = x - 38 / zoom - width / 2
+    y = y - shoulderHeight + height
+    return x, y
+end
+
 function Coordinates.CenterTopOfObject(object, width, height)
     if object == nil then
         print('yacm error: CenterTopOfObject: nil player parameter')

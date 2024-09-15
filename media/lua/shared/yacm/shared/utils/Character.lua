@@ -50,6 +50,33 @@ function Character.getFirstHandOrBeltItemByGroup(player, group)
     return item
 end
 
+function Character.getAllHandItemsByGroup(player, group)
+    local items = {}
+    local primary = player:getPrimaryHandItem()
+    local secondary = player:getSecondaryHandItem()
+    if primary and instanceof(primary, group) then
+        table.insert(items, primary)
+    elseif secondary and instanceof(secondary, group) then
+        table.insert(items, secondary)
+    end
+    return items
+end
+
+function Character.getAllHandAndBeltItemsByGroup(player, group)
+    local items = Character.getAllHandItemsByGroup(player, group)
+    local inventoryItems = player:getAttachedItems()
+    if inventoryItems == nil or inventoryItems:size() <= 0 then
+        return items
+    end
+    for i = 0, inventoryItems:size() - 1 do
+        local inventoryItem = inventoryItems:getItemByIndex(i)
+        if instanceof(inventoryItem, group) then
+            table.insert(items, inventoryItem)
+        end
+    end
+    return items
+end
+
 function Character.isItemOnBeltAndNotInHand(player, item)
     return item.getID ~= nil and item:getAttachedSlot() ~= -1
         and not Character.getHandItemById(player, item:getID())

@@ -1,9 +1,12 @@
 local RangeIndicator      = require('yacm/client/ui/RangeIndicator')
 local Character           = require('yacm/shared/utils/Character')
+local World               = require('yacm/shared/utils/World')
+local RadioStatusIcons    = require('yacm/client/ui/RadioStatusIcons')
 
 local RadioRangeIndicator = {}
 
-local Colors              = {
+
+local Colors = {
     { 235, 255, 000 },
     { 000, 235, 255 },
     { 255, 000, 235 },
@@ -11,13 +14,16 @@ local Colors              = {
     { 000, 255, 235 },
     { 235, 000, 255 },
 }
-local NextColorIndex      = 1
+
+local NextColorIndex = 1
+
 
 function RadioRangeIndicator:freeIndicators()
     for _, indicator in pairs(self.indicators) do
         indicator:unsubscribe()
     end
     self.indicators = {}
+    self.radios = {}
     NextColorIndex = 1
 end
 
@@ -29,8 +35,9 @@ function RadioRangeIndicator:registerRadio(object, radio)
             local indicator = RangeIndicator:new(object, range, Colors[NextColorIndex])
             NextColorIndex = (NextColorIndex) % #Colors + 1
             indicator:subscribe()
-            indicator.enabled = true
+            indicator.enabled = self.enabled
             table.insert(self.indicators, indicator)
+            table.insert(self.radios, { object = object, radio = radio, range = range })
         end
     end
 end
@@ -59,12 +66,36 @@ end
 function RadioRangeIndicator:update()
     local currentTime = Calendar.getInstance():getTimeInMillis()
     local elapsed = currentTime - self.previousTime
-    if elapsed < 1000 then
+    if elapsed < 500 then
         return
     end
     self:freeIndicators()
     self:discoverRadios()
     self.previousTime = currentTime
+end
+
+function RadioRangeIndicator:updateIcons()
+    local radios = Character.getAllHandAndBeltItemsByGroup(self.player, 'Radio')
+    for _, radio in pairs(radios) do
+        local radioData = radio:getDeviceData()
+        if radioData then
+            if radioData:getIsTurnedOn() then
+                self.radioStatusIcons.enabled = self.showIcon
+                return
+            end
+        end
+    end
+    for _, info in pairs(self.radios) do
+        local object   = info['object']
+        local range    = info['range']
+
+        local distance = World.distanceManhatten(object, self.player)
+        if distance <= range then
+            self.radioStatusIcons.enabled = self.showIcon
+            return
+        end
+    end
+    self.radioStatusIcons.enabled = false
 end
 
 function RadioRangeIndicator:subscribe()
@@ -75,6 +106,11 @@ function RadioRangeIndicator:subscribe()
         self:update()
     end
     Events.OnTick.Add(self.event)
+    self.iconEvent = function()
+        self:updateIcons()
+    end
+    Events.OnPreUIDraw.Add(self.iconEvent)
+    self.radioStatusIcons:subscribe()
 end
 
 function RadioRangeIndicator:unsubscribe()
@@ -84,9 +120,28 @@ function RadioRangeIndicator:unsubscribe()
     self:freeIndicators()
     Events.OnTick.Remove(self.event)
     self.event = nil
+    Events.OnPreUIDraw.Remove(self.iconEvent)
+    self.iconEvent = nil
+    self.radioStatusIcons:unsubscribe()
 end
 
-function RadioRangeIndicator:new(discoveringRange, radioMaxRange)
+function RadioRangeIndicator:updateIndicators()
+    for _, indicator in pairs(self.indicators) do
+        indicator.enabled = self.enabled
+    end
+end
+
+function RadioRangeIndicator:enable()
+    self.enabled = true
+    self:updateIndicators()
+end
+
+function RadioRangeIndicator:disable()
+    self.enabled = false
+    self:updateIndicators()
+end
+
+function RadioRangeIndicator:new(discoveringRange, radioMaxRange, showIcon)
     local o = {}
     setmetatable(o, self)
     self.__index = self
@@ -94,8 +149,12 @@ function RadioRangeIndicator:new(discoveringRange, radioMaxRange)
     o.player = getPlayer()
     o.range = discoveringRange
     o.radioMaxRange = radioMaxRange
+    o.showIcon = showIcon
     o.indicators = {}
+    o.radios = {}
     o.previousTime = 0
+    o.radioStatusIcons = RadioStatusIcons:new(o.player)
+    o.enabled = false
     return o
 end
 
