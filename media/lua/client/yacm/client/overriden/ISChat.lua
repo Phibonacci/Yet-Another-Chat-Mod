@@ -38,9 +38,16 @@ ISChat.yacmCommand[2] = { name = 'pitch', command = '/pitch', shortCommand = nil
 
 ISChat.defaultTabStream    = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1]
-ISChat.defaultTabStream[2] = ISChat.allChatStreams[8]
-ISChat.defaultTabStream[3] = ISChat.allChatStreams[9]
-ISChat.defaultTabStream[4] = ISChat.allChatStreams[10]
+ISChat.defaultTabStream[2] = ISChat.allChatStreams[9]
+ISChat.defaultTabStream[3] = ISChat.allChatStreams[10]
+ISChat.defaultTabStream[4] = ISChat.allChatStreams[11]
+
+
+ISChat.lastTabStream    = {}
+ISChat.lastTabStream[1] = ISChat.defaultTabStream[1]
+ISChat.lastTabStream[2] = ISChat.defaultTabStream[2]
+ISChat.lastTabStream[3] = ISChat.defaultTabStream[3]
+ISChat.lastTabStream[4] = ISChat.defaultTabStream[4]
 
 
 local function IsOnlySpacesOrEmpty(command)
@@ -1220,6 +1227,10 @@ function ISChat.onTextChange()
         if ISChat.instance.lastStream ~= stream then
             UpdateRangeIndicator(stream)
         end
+        -- you are allowed to use a command from another tab but it wont be remembered for the next message
+        if ISChat.instance.currentTabID == stream['tabID'] then
+            ISChat.lastTabStream[ISChat.instance.currentTabID] = stream
+        end
         YacmClientSendCommands.sendTyping(getPlayer():getUsername(), stream['name'])
     else
         if ISChat.instance.rangeIndicator then
@@ -1515,11 +1526,7 @@ local function OnRangeButtonClick()
         ISChat.instance.rangeButtonState = 'visible'
         ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-on.png"))
     end
-    local curTxtPanel = ISChat.instance.chatText
-    if curTxtPanel == nil then
-        return
-    end
-    UpdateRangeIndicator(curTxtPanel.chatStreams[curTxtPanel.streamID])
+    UpdateRangeIndicator(ISChat.lastTabStream[ISChat.instance.currentTabID])
 end
 
 local function OnRadioButtonClick()
@@ -1761,18 +1768,9 @@ function ISChat:focus()
     self.textEntry:setEditable(true)
     self.textEntry:focus()
     self.textEntry:ignoreFirstInput()
-    self.textEntry:setText(self.chatText.lastChatCommand)
-    if self.chatText.lastChatCommand ~= nil then
-        local stream = GetCommandFromMessage(self.chatText.lastChatCommand)
-        if stream ~= nil then
-            UpdateRangeIndicator(stream)
-        end
-    else
-        if ISChat.instance.rangeIndicator then
-            ISChat.instance.rangeIndicator:unsubscribe()
-        end
-        ISChat.instance.rangeIndicator = nil
-    end
+    local stream = ISChat.lastTabStream[ISChat.instance.currentTabID]
+    self.textEntry:setText(stream['command'])
+    UpdateRangeIndicator(stream)
     self.fade:reset()
     self.fade:update() --reset fraction to start value
 end
