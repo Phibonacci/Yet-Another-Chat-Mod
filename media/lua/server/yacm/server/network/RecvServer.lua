@@ -1,10 +1,13 @@
-local Character = require('yacm/shared/utils/Character')
-local ChatMessage = require('yacm/server/ChatMessage')
-local SendServer = require('yacm/server/network/SendServer')
-local Radio = require('yacm/server/Radio')
-local World = require('yacm/shared/utils/World')
+local Character    = require('yacm/shared/utils/Character')
+local ChatMessage  = require('yacm/server/ChatMessage')
+local SendServer   = require('yacm/server/network/SendServer')
+local Radio        = require('yacm/server/radio/Radio')
+local RadioManager = require('yacm/server/radio/RadioManager')
+local World        = require('yacm/shared/utils/World')
+
 
 local RecvServer = {}
+
 
 RecvServer['MuteInHandRadio'] = function(player, args)
     local playerName = args['player']
@@ -21,8 +24,8 @@ RecvServer['MuteInHandRadio'] = function(player, args)
         print('yacm error: MuteInHandRadio packet has no id value')
         return
     end
-    local radio = Character.getItemById(player, id)
-    if radio == nil then
+    local radio = Character.getItemById(player, id) or Character.getFirstAttachedItemByType(player, args['belt'])
+    if radio == nil or not instanceof(radio, 'Radio') then
         print('yacm error: MuteInHandRadio packet asking for id ' .. id ..
             ' but no radio was found')
         return
@@ -35,6 +38,7 @@ RecvServer['MuteInHandRadio'] = function(player, args)
     Radio.MuteRadio(radio, muteState)
     Radio.SyncHand(radio, player, id)
 end
+
 
 RecvServer['MuteSquareRadio'] = function(player, args)
     local x = args['x']
@@ -70,17 +74,84 @@ RecvServer['MuteSquareRadio'] = function(player, args)
     Radio.SyncSquare(radio)
 end
 
+
 RecvServer['ChatMessage'] = function(player, args)
     ChatMessage.ProcessMessage(player, args, 'ChatMessage', true)
 end
+
 
 RecvServer['Typing'] = function(player, args)
     ChatMessage.ProcessMessage(player, args, 'Typing', false)
 end
 
+
 RecvServer['AskSandboxVars'] = function(player, args)
     SendServer.Command(player, 'SendSandboxVars', ChatMessage.MessageTypeSettings)
 end
+
+
+RecvServer['GiveBeltRadioState'] = function(player, args)
+    local playerName = args['player']
+    if playerName == nil then
+        print('yacm error: GiveBeltRadioState packet with null player name')
+        return
+    end
+    local beltType = args['belt']
+    if beltType == nil then
+        print('yacm error: GiveBeltRadioState packet has no "belt" variable')
+        return
+    end
+    local turnedOn = args['turnedOn']
+    if type(turnedOn) ~= 'boolean' then
+        print('yacm error: GiveBeltRadioState packet has no "turnedOn" variable')
+        return
+    end
+    local muteState = args['mute']
+    if type(muteState) ~= 'boolean' then
+        print('yacm error: GiveBeltRadioState packet has no "mute" variable')
+        return
+    end
+    local volume = args['volume']
+    if type(volume) ~= 'number' then
+        print('yacm error: GiveBeltRadioState packet has no "volume" variable')
+        return
+    end
+    local frequency = args['frequency']
+    if type(frequency) ~= 'number' then
+        print('yacm error: GiveBeltRadioState packet has no "frequency" variable')
+        return
+    end
+    local battery = args['battery']
+    if type(battery) ~= 'number' then
+        print('yacm error: GiveBeltRadioState packet has no "battery" variable')
+        return
+    end
+    local headphone = args['headphone']
+    if type(headphone) ~= 'number' then
+        print('yacm error: GiveBeltRadioState packet has no "headphone" variable')
+        return
+    end
+    local isTwoWay = args['isTwoWay']
+    if type(isTwoWay) ~= 'boolean' then
+        print('yacm error: GiveBeltRadioState packet has no "isTwoWay" variable')
+        return
+    end
+    local transmitRange = args['transmitRange']
+    if type(transmitRange) ~= 'number' then
+        print('yacm error: GiveBeltRadioState packet has no "transmitRange" variable')
+        return
+    end
+    local radio = Character.getFirstAttachedItemByType(player, beltType)
+    if radio == nil or not instanceof(radio, 'Radio') then
+        print('yacm error: GiveBeltRadioState packet asking for a belt radio of type ' .. beltType ..
+            ' but no radio was found')
+        return
+    end
+    radio = RadioManager:getOrCreateFakeBeltRadio(player)
+    Radio.MuteRadio(radio, muteState)
+    Radio.SyncBelt(radio, player, turnedOn, muteState, volume, frequency, battery, headphone, isTwoWay, transmitRange)
+end
+
 
 RecvServer['AskInHandRadioState'] = function(player, args)
     local playerName = args['player']
@@ -93,14 +164,15 @@ RecvServer['AskInHandRadioState'] = function(player, args)
         print('yacm error: AskInHandRadioState packet with a null id')
         return
     end
-    local radio = Character.getItemById(player, id)
-    if radio == nil then
+    local radio = Character.getItemById(player, id) or Character.getFirstAttachedItemByType(player, args['belt'])
+    if radio == nil or not instanceof(radio, 'Radio') then
         print('yacm error: AskInHandRadioState packet asking for id ' .. id ..
             ' but no radio was found')
         return
     end
     Radio.SyncHand(radio, player, id)
 end
+
 
 RecvServer['AskSquareRadioState'] = function(player, args)
     local x = args['x']
@@ -131,5 +203,6 @@ local function OnClientCommand(module, command, player, args)
         RecvServer[command](player, args)
     end
 end
+
 
 Events.OnClientCommand.Add(OnClientCommand)

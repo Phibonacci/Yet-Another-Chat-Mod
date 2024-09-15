@@ -103,6 +103,17 @@ option YetAnotherChatMod.RadioColor
 	translation = YetAnotherChatMod_RadioColor,
 }
 
+option YetAnotherChatMod.RadioSoundMaxRange
+{
+	type = integer,
+	min = 1,
+	max = 15,
+	default = 6,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_RadioSoundMaxRange,
+}
+
 option YetAnotherChatMod.WhisperEnabled
 {
 	type = boolean,

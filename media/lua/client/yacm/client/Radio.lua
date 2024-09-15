@@ -1,5 +1,7 @@
-local World = require('yacm/shared/utils/World')
-local Character = require('yacm/shared/utils/Character')
+local Character              = require('yacm/shared/utils/Character')
+local World                  = require('yacm/shared/utils/World')
+local YacmClientSendCommands = require('yacm/client/network/SendYacmClient')
+
 
 local Radio = {}
 
@@ -97,5 +99,38 @@ function Radio.SyncInHand(id, turnedOn, mute, power, volume, frequency)
     end
     radioData:setMicIsMuted(mute)
 end
+
+local function Update()
+    local player = getPlayer()
+    local inventoryRadios = player:getAttachedItems()
+    local inventoryRadiosSize = inventoryRadios:size()
+    for i = 0, inventoryRadiosSize - 1 do
+        local item = inventoryRadios:getItemByIndex(i)
+        local id = item:getID()
+        if instanceof(item, "Radio") then
+            -- is on belt
+            local primary = player:getPrimaryHandItem()
+            local secondary = player:getSecondaryHandItem()
+            -- radios in hand already decrease the battery level
+            if (primary and primary:getID() == id)
+                or (secondary and secondary:getID() == id)
+            then
+                return
+            end
+            local radioData = item:getDeviceData()
+            if radioData and radioData:getIsTurnedOn() then
+                local useDelta = radioData:getUseDelta()
+                local power = radioData:getPower()
+                power = math.max(0, power - useDelta)
+                radioData:setPower(power)
+                -- we could only send it when the battery reach 0 but every 1 game-time minute
+                -- is really not that much and it will protect us from any sync error
+                YacmClientSendCommands.sendGiveRadioState(item)
+            end
+        end
+    end
+end
+
+Events.EveryOneMinute.Add(Update)
 
 return Radio

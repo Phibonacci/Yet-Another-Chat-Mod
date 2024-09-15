@@ -1,5 +1,5 @@
 local Character = require('yacm/shared/utils/Character')
-local RadioManager = require('yacm/server/RadioManager')
+local RadioManager = require('yacm/server/radio/RadioManager')
 local SendServer = require('yacm/server/network/SendServer')
 local StringParser = require('yacm/shared/utils/StringParser')
 local World = require('yacm/shared/utils/World')
@@ -10,10 +10,6 @@ local function PlayersDistance(source, target)
     local stupidDistance = source:DistTo(target:getX(), target:getY())
     local accurateDistance = math.max(stupidDistance - 1, 0)
     return math.floor(accurateDistance + 0.5)
-end
-
-local function DistanceManhatten(source, target)
-    return math.abs(target:getX() - source:getX()) + math.abs(target:getY() - source:getY())
 end
 
 local AuthorHasAccessByType = {
@@ -210,12 +206,23 @@ local function SetMessageTypeSettings()
             ['radio'] = {
                 ['discord'] = SandboxVars.YetAnotherChatMod.RadioDiscordEnabled,
                 ['frequency'] = SandboxVars.YetAnotherChatMod.RadioDiscordFrequency,
-                ['color'] = GetColorFromString(SandboxVars.YetAnotherChatMod.RadioColor),
+                ['soundMaxRange'] = SandboxVars.YetAnotherChatMod.RadioSoundMaxRange,
             },
             ['hideCallout'] = SandboxVars.YetAnotherChatMod.HideCallout,
             ['isVoiceEnabled'] = SandboxVars.YetAnotherChatMod.VoiceEnabled,
         },
     }
+end
+
+local function GetPlayerRadio(player)
+    local radio = Character.getFirstHandItemByGroup(player, 'Radio')
+    if radio == nil then
+        local attachedRadio = Character.getFirstAttachedItemByGroup(player, 'Radio')
+        if attachedRadio then
+            radio = RadioManager:getFakeBeltRadio(player)
+        end
+    end
+    return radio
 end
 
 local function GetRangeForMessageType(type)
@@ -261,7 +268,7 @@ local function IsInRadioEmittingRange(radioEmitters, receiver)
         local radioData = radioEmitter:getDeviceData()
         if radioData ~= nil then
             local transmitRange = radioData:getTransmitRange()
-            local distance = DistanceManhatten(radioEmitter, receiver)
+            local distance = World.distanceManhatten(radioEmitter, receiver)
             if distance <= transmitRange then
                 return true, distance
             end
@@ -271,6 +278,11 @@ local function IsInRadioEmittingRange(radioEmitters, receiver)
 end
 
 local function GetSquaresRadios(player, args, radioFrequencies, range)
+    if ChatMessage.MessageTypeSettings == nil then
+        print('yacm error: GetSquaresRadios: tried to get radios before server settings were initialized')
+        return {}, false
+    end
+    local maxSoundRange = ChatMessage.MessageTypeSettings['options']['radio']['soundMaxRange']
     local radiosByFrequency = {}
     local radios = World.getItemsInRangeByGroup(player, range, 'IsoRadio')
     local found = false
@@ -299,6 +311,7 @@ local function GetSquaresRadios(player, args, radioFrequencies, range)
             if turnedOn and frequency ~= nil and radioFrequencies[frequency] ~= nil
                 -- and playerDistance <= radioRange
                 and isInRange
+                and Character.canHearRadioSound(player, radio, radioData, maxSoundRange)
             then
                 if radiosByFrequency[frequency] == nil then
                     radiosByFrequency[frequency] = {}
@@ -316,7 +329,7 @@ end
 
 local function GetPlayerRadios(player, args, radioFrequencies, range)
     local radiosByFrequency = {}
-    local radio = Character.getHandItemByGroup(player, 'Radio')
+    local radio = GetPlayerRadio(player)
     local found = false
     if radio == nil then
         return radiosByFrequency
@@ -324,12 +337,10 @@ local function GetPlayerRadios(player, args, radioFrequencies, range)
     local radioData = radio and radio:getDeviceData() or nil
     if radioData then
         local frequency = radioData:getChannel()
-        local isInRange, distance = IsInRadioEmittingRange(radioFrequencies[frequency], radio)
-        local hasHeadphones = radioData:getHeadphoneType() >= 0
+        local isInRange, distance = IsInRadioEmittingRange(radioFrequencies[frequency], player)
         if radioData:getIsTurnedOn()
             and frequency ~= nil and radioFrequencies[frequency] ~= nil
             and isInRange
-            and (not hasHeadphones or getPlayer():getUsername() == player:getUsername())
         then
             if radiosByFrequency[frequency] == nil then
                 radiosByFrequency[frequency] = {}
@@ -345,6 +356,11 @@ local function GetPlayerRadios(player, args, radioFrequencies, range)
 end
 
 local function GetVehiclesRadios(player, args, radioFrequencies, range)
+    if ChatMessage.MessageTypeSettings == nil then
+        print('yacm error: GetVehiclesRadios: tried to get radios before server settings were initialized')
+        return {}, false
+    end
+    local maxSoundRange = ChatMessage.MessageTypeSettings['options']['radio']['soundMaxRange']
     local vehiclesByFrequency = {}
     local vehicles = World.getVehiclesInRange(player, range)
     local found = false
@@ -355,10 +371,11 @@ local function GetVehiclesRadios(player, args, radioFrequencies, range)
             local radioData = radio:getDeviceData()
             if radioData ~= nil then
                 local frequency = radioData:getChannel()
-                local isInRange, distance = IsInRadioEmittingRange(radioFrequencies[frequency], radio)
+                local isInRange, distance = IsInRadioEmittingRange(radioFrequencies[frequency], vehicle)
                 if radioData:getIsTurnedOn()
                     and frequency ~= nil and radioFrequencies[frequency] ~= nil
                     and isInRange
+                    and Character.canHearRadioSound(player, vehicle, radioData, maxSoundRange)
                 then
                     if vehiclesByFrequency[frequency] == nil then
                         vehiclesByFrequency[frequency] = {}
@@ -384,7 +401,7 @@ local function SendRadioPackets(author, player, args, sourceRadioByFrequencies)
         print('yacm error: SendRadioPackets: no range for type "say"')
         return
     end
-    local range = ChatMessage.MessageTypeSettings['say']['range']
+    local range = ChatMessage.MessageTypeSettings['options']['radio']['soundMaxRange']
     local squaresRadios, squaresRadiosFound = GetSquaresRadios(player, args, sourceRadioByFrequencies, range)
     local playersRadios, playersRadiosFound = GetPlayerRadios(player, args, sourceRadioByFrequencies, range)
     local vehiclesRadios, vehiclesRadiosFound = GetVehiclesRadios(player, args, sourceRadioByFrequencies, range)
@@ -435,7 +452,7 @@ local function GetEmittingRadios(player, packetType, messageType, range)
                 end
             end
         end
-        local radio = Character.getHandItemByGroup(player, 'Radio')
+        local radio = GetPlayerRadio(player)
         local radioData = radio and radio:getDeviceData() or nil
         if radioData then
             local frequency = radioData:getChannel()

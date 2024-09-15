@@ -117,12 +117,8 @@ end
 
 function RangeIndicator:new(object, range, color)
     RangeIndicator.__index = self
-    local x, y = coordinates.CenterBaseOfObjectNoZoom(self.object, 20, 6)
-    if x == nil then
-        x, y = 0, 0
-    end
     setmetatable(RangeIndicator, { __index = ISUIElement })
-    local o = ISUIElement:new(x, y, 20, 6)
+    local o = ISUIElement:new(0, 0, 20, 6)
     setmetatable(o, RangeIndicator)
 
     o:setX(0)

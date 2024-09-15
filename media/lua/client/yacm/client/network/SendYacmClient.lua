@@ -56,6 +56,17 @@ function YacmClientSendCommands.sendMuteRadio(radio, state)
         })
     elseif instanceof(radio, 'Radio') then -- is an inventoryItem radio
         local id = radio:getID()
+        local player = getPlayer()
+        local primary = player:getPrimaryHandItem()
+        local secondary = player:getSecondaryHandItem()
+        local beltType = nil
+        if (primary == nil or primary:getID() ~= id)
+            and (secondary == nil or secondary:getID() ~= id)
+        then
+            -- the ID is unreliable for non-in-hand items so we're going with the type
+            -- and pray to find the right radio, or (un)mute the wrong one...
+            beltType = radio:getType()
+        end
         if id == nil then
             print('yacm error: YacmClientSendCommands.sendMuteRadio: no id found')
             return
@@ -63,8 +74,48 @@ function YacmClientSendCommands.sendMuteRadio(radio, state)
         SendYacmClientCommand('MuteInHandRadio', {
             mute = state,
             id = id,
+            belt = beltType,
             player = getPlayer():getUsername(),
         })
+    end
+end
+
+-- only for belt items
+function YacmClientSendCommands.sendGiveRadioState(radio)
+    if not isClient() then return end
+    local radioData = radio:getDeviceData()
+    if radioData == nil then
+        print('yacm error: YacmClientSendCommands.sendTellRadioState: no radioData found')
+        return
+    end
+
+    if instanceof(radio, 'Radio') then -- is an inventoryItem radio
+        local player = getPlayer()
+        local primary = player:getPrimaryHandItem()
+        local secondary = player:getSecondaryHandItem()
+        local beltType = nil
+        local id = radio:getID()
+        -- is not in-hand (so the server is not sync with it already)
+        if (primary == nil or primary:getID() ~= id)
+            and (secondary == nil or secondary:getID() ~= id)
+        then
+            -- the ID is unreliable for non-in-hand items so we're going with the type
+            -- and pray to find the right radio, or sync the wrong one...
+            beltType = radio:getType()
+
+            SendYacmClientCommand('GiveBeltRadioState', {
+                belt = beltType,
+                player = getPlayer():getUsername(),
+                turnedOn = radioData:getIsTurnedOn(),
+                mute = radioData:getMicIsMuted(),
+                volume = radioData:getDeviceVolume(),
+                frequency = radioData:getChannel(),
+                battery = radioData:getPower(),
+                headphone = radioData:getHeadphoneType(),
+                isTwoWay = radioData:getIsTwoWay(),
+                transmitRange = radioData:getTransmitRange(),
+            })
+        end
     end
 end
 
@@ -83,12 +134,24 @@ function YacmClientSendCommands.sendAskRadioState(radio)
         })
     elseif instanceof(radio, 'Radio') then -- is an inventoryItem radio
         local id = radio:getID()
+        local player = getPlayer()
+        local primary = player:getPrimaryHandItem()
+        local secondary = player:getSecondaryHandItem()
+        local beltType = nil
+        if (primary == nil or primary:getID() ~= id)
+            and (secondary == nil or secondary:getID() ~= id)
+        then
+            -- the ID is unreliable for non-in-hand items so we're going with the type
+            -- and pray to find the right radio, or (un)mute the wrong one...
+            beltType = radio:getType()
+        end
         if id == nil then
             print('yacm error: YacmClientSendCommands.sendAskRadioState: no id found')
             return
         end
         SendYacmClientCommand('AskInHandRadioState', {
             id = id,
+            belt = beltType,
             player = getPlayer():getUsername(),
         })
     end

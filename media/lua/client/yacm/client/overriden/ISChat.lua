@@ -3,6 +3,7 @@ local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/shared/Version')
 local ChatUI                       = require('yacm/client/ui/ChatUI')
 
 local Character                    = require('yacm/shared/utils/Character')
+local FakeRadioPacket              = require('yacm/client/FakeRadioPacket')
 local Parser                       = require('yacm/client/parser/Parser')
 local PlayerBubble                 = require('yacm/client/ui/bubble/PlayerBubble')
 local RadioBubble                  = require('yacm/client/ui/bubble/RadioBubble')
@@ -894,7 +895,7 @@ local function CreatePlayersRadiosBubbles(message, messageColor, playersInfo, vo
             CreatePlayerRadioBubble(
                 getPlayer():getUsername(), message, messageColor, voicePitch)
             if username:upper() == getPlayer():getUsername():upper() then
-                local radio = Character.getHandItemByGroup(getPlayer(), 'Radio')
+                local radio = Character.getFirstHandOrBeltItemByGroup(getPlayer(), 'Radio')
                 if radio ~= nil then
                     local radioData = radio:getDeviceData()
                     if radioData ~= nil then
@@ -1044,7 +1045,11 @@ local function GetMessageType(message)
 end
 
 local function GenerateRadiosPacketFromListeningRadiosInRange(frequency)
-    local radios = World.getListeningRadiosPositions(getPlayer(), YacmServerSettings['say']['range'], frequency)
+    if YacmServerSettings == nil then
+        return nil
+    end
+    local maxSoundRange = YacmServerSettings['options']['radio']['soundMaxRange']
+    local radios = FakeRadioPacket.getListeningRadiosPositions(getPlayer(), maxSoundRange, frequency)
     if radios == nil then
         return nil
     end
@@ -1065,7 +1070,7 @@ ISChat.addLineInChat = function(message, tabID)
     if message:getRadioChannel() ~= -1 then -- scripted radio message
         local messageWithoutColorPrefix = message:getText():gsub('*%d+,%d+,%d+*', '')
         message:setText(messageWithoutColorPrefix)
-        local color = (YacmServerSettings and YacmServerSettings['options']['radio']['color']) or {
+        local color = (YacmServerSettings and YacmServerSettings['options']['scriptedRadio']['color']) or {
             171, 240, 140,
         }
         ISChat.onRadioPacket(
@@ -1497,6 +1502,9 @@ ISChat.ISTabPanelOnMouseDown = function(target, x, y)
 end
 
 local function OnRangeButtonClick()
+    if YacmServerSettings == nil then
+        return
+    end
     if ISChat.instance.rangeButtonState == 'visible' then
         ISChat.instance.rangeButtonState = 'always-visible'
         ISChat.instance.rangeButton:setImage(getTexture("media/ui/yacm/icons/eye-on-plus.png"))
@@ -1515,13 +1523,17 @@ local function OnRangeButtonClick()
 end
 
 local function OnRadioButtonClick()
+    if YacmServerSettings == nil then
+        return
+    end
     ISChat.instance.radioButtonState = not ISChat.instance.radioButtonState
     if ISChat.instance.radioButtonState == true then
         if ISChat.instance.radioRangeIndicator then
             ISChat.instance.radioRangeIndicator:unsubscribe()
             ISChat.instance.radioRangeIndicator = nil
         end
-        ISChat.instance.radioRangeIndicator = RadioRangeIndicator:new(25)
+        local radioMaxRange = YacmServerSettings['options']['radio']['soundMaxRange']
+        ISChat.instance.radioRangeIndicator = RadioRangeIndicator:new(25, radioMaxRange)
         ISChat.instance.radioRangeIndicator:subscribe()
         ISChat.instance.radioButton:setImage(getTexture("media/ui/yacm/icons/mic-on.png"))
     else

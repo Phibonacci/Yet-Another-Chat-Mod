@@ -1,5 +1,6 @@
 ---@diagnostic disable: trailing-space
 local Character = require('yacm/shared/utils/Character')
+local FakeRadio = require('yacm/server/radio/FakeRadio')
 local World = require('yacm/shared/utils/World')
 
 local RadioManager = {}
@@ -196,19 +197,19 @@ function RadioManager:makeNoise(frequency, range)
                 --  0 headphones
                 --  1 earbuds
                 local hasHeadphones = radioData:getHeadphoneType() >= 0
-
                 if radioData:getIsTurnedOn()
                     and radioFrequency == frequency
                     and not hasHeadphones
                 then
-                    addSound(source, source:getX(), source:getY(), source:getZ(), range, range)
+                    local radioRange = Character.getRadioRange(radioData, range)
+                    addSound(source, source:getX(), source:getY(), source:getZ(), radioRange, radioRange)
                 end
             end
         end
     )
     World.forAllPlayers(
         function(player)
-            local radio = Character.getHandItemByGroup(player, 'Radio')
+            local radio = Character.getFirstHandOrBeltItemByGroup(player, 'Radio')
             if radio ~= nil then
                 local radioData = radio:getDeviceData()
                 if radioData ~= nil then
@@ -221,14 +222,27 @@ function RadioManager:makeNoise(frequency, range)
                     --  0 headphones
                     --  1 earbuds
                     local hasHeadphones = radioData:getHeadphoneType() >= 0
-
                     if turnedOn and radioFrequency == frequency and not hasHeadphones then
-                        addSound(player, player:getX(), player:getY(), player:getZ(), range, range)
+                        local radioRange = Character.getRadioRange(radioData, range)
+                        addSound(player, player:getX(), player:getY(), player:getZ(), radioRange, radioRange)
                     end
                 end
             end
         end
     )
+end
+
+function RadioManager:getOrCreateFakeBeltRadio(player)
+    local username = player:getUsername()
+    if self.beltRadioByPlayer[username] == nil then
+        self.beltRadioByPlayer[username] = FakeRadio:new()
+    end
+    return self.beltRadioByPlayer[username]
+end
+
+function RadioManager:getFakeBeltRadio(player)
+    local username = player:getUsername()
+    return self.beltRadioByPlayer[username]
 end
 
 local function CreateRadioManager()
@@ -238,6 +252,7 @@ local function CreateRadioManager()
     o.squares = {}
     o.vehicles = {}
     o.loaded = false
+    o.beltRadioByPlayer = {}
     return o
 end
 

@@ -32,7 +32,7 @@ end
 
 local function GetPlayerRadiosPositions(player, range, frequency)
     local radiosResult = {}
-    local radio = Character.getHandItemByGroup(player, 'Radio')
+    local radio = Character.getFirstHandOrBeltItemByGroup(player, 'Radio')
     local found = false
     if radio == nil then
         return radiosResult
