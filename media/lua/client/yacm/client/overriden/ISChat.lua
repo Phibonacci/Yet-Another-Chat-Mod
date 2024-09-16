@@ -190,6 +190,9 @@ end
 
 local function AddTab(tabTitle, tabID)
     local chat = ISChat.instance
+    if chat.tabs[tabID] ~= nil then
+        return
+    end
     local newTab = chat:createTab()
     newTab.parent = chat
     newTab.tabTitle = tabTitle
@@ -1448,21 +1451,26 @@ local function RemoveTab(tabTitle, tabID)
 end
 
 ISChat.onRecvSandboxVars = function(messageTypeSettings)
-    if YacmServerSettings ~= nil then
-        return
+    if YacmServerSettings == nil then
+        Events.OnPostRender.Remove(AskServerData)
     end
-    Events.OnPostRender.Remove(AskServerData)
 
     YacmServerSettings = messageTypeSettings -- a global
 
     if HasAtLeastOneChanelEnabled(2) == true then
         AddTab('Out Of Character', 2)
+    elseif ISChat.instance.tabs[2] ~= nil then
+        RemoveTab('Out Of Character', 2)
     end
     if HasAtLeastOneChanelEnabled(3) == true then
         AddTab('Private Message', 3)
+    elseif ISChat.instance.tabs[3] ~= nil then
+        RemoveTab('Private Message', 3)
     end
     if getPlayer():getAccessLevel() == 'Admin' and messageTypeSettings['admin']['enabled'] then
         AddTab('Admin', 4)
+    elseif ISChat.instance.tabs[4] ~= nil then
+        RemoveTab('Admin', 4)
     end
     if ISChat.instance.tabCnt > 1 and not HasAtLeastOneChanelEnabled(1) then
         RemoveTab('General', 1)
@@ -1473,10 +1481,12 @@ ISChat.onRecvSandboxVars = function(messageTypeSettings)
     UpdateRangeIndicator(ISChat.defaultTabStream[ISChat.instance.currentTabID])
     UpdateInfoWindow()
     if ISChat.instance.yacmModData == nil or ISChat.instance.yacmModData['isVoiceEnabled'] == nil then
-        -- wait for the server settings to override this if voices are enabled by default
         ISChat.instance.isVoiceEnabled = messageTypeSettings['options']['isVoiceEnabled']
     end
     local radioMaxRange = YacmServerSettings['options']['radio']['soundMaxRange']
+    if ISChat.instance.radioRangeIndicator then
+        ISChat.instance.radioRangeIndicator:unsubscribe()
+    end
     ISChat.instance.radioRangeIndicator = RadioRangeIndicator:new(25, radioMaxRange, ISChat.instance.isRadioIconEnabled)
     ISChat.instance.radioRangeIndicator:subscribe()
 end

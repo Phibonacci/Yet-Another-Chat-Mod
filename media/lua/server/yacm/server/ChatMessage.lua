@@ -220,6 +220,43 @@ local function SetMessageTypeSettings()
     ChatMessage.MessageTypeSettings['meyell']    = ChatMessage.MessageTypeSettings['yell']
 end
 
+local SandboxVarsCopy = nil
+local function CopyYacmSandboxVars()
+    SandboxVarsCopy = {}
+    for key, var in pairs(SandboxVars.YetAnotherChatMod) do
+        SandboxVarsCopy[key] = var
+    end
+end
+
+local function HasYacmSandboxVarsChanged()
+    if SandboxVarsCopy == nil then
+        return false
+    end
+    for key, var in pairs(SandboxVars.YetAnotherChatMod) do
+        if SandboxVarsCopy[key] ~= var then
+            return true
+        end
+    end
+    return false
+end
+
+local function DetectMessageTypeSettingsUpdate()
+    if ChatMessage.MessageTypeSettings == nil then
+        return
+    end
+    if SandboxVarsCopy == nil then
+        CopyYacmSandboxVars()
+        return
+    end
+    if HasYacmSandboxVarsChanged() then
+        CopyYacmSandboxVars()
+        SetMessageTypeSettings()
+        World.forAllPlayers(function(player)
+            SendServer.Command(player, 'SendSandboxVars', ChatMessage.MessageTypeSettings)
+        end)
+    end
+end
+
 local function GetPlayerRadio(player)
     local radio = Character.getFirstHandItemByGroup(player, 'Radio')
     if radio == nil then
@@ -542,5 +579,6 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
 end
 
 Events.OnServerStarted.Add(SetMessageTypeSettings)
+Events.EveryOneMinute.Add(DetectMessageTypeSettingsUpdate)
 
 return ChatMessage
