@@ -167,8 +167,10 @@ ISChat.onSwitchStream = function()
         end
         local chatStreams = curTxtPanel.chatStreams
         curTxtPanel.streamID = curTxtPanel.streamID % #chatStreams + 1
-        ISChat.instance.textEntry:setText(chatStreams[curTxtPanel.streamID].command)
-        UpdateRangeIndicator(chatStreams[curTxtPanel.streamID])
+        local stream = chatStreams[curTxtPanel.streamID]
+        ISChat.lastTabStream[ISChat.instance.currentTabID] = stream
+        ISChat.instance.textEntry:setText(stream.command)
+        UpdateRangeIndicator(stream)
     end
 end
 
