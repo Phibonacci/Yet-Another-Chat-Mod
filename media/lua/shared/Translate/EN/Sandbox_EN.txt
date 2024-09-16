@@ -4,6 +4,8 @@ Sandbox_EN = {
     Sandbox_YetAnotherChatMod_BubbleTimerInSeconds         = "Bubble timer (seconds)",
     Sandbox_YetAnotherChatMod_BubbleOpacity                = "Bubble opacity",
 
+    Sandbox_YetAnotherChatMod_VoiceEnabled                 = "Enable player fake voices",
+
     Sandbox_YetAnotherChatMod_VerbEnabled                  = "Add verb prefix to messages, and quotes",
 
     Sandbox_YetAnotherChatMod_HideCallout                  = "Hide callouts in chat window (Q spam)",

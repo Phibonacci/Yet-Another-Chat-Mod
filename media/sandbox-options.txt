@@ -27,7 +27,7 @@ option YetAnotherChatMod.VoiceEnabled
 	default = true,
 
 	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_VoiceEnabled
+	translation = YetAnotherChatMod_VoiceEnabled,
 }
 
 
@@ -37,7 +37,7 @@ option YetAnotherChatMod.VerbEnabled
 	default = false,
 
 	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_VerbEnabled
+	translation = YetAnotherChatMod_VerbEnabled,
 }
 
 option YetAnotherChatMod.HideCallout
@@ -46,7 +46,7 @@ option YetAnotherChatMod.HideCallout
 	default = true,
 
 	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_HideCallout
+	translation = YetAnotherChatMod_HideCallout,
 }
 
 option YetAnotherChatMod.MarkdownOneAsteriskColor
@@ -55,7 +55,7 @@ option YetAnotherChatMod.MarkdownOneAsteriskColor
 	default = #ADD4A0,
 
 	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_MarkdownOneAsteriskColor
+	translation = YetAnotherChatMod_MarkdownOneAsteriskColor,
 }
 option YetAnotherChatMod.MarkdownTwoAsterisksColor
 {
