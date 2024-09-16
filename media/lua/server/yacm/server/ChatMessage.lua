@@ -212,6 +212,12 @@ local function SetMessageTypeSettings()
             ['isVoiceEnabled'] = SandboxVars.YetAnotherChatMod.VoiceEnabled,
         },
     }
+
+
+    ChatMessage.MessageTypeSettings['mesay']     = ChatMessage.MessageTypeSettings['say']
+    ChatMessage.MessageTypeSettings['mewhisper'] = ChatMessage.MessageTypeSettings['whisper']
+    ChatMessage.MessageTypeSettings['melow']     = ChatMessage.MessageTypeSettings['low']
+    ChatMessage.MessageTypeSettings['meyell']    = ChatMessage.MessageTypeSettings['yell']
 end
 
 local function GetPlayerRadio(player)
@@ -304,12 +310,8 @@ local function GetSquaresRadios(player, args, radioFrequencies, range)
                 volume = 0
             end
             volume = math.abs(volume)
-            -- TODO find a way to use volume in a non confusing way
-            -- local radioRange = math.abs(volume * radioMaxRange + 0.5)
-            -- local playerDistance = PlayersDistance(player, radio)
             local isInRange, distance = IsInRadioEmittingRange(radioFrequencies[frequency], radio)
             if turnedOn and frequency ~= nil and radioFrequencies[frequency] ~= nil
-                -- and playerDistance <= radioRange
                 and isInRange
                 and Character.canHearRadioSound(player, radio, radioData, maxSoundRange)
             then
@@ -427,6 +429,7 @@ local function SendRadioPackets(author, player, args, sourceRadioByFrequencies)
         type = args.type,
         radios = targetRadiosByFrequencies,
         pitch = args.pitch,
+        disableVerb = args.disableVerb,
     })
 end
 
@@ -485,6 +488,7 @@ local function SendRadioEmittingPackets(player, args, radioFrequencies)
             message = args.message,
             color = args.color,
             frequency = frequency,
+            disableVerb = args.disableVerb,
         })
     end
 end

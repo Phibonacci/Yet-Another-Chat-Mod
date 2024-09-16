@@ -4,7 +4,7 @@ function SendYacmClientCommand(commandName, args)
     sendClientCommand('YACM', commandName, args)
 end
 
-function YacmClientSendCommands.sendChatMessage(message, playerColor, type, pitch)
+function YacmClientSendCommands.sendChatMessage(message, playerColor, type, pitch, disableVerb)
     if not isClient() then return end
     SendYacmClientCommand('ChatMessage', {
         author = getPlayer():getUsername(),
@@ -12,6 +12,7 @@ function YacmClientSendCommands.sendChatMessage(message, playerColor, type, pitc
         type = type,
         color = playerColor,
         pitch = pitch,
+        disableVerb = disableVerb,
     })
 end
 

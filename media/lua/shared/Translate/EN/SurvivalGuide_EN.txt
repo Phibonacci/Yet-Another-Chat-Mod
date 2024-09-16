@@ -7,9 +7,13 @@ SurvivalGuide_EN {
                                                 " <IMAGE:media/ui/yacm/icons/eye-on-plus.png> Always show the speaking range of the current channel <BR>" ..
                                                 " <IMAGE:media/ui/yacm/icons/mic-on.png> Show the listening range of the surrounding radios <BR>",
     SurvivalGuide_YetAnotherChatMod_Whisper   = " /whisper or /w to whisper <BR>",
+    SurvivalGuide_YetAnotherChatMod_MeWhisper = " /mewhisper or /mw to express an action without verb formatting <BR>",
     SurvivalGuide_YetAnotherChatMod_Low       = " /low or /l to talk quietly <BR>",
+    SurvivalGuide_YetAnotherChatMod_MeLow     = " /melow or /ml to express an action without verb formatting <BR>",
     SurvivalGuide_YetAnotherChatMod_Say       = " /say or /s to speak at normal volume <BR>",
+    SurvivalGuide_YetAnotherChatMod_MeSay     = " /mesay or /ms to express an action without verb formatting <BR>",
     SurvivalGuide_YetAnotherChatMod_Yell      = " /yell or /y to scream <BR>",
+    SurvivalGuide_YetAnotherChatMod_MeYell    = " /meyell or /my to express an action without verb formatting <BR>",
     SurvivalGuide_YetAnotherChatMod_Faction   = " /faction or /f to speak to faction channel <BR>",
     SurvivalGuide_YetAnotherChatMod_SafeHouse = " /safehouse or /sh to speak to safehouse channel <BR>",
     SurvivalGuide_YetAnotherChatMod_General   = " /general or /g to speak to general channel <BR>",

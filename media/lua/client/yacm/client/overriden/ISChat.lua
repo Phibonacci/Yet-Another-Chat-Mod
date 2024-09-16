@@ -24,11 +24,18 @@ ISChat.allChatStreams[3]  = { name = 'low', command = '/low ', shortCommand = '/
 ISChat.allChatStreams[4]  = { name = 'yell', command = '/yell ', shortCommand = '/y ', tabID = 1 }
 ISChat.allChatStreams[5]  = { name = 'faction', command = '/faction ', shortCommand = '/f ', tabID = 1 }
 ISChat.allChatStreams[6]  = { name = 'safehouse', command = '/safehouse ', shortCommand = '/sh ', tabID = 1 }
-ISChat.allChatStreams[7]  = { name = 'general', command = '/all ', shortCommand = '/g', tabID = 1 }
+ISChat.allChatStreams[7]  = { name = 'general', command = '/general ', shortCommand = '/g ', tabID = 1 }
 ISChat.allChatStreams[8]  = { name = 'scriptedRadio', command = nil, shortCommand = nil, tabID = 1 }
 ISChat.allChatStreams[9]  = { name = 'ooc', command = '/ooc ', shortCommand = '/o ', tabID = 2 }
 ISChat.allChatStreams[10] = { name = 'pm', command = '/pm ', shortCommand = '/p ', tabID = 3 }
 ISChat.allChatStreams[11] = { name = 'admin', command = '/admin ', shortCommand = '/a ', tabID = 4 }
+
+
+ISChat.noVerbStreams    = {}
+ISChat.noVerbStreams[1] = { name = 'mesay', command = '/mesay ', shortCommand = '/ms ', tabID = 1, forget = true }
+ISChat.noVerbStreams[2] = { name = 'mewhisper', command = '/mewhisper ', shortCommand = '/mw ', tabID = 1, forget = true }
+ISChat.noVerbStreams[3] = { name = 'melow', command = '/melow ', shortCommand = '/ml ', tabID = 1, forget = true }
+ISChat.noVerbStreams[4] = { name = 'meyell', command = '/meyell ', shortCommand = '/my ', tabID = 1, forget = true }
 
 
 ISChat.yacmCommand    = {}
@@ -58,12 +65,19 @@ end
 local function GetCommandFromMessage(command)
     if not luautils.stringStarts(command, '/') then
         local defaultStream = ISChat.defaultTabStream[ISChat.instance.currentTabID]
-        return defaultStream, ''
+        return defaultStream, '', false
     end
     if IsOnlySpacesOrEmpty(command) then
         return nil
     end
     for _, stream in ipairs(ISChat.allChatStreams) do
+        if stream.command and luautils.stringStarts(command, stream.command) then
+            return stream, stream.command, false
+        elseif stream.shortCommand and luautils.stringStarts(command, stream.shortCommand) then
+            return stream, stream.shortCommand, false
+        end
+    end
+    for _, stream in ipairs(ISChat.noVerbStreams) do
         if stream.command and luautils.stringStarts(command, stream.command) then
             return stream, stream.command
         elseif stream.shortCommand and luautils.stringStarts(command, stream.shortCommand) then
@@ -330,13 +344,21 @@ local function ProcessChatCommand(stream, command)
         return false
     end
     if stream.name == 'yell' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'yell', pitch)
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'yell', pitch, false)
     elseif stream.name == 'say' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'say', pitch)
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'say', pitch, false)
     elseif stream.name == 'low' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'low', pitch)
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'low', pitch, false)
     elseif stream.name == 'whisper' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'whisper', pitch)
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'whisper', pitch, false)
+    elseif stream.name == 'meyell' then
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'yell', pitch, true)
+    elseif stream.name == 'mesay' then
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'say', pitch, true)
+    elseif stream.name == 'melow' then
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'low', pitch, true)
+    elseif stream.name == 'mewhisper' then
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'whisper', pitch, true)
     elseif stream.name == 'pm' then
         local targetStart, targetEnd = command:find('^%s*"%a+%s?%a+"')
         if targetStart == nil then
@@ -350,15 +372,15 @@ local function ProcessChatCommand(stream, command)
         YacmClientSendCommands.sendPrivateMessage(pmBody, playerColor, target, pitch)
         ISChat.instance.chatText.lastChatCommand = ISChat.instance.chatText.lastChatCommand .. target .. ' '
     elseif stream.name == 'faction' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'faction', pitch)
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'faction', pitch, false)
     elseif stream.name == 'safehouse' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'safehouse', pitch)
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'safehouse', pitch, false)
     elseif stream.name == 'general' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'general', pitch)
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'general', pitch, false)
     elseif stream.name == 'admin' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'admin', pitch)
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'admin', pitch, false)
     elseif stream.name == 'ooc' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'ooc', pitch)
+        YacmClientSendCommands.sendChatMessage(command, playerColor, 'ooc', pitch, false)
     else
         return false
     end
@@ -559,12 +581,12 @@ local MessageTypeToVerb = {
     ['yell'] = ' yells, ',
     ['radio'] = ' over the radio, ',
     ['scriptedRadio'] = 'over the radio, ',
-    ['pm'] = ': ',
-    ['faction'] = ' (faction): ',
-    ['safehouse'] = ' (Safe House): ',
-    ['general'] = ' (General): ',
-    ['admin'] = ': ',
-    ['ooc'] = ': ',
+    ['pm'] = ' ',
+    ['faction'] = ' ',
+    ['safehouse'] = ' ',
+    ['general'] = ' ',
+    ['admin'] = ' ',
+    ['ooc'] = ' ',
 }
 
 function BuildVerbString(type)
@@ -590,7 +612,7 @@ function BuildQuote(type)
     return '"'
 end
 
-function BuildMessageFromPacket(type, message, author, playerColor, frequency)
+function BuildMessageFromPacket(type, message, author, playerColor, frequency, disableVerb)
     local messageColor = BuildColorFromMessageType(type)
     local parsedMessage = Parser.ParseYacmMessage(message, messageColor, 20, 200)
     local radioPrefix = ''
@@ -600,7 +622,7 @@ function BuildMessageFromPacket(type, message, author, playerColor, frequency)
     local messageColorString = StringBuilder.BuildBracketColorString(messageColor)
     local quote
     local verbString
-    if YacmServerSettings == nil or YacmServerSettings['options']['verb'] == true then
+    if not disableVerb and (YacmServerSettings == nil or YacmServerSettings['options']['verb'] == true) then
         quote = BuildQuote(type)
         verbString = BuildVerbString(type)
     else
@@ -811,11 +833,11 @@ local function ReduceBoredom()
     player:getBodyDamage():setBoredomLevel(boredom - 0.6)
 end
 
-function ISChat.onMessagePacket(type, author, message, color, hideInChat, target, isFromDiscord, voicePitch)
+function ISChat.onMessagePacket(type, author, message, color, hideInChat, target, isFromDiscord, voicePitch, disableVerb)
     if author ~= getPlayer():getUsername() then
         ReduceBoredom()
     end
-    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, author, color)
+    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, author, color, nil, disableVerb)
     if type == 'pm' and target:lower() == getPlayer():getUsername():lower() then
         ISChat.instance.lastPrivateMessageAuthor = author
     end
@@ -974,20 +996,20 @@ function ISChat.onDiscordPacket(message)
     processGeneralMessage(message)
 end
 
-function ISChat.onRadioEmittingPacket(type, author, message, color, frequency)
+function ISChat.onRadioEmittingPacket(type, author, message, color, frequency, disableVerb)
     local time = Calendar.getInstance():getTimeInMillis()
     local stream = GetStreamFromType(type)
     if stream == nil then
         print('yacm error: onRadioEmittingPacket: stream not found')
         return
     end
-    local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency)
+    local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency, disableVerb)
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
         formattedMessage, time, type)
     AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
 end
 
-function ISChat.onRadioPacket(type, author, message, color, radiosInfo, voicePitch)
+function ISChat.onRadioPacket(type, author, message, color, radiosInfo, voicePitch, disableVerb)
     local time = Calendar.getInstance():getTimeInMillis()
     local stream = GetStreamFromType(type)
     if stream == nil then
@@ -1000,7 +1022,8 @@ function ISChat.onRadioPacket(type, author, message, color, radiosInfo, voicePit
         ReduceBoredom()
     end
     for frequency, radios in pairs(radiosInfo) do
-        local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency)
+        local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency,
+            disableVerb)
         local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
             formattedMessage, time, type)
         local messageColor = BuildColorFromMessageType(type)
@@ -1093,7 +1116,8 @@ ISChat.addLineInChat = function(message, tabID)
             messageWithoutColorPrefix,
             color,
             nil, -- todo find a way to locate the radio
-            message:getRadioChannel()
+            message:getRadioChannel(),
+            false
         )
     else
         message:setOverHeadSpeech(false)
@@ -1107,7 +1131,8 @@ ISChat.addLineInChat = function(message, tabID)
             { 255, 255, 255 },
             YacmServerSettings and YacmServerSettings['options'] and
             YacmServerSettings['options']['hideCallout'] or nil,
-            nil -- voice pitch, should not be used, if we want it we need to send a packet to the server instead
+            nil, -- voice pitch, should not be used, if we want it we need to send a packet to the server instead
+            false
         )
     end
 
@@ -1130,7 +1155,8 @@ ISChat.addLineInChat = function(message, tabID)
                 nil,
                 nil,
                 true,
-                nil -- voice pitch, should not be used
+                nil, -- voice pitch, should not be used anyway
+                false
             )
         end
         if YacmServerSettings and YacmServerSettings['options']
@@ -1146,7 +1172,9 @@ ISChat.addLineInChat = function(message, tabID)
                         message:getAuthor(),
                         messageWithoutPrefix,
                         discordColor,
-                        radiosInfo
+                        radiosInfo,
+                        nil,
+                        false
                     )
                 end
             end
@@ -1235,7 +1263,8 @@ function ISChat.onTextChange()
             UpdateRangeIndicator(stream)
         end
         -- you are allowed to use a command from another tab but it wont be remembered for the next message
-        if ISChat.instance.currentTabID == stream['tabID'] then
+        -- /me* commands are also not remembered as they should be occasional
+        if ISChat.instance.currentTabID == stream['tabID'] and not stream['forget'] then
             ISChat.lastTabStream[ISChat.instance.currentTabID] = stream
         end
         YacmClientSendCommands.sendTyping(getPlayer():getUsername(), stream['name'])
@@ -1322,14 +1351,26 @@ local function UpdateInfoWindow()
     if YacmServerSettings['whisper']['enabled'] then
         info = info .. getText('SurvivalGuide_YetAnotherChatMod_Whisper')
     end
+    if YacmServerSettings['whisper']['enabled'] and YacmServerSettings['options']['verb'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_MeWhisper')
+    end
     if YacmServerSettings['low']['enabled'] then
         info = info .. getText('SurvivalGuide_YetAnotherChatMod_Low')
+    end
+    if YacmServerSettings['low']['enabled'] and YacmServerSettings['options']['verb'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_MeLow')
     end
     if YacmServerSettings['say']['enabled'] then
         info = info .. getText('SurvivalGuide_YetAnotherChatMod_Say')
     end
+    if YacmServerSettings['say']['enabled'] and YacmServerSettings['options']['verb'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_MeSay')
+    end
     if YacmServerSettings['yell']['enabled'] then
         info = info .. getText('SurvivalGuide_YetAnotherChatMod_Yell')
+    end
+    if YacmServerSettings['yell']['enabled'] and YacmServerSettings['options']['verb'] then
+        info = info .. getText('SurvivalGuide_YetAnotherChatMod_MeYell')
     end
     if YacmServerSettings['pm']['enabled'] then
         info = info .. getText('SurvivalGuide_YetAnotherChatMod_Pm')

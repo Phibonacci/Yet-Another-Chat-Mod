@@ -11,7 +11,7 @@ Sandbox_EN = {
     Sandbox_YetAnotherChatMod_MarkdownOneAsteriskColor     = "Markdown one asterisk color",
     Sandbox_YetAnotherChatMod_MarkdownTwoAsterisksColor    = "Markdown two asterisks color",
 
-    Sandbox_YetAnotherChatMod_GeneralDiscordEnabled        = "Enable discord sync with /all messages",
+    Sandbox_YetAnotherChatMod_GeneralDiscordEnabled        = "Enable discord sync with /general messages",
     Sandbox_YetAnotherChatMod_RadioDiscordEnabled          = "Enable discord sync with a radio channel",
     Sandbox_YetAnotherChatMod_RadioDiscordFrequency        = "Set the radio frequency to sync with discord",
 
