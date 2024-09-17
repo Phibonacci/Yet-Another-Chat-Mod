@@ -1,6 +1,7 @@
 local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/shared/Version')
 
 local ChatUI                       = require('yacm/client/ui/ChatUI')
+local ChatText                     = require('yacm/client/ui/Chat/ChatText')
 
 local Character                    = require('yacm/shared/utils/Character')
 local FakeRadioPacket              = require('yacm/client/FakeRadioPacket')
@@ -1292,16 +1293,16 @@ function ISChat:onActivateView()
     end
 end
 
-local function RenderChatText(self)
-    self:setStencilRect(0, 0, self.width, self.height)
-    ISRichTextPanel.render(self)
-    self:clearStencilRect()
+local function RenderChatText(chat)
+    chat:setStencilRect(0, 0, chat.width, chat.height)
+    ChatText.render(chat)
+    chat:clearStencilRect()
 end
 
 function ISChat:createTab()
     local chatY = self:titleBarHeight() + self.btnHeight + 2 * self.inset
     local chatHeight = self.textEntry:getY() - chatY
-    local chatText = ISRichTextPanel:new(0, chatY, self:getWidth(), chatHeight)
+    local chatText = ChatText:new(0, chatY, self:getWidth(), chatHeight)
     chatText.maxLines = 500
     chatText:initialise()
     chatText.background = false
