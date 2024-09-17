@@ -1,6 +1,8 @@
 Sandbox_EN = {
     Sandbox_YetAnotherChatMod                              = "Yet Another Chat Mod",
 
+    Sandbox_YetAnotherChatMod_ShowCharacterName            = "Show character name in chat instead of username",
+
     Sandbox_YetAnotherChatMod_BubbleTimerInSeconds         = "Bubble timer (seconds)",
     Sandbox_YetAnotherChatMod_BubbleOpacity                = "Bubble opacity",
 

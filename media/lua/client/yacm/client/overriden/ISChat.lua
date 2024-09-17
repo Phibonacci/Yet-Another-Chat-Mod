@@ -616,7 +616,7 @@ function BuildQuote(type)
     return '"'
 end
 
-function BuildMessageFromPacket(type, message, author, playerColor, frequency, disableVerb)
+function BuildMessageFromPacket(type, message, name, playerColor, frequency, disableVerb)
     local messageColor = BuildColorFromMessageType(type)
     local parsedMessage = Parser.ParseYacmMessage(message, messageColor, 20, 200)
     local radioPrefix = ''
@@ -634,8 +634,8 @@ function BuildMessageFromPacket(type, message, author, playerColor, frequency, d
         verbString = ' '
     end
     local formatedMessage = ''
-    if author ~= nil then
-        formatedMessage = formatedMessage .. StringBuilder.BuildBracketColorString(playerColor) .. author
+    if name ~= nil then
+        formatedMessage = formatedMessage .. StringBuilder.BuildBracketColorString(playerColor) .. name
     end
     formatedMessage = formatedMessage ..
         StringBuilder.BuildBracketColorString({ 150, 150, 150 }) ..
@@ -837,11 +837,17 @@ local function ReduceBoredom()
     player:getBodyDamage():setBoredomLevel(boredom - 0.6)
 end
 
-function ISChat.onMessagePacket(type, author, message, color, hideInChat, target, isFromDiscord, voicePitch, disableVerb)
+function ISChat.onMessagePacket(type, author, characterName, message, color, hideInChat, target, isFromDiscord,
+                                voicePitch, disableVerb)
     if author ~= getPlayer():getUsername() then
         ReduceBoredom()
     end
-    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, author, color, nil, disableVerb)
+    print('message: ' .. characterName)
+    local name = characterName
+    if YacmServerSettings and not YacmServerSettings['options']['showCharacterName'] then
+        name = author
+    end
+    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, name, color, nil, disableVerb)
     if type == 'pm' and target:lower() == getPlayer():getUsername():lower() then
         ISChat.instance.lastPrivateMessageAuthor = author
     end
@@ -1000,20 +1006,24 @@ function ISChat.onDiscordPacket(message)
     processGeneralMessage(message)
 end
 
-function ISChat.onRadioEmittingPacket(type, author, message, color, frequency, disableVerb)
+function ISChat.onRadioEmittingPacket(type, author, characterName, message, color, frequency, disableVerb)
     local time = Calendar.getInstance():getTimeInMillis()
     local stream = GetStreamFromType(type)
     if stream == nil then
         print('yacm error: onRadioEmittingPacket: stream not found')
         return
     end
-    local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency, disableVerb)
+    local name = characterName
+    if YacmServerSettings and not YacmServerSettings['options']['showCharacterName'] then
+        name = author
+    end
+    local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, name, color, frequency, disableVerb)
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
         formattedMessage, time, type)
     AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
 end
 
-function ISChat.onRadioPacket(type, author, message, color, radiosInfo, voicePitch, disableVerb)
+function ISChat.onRadioPacket(type, author, characterName, message, color, radiosInfo, voicePitch, disableVerb)
     local time = Calendar.getInstance():getTimeInMillis()
     local stream = GetStreamFromType(type)
     if stream == nil then
@@ -1025,8 +1035,12 @@ function ISChat.onRadioPacket(type, author, message, color, radiosInfo, voicePit
     if author ~= playerName then
         ReduceBoredom()
     end
+    local name = characterName
+    if YacmServerSettings and not YacmServerSettings['options']['showCharacterName'] then
+        name = author
+    end
     for frequency, radios in pairs(radiosInfo) do
-        local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, author, color, frequency,
+        local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, name, color, frequency,
             disableVerb)
         local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
             formattedMessage, time, type)
@@ -1117,6 +1131,7 @@ ISChat.addLineInChat = function(message, tabID)
         ISChat.onRadioPacket(
             'scriptedRadio',
             nil,
+            nil,
             messageWithoutColorPrefix,
             color,
             nil, -- todo find a way to locate the radio
@@ -1130,6 +1145,7 @@ ISChat.addLineInChat = function(message, tabID)
     if messageType == 'Local' then -- when pressing Q to shout
         ISChat.onMessagePacket(
             'yell',
+            message:getAuthor(),
             message:getAuthor(),
             line,
             { 255, 255, 255 },
@@ -1154,6 +1170,7 @@ ISChat.addLineInChat = function(message, tabID)
             ISChat.onMessagePacket(
                 'general',
                 message:getAuthor(),
+                message:getAuthor(),
                 messageWithoutPrefix,
                 discordColor,
                 nil,
@@ -1173,6 +1190,7 @@ ISChat.addLineInChat = function(message, tabID)
                 if radiosInfo ~= nil then
                     ISChat.onRadioPacket(
                         'say',
+                        message:getAuthor(),
                         message:getAuthor(),
                         messageWithoutPrefix,
                         discordColor,

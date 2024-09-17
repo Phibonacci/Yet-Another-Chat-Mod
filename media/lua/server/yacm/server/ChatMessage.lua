@@ -198,6 +198,7 @@ local function SetMessageTypeSettings()
             ['color'] = GetColorFromString(SandboxVars.YetAnotherChatMod.RadioColor),
         },
         ['options'] = {
+            ['showCharacterName'] = SandboxVars.YetAnotherChatMod.ShowCharacterName,
             ['verb'] = SandboxVars.YetAnotherChatMod.VerbEnabled,
             ['bubble'] = {
                 ['timer'] = SandboxVars.YetAnotherChatMod.BubbleTimerInSeconds,
@@ -461,6 +462,7 @@ local function SendRadioPackets(author, player, args, sourceRadioByFrequencies)
 
     SendServer.Command(player, 'RadioMessage', {
         author = args.author,
+        characterName = args.characterName,
         message = args.message,
         color = args.color,
         type = args.type,
@@ -522,6 +524,7 @@ local function SendRadioEmittingPackets(player, args, radioFrequencies)
         SendServer.Command(player, 'RadioEmittingMessage', {
             type = args.type,
             author = args.author,
+            characterName = args.characterName,
             message = args.message,
             color = args.color,
             frequency = frequency,

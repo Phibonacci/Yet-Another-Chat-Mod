@@ -3,6 +3,12 @@ local World = require('yacm/shared/utils/World')
 
 local Character = {}
 
+function Character.getFirstAndLastName(player)
+    return player:getDescriptor():getForename()
+        .. " "
+        .. player:getDescriptor():getSurname()
+end
+
 function Character.getFirstHandItemByGroup(player, group)
     local primary = player:getPrimaryHandItem()
     local secondary = player:getSecondaryHandItem()

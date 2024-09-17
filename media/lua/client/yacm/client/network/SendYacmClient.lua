@@ -1,3 +1,5 @@
+local Character = require('yacm/shared/utils/Character')
+
 local YacmClientSendCommands = {}
 
 function SendYacmClientCommand(commandName, args)
@@ -6,8 +8,10 @@ end
 
 function YacmClientSendCommands.sendChatMessage(message, playerColor, type, pitch, disableVerb)
     if not isClient() then return end
+    local player = getPlayer()
     SendYacmClientCommand('ChatMessage', {
-        author = getPlayer():getUsername(),
+        author = player:getUsername(),
+        characterName = Character.getFirstAndLastName(player),
         message = message,
         type = type,
         color = playerColor,
@@ -18,8 +22,10 @@ end
 
 function YacmClientSendCommands.sendPrivateMessage(message, playerColor, target, pitch)
     if not isClient() then return end
+    local player = getPlayer()
     SendYacmClientCommand('ChatMessage', {
         author = getPlayer():getUsername(),
+        characterName = Character.getFirstAndLastName(player),
         message = message,
         type = 'pm',
         target = target,

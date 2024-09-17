@@ -1,5 +1,14 @@
 VERSION = 1,
 
+option YetAnotherChatMod.ShowCharacterName
+{
+	type = boolean,
+	default = true,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_ShowCharacterName,
+}
+
 option YetAnotherChatMod.BubbleTimerInSeconds
 {
 	type = integer,
