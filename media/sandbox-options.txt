@@ -138,7 +138,7 @@ option YetAnotherChatMod.WhisperEnabled
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_WhisperEnabled,
 }
 option YetAnotherChatMod.WhisperRange
@@ -148,7 +148,7 @@ option YetAnotherChatMod.WhisperRange
 	max = 10000,
 	default = 3,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_WhisperRange,
 }
 option YetAnotherChatMod.WhisperZombieRange
@@ -158,7 +158,7 @@ option YetAnotherChatMod.WhisperZombieRange
 	max = 10000,
 	default = 3,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_WhisperZombieRange,
 }
 option YetAnotherChatMod.WhisperColor
@@ -166,7 +166,7 @@ option YetAnotherChatMod.WhisperColor
 	type = string,
 	default = #B4FFC5,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_WhisperColor,
 }
 
@@ -175,7 +175,7 @@ option YetAnotherChatMod.LowEnabled
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_LowEnabled,
 }
 option YetAnotherChatMod.LowRange
@@ -185,7 +185,7 @@ option YetAnotherChatMod.LowRange
 	max = 10000,
 	default = 10,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_LowRange,
 }
 option YetAnotherChatMod.LowZombieRange
@@ -195,7 +195,7 @@ option YetAnotherChatMod.LowZombieRange
 	max = 10000,
 	default = 10,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_LowZombieRange,
 }
 option YetAnotherChatMod.LowColor
@@ -203,7 +203,7 @@ option YetAnotherChatMod.LowColor
 	type = string,
 	default = #B4FFFF,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_LowColor,
 }
 
@@ -212,7 +212,7 @@ option YetAnotherChatMod.SayEnabled
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_SayEnabled,
 }
 option YetAnotherChatMod.SayRange
@@ -222,7 +222,7 @@ option YetAnotherChatMod.SayRange
 	max = 10000,
 	default = 30,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_SayRange,
 }
 option YetAnotherChatMod.SayZombieRange
@@ -232,7 +232,7 @@ option YetAnotherChatMod.SayZombieRange
 	max = 10000,
 	default = 30,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_SayZombieRange,
 }
 option YetAnotherChatMod.SayColor
@@ -240,7 +240,7 @@ option YetAnotherChatMod.SayColor
 	type = string,
 	default = #FFFFFF,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_SayColor,
 }
 
@@ -249,7 +249,7 @@ option YetAnotherChatMod.YellEnabled
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_YellEnabled,
 }
 option YetAnotherChatMod.YellRange
@@ -259,7 +259,7 @@ option YetAnotherChatMod.YellRange
 	max = 10000,
 	default = 60,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_YellRange,
 }
 option YetAnotherChatMod.YellZombieRange
@@ -269,7 +269,7 @@ option YetAnotherChatMod.YellZombieRange
 	max = 10000,
 	default = 60,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_YellZombieRange,
 }
 option YetAnotherChatMod.YellColor
@@ -277,7 +277,7 @@ option YetAnotherChatMod.YellColor
 	type = string,
 	default = #E69696,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_YellColor,
 }
 
@@ -286,7 +286,7 @@ option YetAnotherChatMod.PrivateMessageEnabled
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_PrivateMessageEnabled,
 }
 option YetAnotherChatMod.PrivateMessageColor
@@ -294,7 +294,7 @@ option YetAnotherChatMod.PrivateMessageColor
 	type = string,
 	default = #FFB8DA,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_PrivateMessageColor,
 }
 
@@ -303,7 +303,7 @@ option YetAnotherChatMod.FactionMessageEnabled
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_FactionMessageEnabled,
 }
 option YetAnotherChatMod.FactionMessageColor
@@ -311,7 +311,7 @@ option YetAnotherChatMod.FactionMessageColor
 	type = string,
 	default = #AAFFAA,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_FactionMessageColor,
 }
 
@@ -320,7 +320,7 @@ option YetAnotherChatMod.SafeHouseMessageEnabled
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_SafeHouseMessageEnabled,
 }
 option YetAnotherChatMod.SafeHouseMessageColor
@@ -328,7 +328,7 @@ option YetAnotherChatMod.SafeHouseMessageColor
 	type = string,
 	default = #FFFF60,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_SafeHouseMessageColor,
 }
 
@@ -337,7 +337,7 @@ option YetAnotherChatMod.GeneralMessageEnabled
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_GeneralMessageEnabled,
 }
 option YetAnotherChatMod.GeneralMessageColor
@@ -345,7 +345,7 @@ option YetAnotherChatMod.GeneralMessageColor
 	type = string,
 	default = #BEBEFF,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_GeneralMessageColor,
 }
 
@@ -354,7 +354,7 @@ option YetAnotherChatMod.AdminMessageEnabled
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_AdminMessageEnabled,
 }
 option YetAnotherChatMod.AdminMessageColor
@@ -362,7 +362,7 @@ option YetAnotherChatMod.AdminMessageColor
 	type = string,
 	default = #FFAAAA,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_AdminMessageColor,
 }
 
@@ -371,7 +371,7 @@ option YetAnotherChatMod.OutOfCharacterMessageEnabled
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_OutOfCharacterMessageEnabled,
 }
 option YetAnotherChatMod.OutOfCharacterMessageRange
@@ -381,7 +381,7 @@ option YetAnotherChatMod.OutOfCharacterMessageRange
 	max = 10000,
 	default = 120,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_OutOfCharacterMessageRange,
 }
 option YetAnotherChatMod.OutOfCharacterMessageColor
@@ -389,6 +389,6 @@ option YetAnotherChatMod.OutOfCharacterMessageColor
 	type = string,
 	default = #92FF94,
 
-	page = YetAnotherChatMod,
+	page = YetAnotherChatModChannels,
 	translation = YetAnotherChatMod_OutOfCharacterMessageColor,
 }
