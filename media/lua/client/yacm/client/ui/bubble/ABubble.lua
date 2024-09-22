@@ -26,11 +26,7 @@ local function Lerp(start, target, progression)
     return start + distance
 end
 
-function ABubble:drawBubble(x, y)
-    if self.dead then
-        return
-    end
-
+function ABubble:updateText(x, y)
     local time = Calendar.getInstance():getTimeInMillis()
     local elapsedTime = time - self.startTime
     local delta = time - self.previousTime
@@ -49,6 +45,7 @@ function ABubble:drawBubble(x, y)
     end
     local parsedMessages = Parser.ParseYacmMessage(self.message, self.color, 20, length)
     self.text = StringBuilder.BuildFontSizeString('medium') .. parsedMessages['bubble']
+    self.rawText = parsedMessages['rawMessage']
     self:paginate()
 
     if self.voice then
@@ -72,15 +69,23 @@ function ABubble:drawBubble(x, y)
     self.currentY = y + self.heightOffset
     self:setX(self.currentX)
     self:setY(self.currentY)
+end
 
-    local zoom = getCore():getZoom(getPlayer():getPlayerNum())
+function ABubble:drawBubble()
+    if self.dead then
+        return
+    end
+
+    local time = Calendar.getInstance():getTimeInMillis()
+    local elapsedTime = time - self.startTime
+
     local scale = 1
-    local alpha
     if self.timer - elapsedTime > 1000 or not self.messageFinishedScrolling then
-        alpha = self.opacity
+        self.alpha = self.opacity
     elseif self.timer - elapsedTime > 0 then
         local fadingTime = elapsedTime - (self.timer - 1000)
-        alpha = (1000 - fadingTime) / 1000 * self.opacity
+        self.fadingProgression = (1000 - fadingTime) / 1000
+        self.alpha = self.fadingProgression * self.opacity
     else
         self.dead = true
         if self.voice then
@@ -93,36 +98,58 @@ function ABubble:drawBubble(x, y)
     local leftW = math.floor(10 * 1 / scale)
     local rightW = math.floor(10 * 1 / scale)
     local centerW = math.floor(self:getWidth()) - rightW - leftW
-    local centerX = leftW
+    local centerX = leftX + leftW
     local rightX = centerX + centerW
     local topH = math.floor(10 * 1 / scale)
-    self:drawTextureScaled(self.bubbleTopLeft, leftX, 0, leftW, topH, alpha)
-    self:drawTextureScaled(self.bubbleTop, centerX, 0, centerW, topH, alpha)
-    self:drawTextureScaled(self.bubbleTopRight, rightX, 0, rightW, topH, alpha)
+    self:drawTextureScaled(self.bubbleTopLeft, leftX, 0, leftW, topH, self.alpha)
+    self:drawTextureScaled(self.bubbleTop, centerX, 0, centerW, topH, self.alpha)
+    self:drawTextureScaled(self.bubbleTopRight, rightX, 0, rightW, topH, self.alpha)
 
     local centerY = topH
     local botH = math.floor(10 * 1 / scale)
     local centerH = math.floor(self:getHeight()) - botH - topH
     local botY = centerY + centerH
 
-    self:drawTextureScaled(self.bubbleCenterLeft, leftX, centerY, leftW, centerH, alpha)
-    self:drawTextureScaled(self.bubbleCenter, centerX, centerY, centerW, centerH, alpha)
-    self:drawTextureScaled(self.bubbleCenterRight, rightX, centerY, rightW, centerH, alpha)
+    self:drawTextureScaled(self.bubbleCenterLeft, leftX, centerY, leftW, centerH, self.alpha)
+    self:drawTextureScaled(self.bubbleCenter, centerX, centerY, centerW, centerH, self.alpha)
+    self:drawTextureScaled(self.bubbleCenterRight, rightX, centerY, rightW, centerH, self.alpha)
 
-    self:drawTextureScaled(self.bubbleBotLeft, leftX, botY, leftW, botH, alpha)
-    self:drawTextureScaled(self.bubbleBot, centerX, botY, centerW, botH, alpha)
-    self:drawTextureScaled(self.bubbleBotRight, rightX, botY, rightW, botH, alpha)
+    if self.playerAvatar or self.playerModel then
+        self:drawTextureScaled(self.bubbleBotLeftSquare, leftX, botY, leftW, botH, self.alpha)
+    else
+        self:drawTextureScaled(self.bubbleBotLeft, leftX, botY, leftW, botH, self.alpha)
+    end
+    self:drawTextureScaled(self.bubbleBot, centerX, botY, centerW, botH, self.alpha)
+    self:drawTextureScaled(self.bubbleBotRight, rightX, botY, rightW, botH, self.alpha)
 
-    if x > 0 and y > 0
-        and x + self:getWidth() < getCore():getScreenWidth()
-        and y + self:getHeight() < getCore():getScreenHeight()
+    if self.currentX > 0 and self.currentY > 0
+        and self.currentX + self:getWidth() < getCore():getScreenWidth()
+        and self.currentY + self:getHeight() < getCore():getScreenHeight()
     then
-        self:drawTextureScaled(self.bubbleArrow, centerX + centerW / 2 + 5, botY + 4 * botH / 5, 7 / scale, 9 / scale,
-            alpha)
+        self:drawTextureScaled(self.bubbleArrow,
+            centerX + centerW / 2 + 5,
+            botY + 4 * botH / 5,
+            7 / scale,
+            9 / scale,
+            self.alpha)
     end
 
     ISRichTextPanel.render(self)
     self.previousTime = time
+end
+
+function ABubble:setY(y)
+    local ys = y
+    if self:getKeepOnScreen() then
+        local maxY = getCore():getScreenHeight();
+        local topSpace = self.topSpace or 0
+        ys = math.max(topSpace, math.min(y, maxY - self.height));
+    end
+
+    self.y = ys;
+    if self.javaObject ~= nil then
+        self.javaObject:setY(ys);
+    end
 end
 
 function ABubble:new(x, y, text, rawText, message, messageColor, timer, opacity, heightOffsetStart)
@@ -138,6 +165,7 @@ function ABubble:new(x, y, text, rawText, message, messageColor, timer, opacity,
     o.opacity = opacity / 100
     o.message = message
     o.color = messageColor
+    o.rawText = rawText
     o.fullMessageLength = #rawText
     o.messageFinishedScrolling = false
     o.background = true
@@ -160,6 +188,13 @@ function ABubble:new(x, y, text, rawText, message, messageColor, timer, opacity,
     o.heightOffsetStart = heightOffsetStart
     o.heightOffset = heightOffsetStart
     o.subscribed = false
+    o.defaultWidth = width
+    o.alpha = o.opacity
+    o.fadingProgression = 1
+    o.defaultLeftMargin = 20
+    o.defaultTopMargin = 10
+    -- I mean padding is already called padding in ISRichTextPanel, how do I call a real margin?
+    o.topSpace = 0
     return o
 end
 

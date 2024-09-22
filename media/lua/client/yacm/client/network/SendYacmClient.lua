@@ -164,4 +164,10 @@ function YacmClientSendCommands.sendAskRadioState(radio)
     end
 end
 
+function YacmClientSendCommands.sendKnownAvatars(knownAvatars)
+    SendYacmClientCommand('KnownAvatars', {
+        avatars = knownAvatars,
+    })
+end
+
 return YacmClientSendCommands

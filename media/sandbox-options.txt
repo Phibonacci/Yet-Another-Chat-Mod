@@ -9,6 +9,16 @@ option YetAnotherChatMod.ShowCharacterName
 	translation = YetAnotherChatMod_ShowCharacterName,
 }
 
+option YetAnotherChatMod.BubblePortrait
+{
+	type = enum,
+	numValues = 4,
+	default = 4,
+
+	page = YetAnotherChatMod,
+	translation = YetAnotherChatMod_BubblePortrait,
+	valueTranslation = YetAnotherChatMod_BubblePortrait_Values,
+}
 option YetAnotherChatMod.BubbleTimerInSeconds
 {
 	type = integer,

@@ -1,9 +1,10 @@
-local Character    = require('yacm/shared/utils/Character')
-local ChatMessage  = require('yacm/server/ChatMessage')
-local SendServer   = require('yacm/server/network/SendServer')
-local Radio        = require('yacm/server/radio/Radio')
-local RadioManager = require('yacm/server/radio/RadioManager')
-local World        = require('yacm/shared/utils/World')
+local AvatarManager = require('yacm/server/AvatarManager')
+local Character     = require('yacm/shared/utils/Character')
+local ChatMessage   = require('yacm/server/ChatMessage')
+local SendServer    = require('yacm/server/network/SendServer')
+local Radio         = require('yacm/server/radio/Radio')
+local RadioManager  = require('yacm/server/radio/RadioManager')
+local World         = require('yacm/shared/utils/World')
 
 
 local RecvServer = {}
@@ -197,6 +198,16 @@ RecvServer['AskSquareRadioState'] = function(player, args)
     local radio = radios[1]
     Radio.SyncSquare(radio, player)
 end
+
+
+RecvServer['KnownAvatars'] = function(player, args)
+    local avatars = args['avatars']
+    if avatars == nil or type(avatars) ~= 'table' then
+        print('yacm error: KnownAvatars packet does not contain an "avatars" variable')
+    end
+    AvatarManager:registerPlayerAvatars(player, avatars)
+end
+
 
 local function OnClientCommand(module, command, player, args)
     if module == 'YACM' and RecvServer[command] then

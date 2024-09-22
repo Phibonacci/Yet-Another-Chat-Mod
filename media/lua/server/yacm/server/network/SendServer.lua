@@ -36,4 +36,13 @@ function SendServer.InHandRadioState(player, radioId, turnedOn, mute, power, vol
     })
 end
 
+function SendServer.Avatar(player, username, checksum, data, extension)
+    SendServer.Command(player, 'AvatarImage', {
+        username = username,
+        checksum = checksum,
+        data = data,
+        extension = extension,
+    })
+end
+
 return SendServer

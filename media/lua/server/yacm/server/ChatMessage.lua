@@ -211,6 +211,7 @@ local function SetMessageTypeSettings()
             },
             ['hideCallout'] = SandboxVars.YetAnotherChatMod.HideCallout,
             ['isVoiceEnabled'] = SandboxVars.YetAnotherChatMod.VoiceEnabled,
+            ['portrait'] = SandboxVars.YetAnotherChatMod.BubblePortrait,
         },
     }
 

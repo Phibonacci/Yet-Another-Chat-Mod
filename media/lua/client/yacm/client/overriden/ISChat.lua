@@ -3,6 +3,7 @@ local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/shared/Version')
 local ChatUI                       = require('yacm/client/ui/ChatUI')
 local ChatText                     = require('yacm/client/ui/Chat/ChatText')
 
+local AvatarManager                = require('yacm/client/AvatarManager')
 local Character                    = require('yacm/shared/utils/Character')
 local FakeRadioPacket              = require('yacm/client/FakeRadioPacket')
 local Parser                       = require('yacm/client/parser/Parser')
@@ -266,6 +267,11 @@ local function InitGlobalModData()
         ISChat.instance.isRadioIconEnabled = true
     elseif yacmModData['isRadioIconEnabled'] ~= nil then
         ISChat.instance.isRadioIconEnabled = yacmModData['isRadioIconEnabled']
+    end
+    if yacmModData['isPortraitEnabled'] == nil and ISChat.instance.isPortraitEnabled == nil then
+        ISChat.instance.isPortraitEnabled = true
+    elseif yacmModData['isPortraitEnabled'] ~= nil then
+        ISChat.instance.isPortraitEnabled = yacmModData['isPortraitEnabled']
     end
     if yacmModData['voicePitch'] == nil then
         local randomPitch = ZombRandFloat(0.85, 1.15)
@@ -675,8 +681,10 @@ function CreatePlayerBubble(author, message, color, voicePitch)
         timer = YacmServerSettings['options']['bubble']['timer']
         opacity = YacmServerSettings['options']['bubble']['opacity']
     end
+    local portrait = (YacmServerSettings and ISChat.instance.isPortraitEnabled and YacmServerSettings['options']['portrait'])
+        or 1
     local bubble = PlayerBubble:new(
-        authorObj, message, color, timer, opacity, ISChat.instance.isVoiceEnabled, voicePitch)
+        authorObj, message, color, timer, opacity, ISChat.instance.isVoiceEnabled, voicePitch, portrait)
     ISChat.instance.bubble[author] = bubble
     -- the player is not typing anymore if his bubble appears
     if ISChat.instance.typingDots[author] ~= nil then
@@ -842,7 +850,6 @@ function ISChat.onMessagePacket(type, author, characterName, message, color, hid
     if author ~= getPlayer():getUsername() then
         ReduceBoredom()
     end
-    print('message: ' .. characterName)
     local name = characterName
     if YacmServerSettings and not YacmServerSettings['options']['showCharacterName'] then
         name = author
@@ -1474,6 +1481,9 @@ ISChat.onRecvSandboxVars = function(messageTypeSettings)
         Events.OnPostRender.Remove(AskServerData)
     end
 
+    local knownAvatars = AvatarManager:getKnownAvatars()
+    YacmClientSendCommands.sendKnownAvatars(knownAvatars)
+
     YacmServerSettings = messageTypeSettings -- a global
 
     if HasAtLeastOneChanelEnabled(2) == true then
@@ -1956,6 +1966,14 @@ function ISChat:onGearButtonClick()
         radioIconOptionName = getText("UI_YACM_disable_radio_icon")
     end
     context:addOption(radioIconOptionName, ISChat.instance, ISChat.onToggleRadioIcon)
+
+    if YacmServerSettings and YacmServerSettings['options']['portrait'] ~= 0 then
+        local portraitOptionName = getText("UI_YACM_enable_portrait")
+        if self.isRadioIconEnabled then
+            portraitOptionName = getText("UI_YACM_disable_portrait")
+        end
+        context:addOption(portraitOptionName, ISChat.instance, ISChat.onTogglePortrait)
+    end
 end
 
 function ISChat.onToggleVoice()
@@ -1974,6 +1992,12 @@ function ISChat.onToggleRadioIcon()
     if ISChat.instance.radioRangeIndicator then
         ISChat.instance.radioRangeIndicator.showIcon = ISChat.instance.isRadioIconEnabled
     end
+end
+
+function ISChat.onTogglePortrait()
+    ISChat.instance.isPortraitEnabled = not ISChat.instance.isPortraitEnabled
+    ISChat.instance.yacmModData['isPortraitEnabled'] = ISChat.instance.isRadioIconEnabled
+    ModData.add('yacm', ISChat.instance.yacmModData)
 end
 
 Events.OnChatWindowInit.Add(ISChat.initChat)

@@ -3,4 +3,6 @@ Sandbox_EN = {
     UI_YACM_chat_disable_voices = "Disable voices",
     UI_YACM_enable_radio_icon   = "Show radio icon",
     UI_YACM_disable_radio_icon  = "Hide radio icon",
+    UI_YACM_enable_portrait     = "Show bubble portrait",
+    UI_YACM_disable_portrait    = "Hide bubble portrait",
 }

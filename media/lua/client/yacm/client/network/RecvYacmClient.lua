@@ -1,3 +1,4 @@
+local AvatarManager = require('yacm/client/AvatarManager')
 local Radio = require('yacm/client/Radio')
 
 local YacmClientRecvCommands = {}
@@ -50,6 +51,32 @@ YacmClientRecvCommands['RadioInHandState'] = function(args)
     Radio.SyncInHand(
         args.id, args.turnedOn, args.mute, args.power, args.volume,
         args.frequency)
+end
+
+YacmClientRecvCommands['AvatarImage'] = function(args)
+    local username  = args['username']
+    local extension = args['extension']
+    local checksum  = args['checksum']
+    local data      = args['data']
+
+    if type(username) ~= 'string' then
+        print('yacm error: AvatarImage packet does not contain a valid "username"')
+        return
+    end
+    if type(extension) ~= 'string' then
+        print('yacm error: AvatarImage packet does not contain a valid "extension"')
+        return
+    end
+    if type(checksum) ~= 'number' then
+        print('yacm error: AvatarImage packet does not contain a valid "checksum"')
+        return
+    end
+    if type(data) ~= 'table' then
+        print('yacm error: AvatarImage packet does not contain a valid "data"')
+        return
+    end
+
+    AvatarManager:saveAvatar(username, extension, checksum, data)
 end
 
 function OnServerCommand(module, command, args)

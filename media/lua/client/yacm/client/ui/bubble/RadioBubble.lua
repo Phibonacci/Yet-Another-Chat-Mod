@@ -22,11 +22,16 @@ function RadioBubble:render()
     if self.dead then
         return
     end
+    if not self.texturesLoaded then
+        self:loadTextures()
+        self.texturesLoaded = true
+    end
     local x, y = RadioBubble.CenterTop(self.type, self.object, self:getWidth(), self:getHeight())
     if x == nil then
         return
     end
-    self:drawBubble(x, y)
+    self:updateText(x, y)
+    self:drawBubble()
 end
 
 function RadioBubble.CenterTop(type, object, width, height)
