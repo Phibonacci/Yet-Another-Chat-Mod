@@ -250,6 +250,14 @@ local function SetPlayerPitch(pitch)
     ModData.add('yacm', ISChat.instance.yacmModData)
 end
 
+local function RandomVoicePitch(isFemale)
+    local randomPitch = ZombRandFloat(0.85, 1.15)
+    if isFemale == true then
+        randomPitch = randomPitch + 0.30
+    end
+    return randomPitch
+end
+
 local function InitGlobalModData()
     local yacmModData = ModData.getOrCreate("yacm")
     ISChat.instance.yacmModData = yacmModData
@@ -274,10 +282,7 @@ local function InitGlobalModData()
         ISChat.instance.isPortraitEnabled = yacmModData['isPortraitEnabled']
     end
     if yacmModData['voicePitch'] == nil then
-        local randomPitch = ZombRandFloat(0.85, 1.15)
-        if getPlayer():getVisual():isFemale() then
-            randomPitch = randomPitch + 0.30
-        end
+        local randomPitch = RandomVoicePitch(getPlayer():getVisual():isFemale())
         SetPlayerPitch(randomPitch)
     end
 end
@@ -665,7 +670,6 @@ end
 function CreatePlayerBubble(author, message, color, voicePitch)
     ISChat.instance.bubble = ISChat.instance.bubble or {}
     ISChat.instance.typingDots = ISChat.instance.typingDots or {}
-    local onlineUsers = getOnlinePlayers()
     if author == nil then
         print('yacm error: CreatePlayerBubble: author is null')
         return
@@ -1158,7 +1162,9 @@ ISChat.addLineInChat = function(message, tabID)
             { 255, 255, 255 },
             YacmServerSettings and YacmServerSettings['options'] and
             YacmServerSettings['options']['hideCallout'] or nil,
-            nil, -- voice pitch, should not be used, if we want it we need to send a packet to the server instead
+            nil,
+            false,
+            ISChat.instance.yacmModData['voicePitch'],
             false
         )
     end
@@ -1180,10 +1186,10 @@ ISChat.addLineInChat = function(message, tabID)
                 message:getAuthor(),
                 messageWithoutPrefix,
                 discordColor,
-                nil,
+                false,
                 nil,
                 true,
-                nil, -- voice pitch, should not be used anyway
+                1.15, -- voice pitch, should not be used anyway
                 false
             )
         end
@@ -1202,7 +1208,7 @@ ISChat.addLineInChat = function(message, tabID)
                         messageWithoutPrefix,
                         discordColor,
                         radiosInfo,
-                        nil,
+                        1.15,
                         false
                     )
                 end

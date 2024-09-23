@@ -22,7 +22,9 @@ local function GetSquaresRadiosPositions(player, range, frequency)
             if turnedOn and radioFrequency == frequency
                 and Character.canHearRadioSound(player, radio, radioData, range)
             then
-                table.insert(radiosResult, pos)
+                table.insert(radiosResult, {
+                    position = pos,
+                })
                 found = true
             end
         end
@@ -47,7 +49,9 @@ local function GetPlayerRadiosPositions(player, range, frequency)
         if radioData:getIsTurnedOn() and radioFrequency == frequency
             and not hasHeadphones
         then
-            table.insert(radiosResult, player:getUsername())
+            table.insert(radiosResult, {
+                username = player:getUsername()
+            })
             found = true
         end
     end
@@ -68,7 +72,9 @@ local function GetVehiclesRadiosPositions(player, range, frequency)
                 if radioData:getIsTurnedOn() and radioFrequency == frequency
                     and Character.canHearRadioSound(player, vehicle, radioData, range)
                 then
-                    table.insert(radiosResult, vehicle:getKeyId())
+                    table.insert(radiosResult, {
+                        key = vehicle:getKeyId()
+                    })
                     found = true
                 end
             end
