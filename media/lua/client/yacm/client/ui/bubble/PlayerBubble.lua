@@ -59,8 +59,12 @@ function PlayerBubble:render()
         self:loadTextures()
         self.texturesLoaded = true
     end
-    if self.playerAvatar or self.playerModel then
+    if self.playerAvatar then
         self.topSpace = math.max(self.avatarHeight - (self:getHeight() + 2), 0)
+        self.marginLeft = self.avatarWidth + self.defaultLeftMargin
+        self:setWidth(self.defaultWidth + self.avatarWidth)
+    elseif self.playerModel then
+        self.topSpace = math.max(self.avatarHeight - 20 - (self:getHeight() + 2), 0)
         self.marginLeft = self.avatarWidth + self.defaultLeftMargin
         self:setWidth(self.defaultWidth + self.avatarWidth)
     else
@@ -80,8 +84,24 @@ function PlayerBubble:render()
             self.avatarWidth, self.avatarHeight,
             math.min(1, self.fadingProgression + 0.35))
     elseif self.playerModel then
-        self.playerModel:setX(self.currentX + 2)
-        self.playerModel:setY(self.currentY + self:getHeight() - self.avatarHeight - 2)
+        local width = self:getWidth()
+        local height = self:getHeight()
+        local screenWidth = getCore():getScreenWidth()
+        local screenHeight = getCore():getScreenHeight()
+        local modelX = self.currentX + 2
+        if self.currentX < 0 then
+            modelX = 2
+        elseif self.currentX > screenWidth - width - 2 then
+            modelX = 2 + screenWidth - width
+        end
+        local modelY = self.currentY + height - self.avatarHeight - 2
+        if self.currentY < 0 then
+            modelY = 0
+        elseif self.currentY > screenHeight - height - 2 then
+            modelY = screenHeight - self.avatarHeight - 2
+        end
+        self.playerModel:setX(modelX)
+        self.playerModel:setY(modelY)
         self.playerModel:render()
     end
 end

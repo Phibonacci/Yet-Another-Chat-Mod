@@ -65,10 +65,10 @@ function ABubble:updateText(x, y)
         self.heightOffset = Lerp(self.heightOffsetStart, 0, self.currentProgression)
     end
 
-    self.currentX = x
-    self.currentY = y + self.heightOffset
-    self:setX(self.currentX)
-    self:setY(self.currentY)
+    self:setX(x)
+    self.currentX = self:getX()
+    self:setY(y + self.heightOffset)
+    self.currentY = self:getY()
 end
 
 function ABubble:drawBubble()
@@ -122,7 +122,7 @@ function ABubble:drawBubble()
     self:drawTextureScaled(self.bubbleBot, centerX, botY, centerW, botH, self.alpha)
     self:drawTextureScaled(self.bubbleBotRight, rightX, botY, rightW, botH, self.alpha)
 
-    if self.currentX > 0 and self.currentY > 0
+    if self.currentX > 0 and self.currentY > self.topSpace
         and self.currentX + self:getWidth() < getCore():getScreenWidth()
         and self.currentY + self:getHeight() < getCore():getScreenHeight()
     then
@@ -142,7 +142,7 @@ function ABubble:setY(y)
     local ys = y
     if self:getKeepOnScreen() then
         local maxY = getCore():getScreenHeight();
-        local topSpace = self.topSpace or 0
+        local topSpace = self.topSpace
         ys = math.max(topSpace, math.min(y, maxY - self.height));
     end
 
