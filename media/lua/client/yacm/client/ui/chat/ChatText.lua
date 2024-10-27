@@ -1,5 +1,4 @@
-local ChatText = {}
-
+local ChatText = ISRichTextPanel:derive("ChatText");
 
 -- from ISRichTextPanel:render
 function ChatText:render()
@@ -139,9 +138,10 @@ end
 
 function ChatText:new(x, y, width, height)
     self.__index = self
-    setmetatable(self, { __index = ISRichTextPanel })
+    -- setmetatable(self, { __index = ISRichTextPanel })
     local o = ISRichTextPanel:new(x, y, width, height)
     setmetatable(o, self)
+    self.__index = self
     return o
 end
 
