@@ -6,12 +6,17 @@ function SendYacmClientCommand(commandName, args)
     sendClientCommand('YACM', commandName, args)
 end
 
+local function FormatCharacterName(player)
+    local first, last = Character.getFirstAndLastName(player)
+    return first .. ' ' .. last
+end
+
 function YacmClientSendCommands.sendChatMessage(message, playerColor, type, pitch, disableVerb)
     if not isClient() then return end
     local player = getPlayer()
     SendYacmClientCommand('ChatMessage', {
         author = player:getUsername(),
-        characterName = Character.getFirstAndLastName(player),
+        characterName = FormatCharacterName(player),
         message = message,
         type = type,
         color = playerColor,
@@ -25,7 +30,7 @@ function YacmClientSendCommands.sendPrivateMessage(message, playerColor, target,
     local player = getPlayer()
     SendYacmClientCommand('ChatMessage', {
         author = getPlayer():getUsername(),
-        characterName = Character.getFirstAndLastName(player),
+        characterName = FormatCharacterName(player),
         message = message,
         type = 'pm',
         target = target,
@@ -168,6 +173,10 @@ function YacmClientSendCommands.sendKnownAvatars(knownAvatars)
     SendYacmClientCommand('KnownAvatars', {
         avatars = knownAvatars,
     })
+end
+
+function YacmClientSendCommands.sendAvatarRequest(avatarRequest)
+    SendYacmClientCommand('AvatarRequest', avatarRequest)
 end
 
 return YacmClientSendCommands

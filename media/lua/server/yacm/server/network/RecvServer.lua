@@ -209,6 +209,35 @@ RecvServer['KnownAvatars'] = function(player, args)
 end
 
 
+RecvServer['AvatarRequest'] = function(player, args)
+    local data = args['data']
+    if data == nil or type(data) ~= 'table' then
+        print('yacm error: AvatarRequest packet does not contain a "data" variable')
+    end
+    local checksum = args['checksum']
+    if checksum == nil or type(checksum) ~= 'number' then
+        print('yacm error: AvatarRequest packet does not contain a "checksum" variable')
+    end
+    local extension = args['extension']
+    if extension == nil or type(extension) ~= 'string' then
+        print('yacm error: AvatarRequest packet does not contain an "extension" variable')
+    end
+    local username = player:getUsername()
+    if username == nil or type(username) ~= 'string' then
+        print('yacm error: AvatarRequest packet does not contain an "username" variable')
+    end
+    local firstName = args['firstName']
+    if firstName == nil or type(firstName) ~= 'string' then
+        print('yacm error: AvatarRequest packet does not contain a "firstName" variable')
+    end
+    local lastName = args['lastName']
+    if lastName == nil or type(lastName) ~= 'string' then
+        print('yacm error: AvatarRequest packet does not contain a "lastName" variable')
+    end
+    AvatarManager:registerAvatarRequest(username, firstName, lastName, extension, checksum, data)
+end
+
+
 local function OnClientCommand(module, command, player, args)
     if module == 'YACM' and RecvServer[command] then
         RecvServer[command](player, args)

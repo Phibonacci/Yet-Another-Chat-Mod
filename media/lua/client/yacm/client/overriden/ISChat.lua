@@ -1,22 +1,24 @@
 local YET_ANOTHER_CHAT_MOD_VERSION = require('yacm/shared/Version')
 
-local ChatUI                       = require('yacm/client/ui/ChatUI')
-local ChatText                     = require('yacm/client/ui/Chat/ChatText')
 
-local AvatarManager                = require('yacm/client/AvatarManager')
-local Character                    = require('yacm/shared/utils/Character')
-local FakeRadioPacket              = require('yacm/client/FakeRadioPacket')
-local Parser                       = require('yacm/client/parser/Parser')
-local PlayerBubble                 = require('yacm/client/ui/bubble/PlayerBubble')
-local RadioBubble                  = require('yacm/client/ui/bubble/RadioBubble')
-local RadioRangeIndicator          = require('yacm/client/ui/RadioRangeIndicator')
-local RangeIndicator               = require('yacm/client/ui/RangeIndicator')
-local StringFormat                 = require('yacm/shared/utils/StringFormat')
-local StringParser                 = require('yacm/shared/utils/StringParser')
-local TypingDots                   = require('yacm/client/ui/TypingDots')
-local World                        = require('yacm/shared/utils/World')
-local StringBuilder                = require('yacm/client/parser/StringBuilder')
-local YacmClientSendCommands       = require('yacm/client/network/SendYacmClient')
+local ChatUI                 = require('yacm/client/ui/ChatUI')
+local ChatText               = require('yacm/client/ui/Chat/ChatText')
+
+local AvatarManager          = require('yacm/client/AvatarManager')
+local AvatarValidationWindow = require('yacm/client/ui/AvatarValidationWindow')
+local Character              = require('yacm/shared/utils/Character')
+local FakeRadioPacket        = require('yacm/client/FakeRadioPacket')
+local Parser                 = require('yacm/client/parser/Parser')
+local PlayerBubble           = require('yacm/client/ui/bubble/PlayerBubble')
+local RadioBubble            = require('yacm/client/ui/bubble/RadioBubble')
+local RadioRangeIndicator    = require('yacm/client/ui/RadioRangeIndicator')
+local RangeIndicator         = require('yacm/client/ui/RangeIndicator')
+local StringFormat           = require('yacm/shared/utils/StringFormat')
+local StringParser           = require('yacm/shared/utils/StringParser')
+local TypingDots             = require('yacm/client/ui/TypingDots')
+local World                  = require('yacm/shared/utils/World')
+local StringBuilder          = require('yacm/client/parser/StringBuilder')
+local YacmClientSendCommands = require('yacm/client/network/SendYacmClient')
 
 
 ISChat.allChatStreams     = {}
@@ -315,6 +317,7 @@ ISChat.initChat = function()
     instance.tabs = {}
     instance.currentTabID = 0
     instance.rangeButtonState = 'hidden'
+    instance.online = false
 
     InitGlobalModData()
     AddTab('General', 1)
@@ -1229,12 +1232,51 @@ ISChat.addLineInChat = function(message, tabID)
     end
 end
 
+function ISChat:update()
+    if not self.online then
+        return
+    end
+    local player = getPlayer()
+    local firstName, lastName = Character.getFirstAndLastName(player)
+    if self.characterNames == nil
+        or self.characterNames.firstName ~= firstName
+        or self.characterNames.lastName ~= lastName
+    then
+        local avatarRequest = AvatarManager:loadAvatarRequest()
+        if avatarRequest then
+            YacmClientSendCommands.sendAvatarRequest(avatarRequest)
+            ISChat.sendInfoToCurrentTab('Uploaded avatar request for "' .. firstName .. ' ' .. lastName .. '"')
+        end
+        self.characterNames = {}
+        self.characterNames.firstName = firstName
+        self.characterNames.lastName = lastName
+    end
+end
+
+local previousUpdateTime = Calendar.getInstance():getTimeInMillis()
+Events.OnTick.Add(function()
+    local currentTime = Calendar.getInstance():getTimeInMillis()
+    local elapsed = currentTime - previousUpdateTime
+    if elapsed < 500 then
+        return
+    end
+    if ISChat.instance then
+        ISChat.instance:update()
+    end
+end
+)
+
 function ISChat:render()
     ChatUI.render(self)
 end
 
 function ISChat:prerender()
     local instance = ISChat.instance
+
+    if YacmServerSettings and YacmServerSettings['options']['portrait'] == 4 then
+        instance:createValidationWindowButton()
+    end
+
     if instance.rangeIndicator ~= nil then
         if instance.rangeButtonState == 'visible' then
             instance.rangeIndicator.enabled = ISChat.instance.focused
@@ -1366,9 +1408,11 @@ ISChat.onTabAdded = function(tabTitle, tabID)
     -- callback from the Java
     -- 0 is General
     -- 1 is Admin
-    if tabID == 1 and YacmServerSettings ~= nil and YacmServerSettings['admin']['enabled']
-        and ISChat.instance.tabs[4] == nil then
-        AddTab('Admin', 4)
+    if tabID == 1 then
+        if YacmServerSettings ~= nil and YacmServerSettings['admin']['enabled']
+            and ISChat.instance.tabs[4] == nil then
+            AddTab('Admin', 4)
+        end
     end
 end
 
@@ -1524,6 +1568,7 @@ ISChat.onRecvSandboxVars = function(messageTypeSettings)
     end
     ISChat.instance.radioRangeIndicator = RadioRangeIndicator:new(25, radioMaxRange, ISChat.instance.isRadioIconEnabled)
     ISChat.instance.radioRangeIndicator:subscribe()
+    ISChat.instance.online = true
 end
 
 ISChat.onTabRemoved = function(tabTitle, tabID)
@@ -1639,6 +1684,14 @@ local function OnRadioButtonClick()
     end
 end
 
+local function OnAvatarValidationWindowButtonClick()
+    if ISChat.instance.avatarValidationWindow then
+        ISChat.instance.avatarValidationWindow:unsubscribe()
+    end
+    ISChat.instance.avatarValidationWindow = AvatarValidationWindow:new()
+    ISChat.instance.avatarValidationWindow:subscribe()
+end
+
 -- redefining ISTabPanel:activateView to remove the update of the info button
 local function PanelActivateView(panel, viewName)
     local self = panel
@@ -1658,6 +1711,29 @@ local function PanelActivateView(panel, viewName)
         end
     end
     return false
+end
+
+function ISChat:createValidationWindowButton()
+    if self.avatarValidationWindowButton then
+        return
+    end
+    local accessLevel = getPlayer():getAccessLevel()
+    if accessLevel == 'Admin' or accessLevel == 'Moderator' then
+        ISChat.avatarValidationWindowButtonName = "avatar validation window button"
+        local th = self:titleBarHeight()
+        self.avatarValidationWindowButton = ISButton:new(self.radioButton:getX() - th / 2 - th, 1, th, th,
+            "", self, OnAvatarValidationWindowButtonClick)
+        self.avatarValidationWindowButton.anchorRight = true
+        self.avatarValidationWindowButton.anchorLeft = false
+        self.avatarValidationWindowButton:initialise()
+        self.avatarValidationWindowButton.borderColor.a = 0.0
+        self.avatarValidationWindowButton.backgroundColor.a = 0
+        self.avatarValidationWindowButton.backgroundColorMouseOver.a = 0.5
+        self.avatarValidationWindowButton:setImage(getTexture("media/ui/yacm/icons/mic-off.png"))
+        self.avatarValidationWindowButton:setUIName(ISChat.avatarValidationWindowButtonName)
+        self:addChild(self.avatarValidationWindowButton)
+        self.avatarValidationWindowButton:setVisible(true)
+    end
 end
 
 function ISChat:createChildren()
@@ -1759,8 +1835,8 @@ function ISChat:createChildren()
     self:addChild(self.rangeButton)
     self.rangeButton:setVisible(true)
 
-    --range button
-    ISChat.radioButtonName = "chat range button"
+    --radio button
+    ISChat.radioButtonName = "radio button"
     self.radioButton = ISButton:new(self.rangeButton:getX() - th / 2 - th, 1, th, th, "", self, OnRadioButtonClick)
     self.radioButton.anchorRight = true
     self.radioButton.anchorLeft = false
@@ -1772,6 +1848,9 @@ function ISChat:createChildren()
     self.radioButton:setUIName(ISChat.radioButtonName)
     self:addChild(self.radioButton)
     self.radioButton:setVisible(true)
+
+    --avatar validation window button
+    self:createValidationWindowButton()
 
     --general stuff
     self.minimumHeight = 90
