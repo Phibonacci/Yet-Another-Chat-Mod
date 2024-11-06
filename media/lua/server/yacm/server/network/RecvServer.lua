@@ -213,30 +213,83 @@ RecvServer['AvatarRequest'] = function(player, args)
     local data = args['data']
     if data == nil or type(data) ~= 'table' then
         print('yacm error: AvatarRequest packet does not contain a "data" variable')
+        return
     end
     local checksum = args['checksum']
     if checksum == nil or type(checksum) ~= 'number' then
         print('yacm error: AvatarRequest packet does not contain a "checksum" variable')
+        return
     end
     local extension = args['extension']
     if extension == nil or type(extension) ~= 'string' then
         print('yacm error: AvatarRequest packet does not contain an "extension" variable')
+        return
     end
     local username = player:getUsername()
     if username == nil or type(username) ~= 'string' then
         print('yacm error: AvatarRequest packet does not contain an "username" variable')
+        return
     end
     local firstName = args['firstName']
     if firstName == nil or type(firstName) ~= 'string' then
         print('yacm error: AvatarRequest packet does not contain a "firstName" variable')
+        return
     end
     local lastName = args['lastName']
     if lastName == nil or type(lastName) ~= 'string' then
         print('yacm error: AvatarRequest packet does not contain a "lastName" variable')
+        return
     end
     AvatarManager:registerAvatarRequest(username, firstName, lastName, extension, checksum, data)
 end
 
+RecvServer['ApproveAvatar'] = function(player, args)
+    local username  = args['username']
+    local firstName = args['firstName']
+    local lastName  = args['lastName']
+    local checksum  = args['checksum']
+    if type(username) ~= 'string' then
+        print('yacm error: ApproveAvatar packet does not contain a "username" variable')
+        return
+    end
+    if type(firstName) ~= 'string' then
+        print('yacm error: ApproveAvatar packet does not contain a "firstName" variable')
+        return
+    end
+    if type(lastName) ~= 'string' then
+        print('yacm error: ApproveAvatar packet does not contain a "lastName" variable')
+        return
+    end
+    if type(checksum) ~= 'number' then
+        print('yacm error: ApproveAvatar packet does not contain a "checksum" variable')
+        return
+    end
+    AvatarManager:approveAvatar(player, username, firstName, lastName, checksum)
+end
+
+RecvServer['RejectAvatar'] = function(player, args)
+    local username  = args['username']
+    local firstName = args['firstName']
+    local lastName  = args['lastName']
+    local checksum  = args['checksum']
+    if type(username) ~= 'string' then
+        print('yacm error: RejectAvatar packet does not contain a "username" variable')
+        return
+    end
+    if type(firstName) ~= 'string' then
+        print('yacm error: RejectAvatar packet does not contain a "firstName" variable')
+        return
+    end
+    if type(lastName) ~= 'string' then
+        print('yacm error: RejectAvatar packet does not contain a "lastName" variable')
+        return
+    end
+    if type(checksum) ~= 'number' then
+        print('yacm error: RejectAvatar packet does not contain a "checksum" variable')
+        return
+    end
+    AvatarManager:rejectAvatar(player, username, firstName, lastName, checksum)
+end
 
 local function OnClientCommand(module, command, player, args)
     if module == 'YACM' and RecvServer[command] then

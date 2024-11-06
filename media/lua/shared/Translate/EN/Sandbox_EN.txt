@@ -25,7 +25,7 @@ Sandbox_EN          = {
 
     Sandbox_YetAnotherChatMod_GeneralDiscordEnabled                 = "Enable discord sync with /general messages",
     Sandbox_YetAnotherChatMod_RadioDiscordEnabled                   = "Enable discord sync with a radio channel",
-    Sandbox_YetAnotherChatMod_RadioDiscordFrequency                 = "Set the radio frequency to sync with discord",
+    Sandbox_YetAnotherChatMod_RadioDiscordFrequency                 = "Set the radio frequency to sync with discord (100.000MHz is 100000)",
 
     Sandbox_YetAnotherChatMod_RadioColor                            = "Set the color of scripted radio messages",
     Sandbox_YetAnotherChatMod_RadioSoundMaxRange                    = "Maximum range at which a radio with full volume can be heard",

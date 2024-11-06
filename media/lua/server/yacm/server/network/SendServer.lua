@@ -36,12 +36,34 @@ function SendServer.InHandRadioState(player, radioId, turnedOn, mute, power, vol
     })
 end
 
-function SendServer.Avatar(player, username, checksum, data, extension)
-    SendServer.Command(player, 'AvatarImage', {
+function SendServer.ApprovedAvatar(player, checksum, username, firstName, lastName, data, extension)
+    SendServer.Command(player, 'ApprovedAvatar', {
         username = username,
+        firstName = firstName,
+        lastName = lastName,
         checksum = checksum,
         data = data,
         extension = extension,
+    })
+end
+
+function SendServer.PendingAvatar(player, checksum, username, firstName, lastName, data, extension)
+    SendServer.Command(player, 'PendingAvatar', {
+        username = username,
+        firstName = firstName,
+        lastName = lastName,
+        checksum = checksum,
+        data = data,
+        extension = extension,
+    })
+end
+
+function SendServer.AvatarProcessed(player, username, firstName, lastName, checksum)
+    SendServer.Command(player, 'AvatarProcessed', {
+        username = username,
+        firstName = firstName,
+        lastName = lastName,
+        checksum = checksum,
     })
 end
 

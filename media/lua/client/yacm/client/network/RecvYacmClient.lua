@@ -53,30 +53,101 @@ YacmClientRecvCommands['RadioInHandState'] = function(args)
         args.frequency)
 end
 
-YacmClientRecvCommands['AvatarImage'] = function(args)
+YacmClientRecvCommands['ApprovedAvatar'] = function(args)
     local username  = args['username']
+    local firstName = args['firstName']
+    local lastName  = args['lastName']
     local extension = args['extension']
     local checksum  = args['checksum']
     local data      = args['data']
 
     if type(username) ~= 'string' then
-        print('yacm error: AvatarImage packet does not contain a valid "username"')
+        print('yacm error: ApprovedAvatar packet does not contain a valid "username"')
+        return
+    end
+    if type(firstName) ~= 'string' then
+        print('yacm error: ApprovedAvatar packet does not contain a valid "firstName"')
+        return
+    end
+    if type(lastName) ~= 'string' then
+        print('yacm error: ApprovedAvatar packet does not contain a valid "lastName"')
         return
     end
     if type(extension) ~= 'string' then
-        print('yacm error: AvatarImage packet does not contain a valid "extension"')
+        print('yacm error: ApprovedAvatar packet does not contain a valid "extension"')
         return
     end
     if type(checksum) ~= 'number' then
-        print('yacm error: AvatarImage packet does not contain a valid "checksum"')
+        print('yacm error: ApprovedAvatar packet does not contain a valid "checksum"')
         return
     end
     if type(data) ~= 'table' then
-        print('yacm error: AvatarImage packet does not contain a valid "data"')
+        print('yacm error: ApprovedAvatar packet does not contain a valid "data"')
         return
     end
 
-    AvatarManager:saveAvatar(username, extension, checksum, data)
+    AvatarManager:saveApprovedAvatar(username, firstName, lastName, extension, checksum, data)
+end
+
+YacmClientRecvCommands['PendingAvatar'] = function(args)
+    local username  = args['username']
+    local firstName = args['firstName']
+    local lastName  = args['lastName']
+    local extension = args['extension']
+    local checksum  = args['checksum']
+    local data      = args['data']
+
+    if type(username) ~= 'string' then
+        print('yacm error: PendingAvatar packet does not contain a valid "username"')
+        return
+    end
+    if type(firstName) ~= 'string' then
+        print('yacm error: PendingAvatar packet does not contain a valid "firstName"')
+        return
+    end
+    if type(lastName) ~= 'string' then
+        print('yacm error: PendingAvatar packet does not contain a valid "lastName"')
+        return
+    end
+    if type(extension) ~= 'string' then
+        print('yacm error: PendingAvatar packet does not contain a valid "extension"')
+        return
+    end
+    if type(checksum) ~= 'number' then
+        print('yacm error: PendingAvatar packet does not contain a valid "checksum"')
+        return
+    end
+    if type(data) ~= 'table' then
+        print('yacm error: PendingAvatar packet does not contain a valid "data"')
+        return
+    end
+
+    AvatarManager:savePendingAvatar(username, firstName, lastName, extension, checksum, data)
+end
+
+YacmClientRecvCommands['AvatarProcessed'] = function(args)
+    local username  = args['username']
+    local firstName = args['firstName']
+    local lastName  = args['lastName']
+    local checksum  = args['checksum']
+
+    if type(username) ~= 'string' then
+        print('yacm error: PendingAvatar packet does not contain a valid "username"')
+        return
+    end
+    if type(firstName) ~= 'string' then
+        print('yacm error: PendingAvatar packet does not contain a valid "firstName"')
+        return
+    end
+    if type(lastName) ~= 'string' then
+        print('yacm error: PendingAvatar packet does not contain a valid "lastName"')
+        return
+    end
+    if type(checksum) ~= 'number' then
+        print('yacm error: PendingAvatar packet does not contain a valid "checksum"')
+        return
+    end
+    AvatarManager:removeAvatarPending(username, firstName, lastName, checksum)
 end
 
 function OnServerCommand(module, command, args)

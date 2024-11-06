@@ -4,17 +4,18 @@ local File = require('yacm/shared/utils/File')
 
 local AvatarIO = {}
 
-local function GetBasePath()
+function AvatarIO.getBasePath()
     local serverName = getServerName()
     if serverName == nil then
         serverName = 'unknown'
         print('yacm error: AvatarIO: unknown server name, using "unknown" directory for avatars')
     end
-    return 'avatars/' .. serverName .. '/'
+    local hostType = isClient() and 'client' or 'server'
+    return 'avatars/' .. hostType .. '/' .. serverName .. '/'
 end
 
 local function GetAvatarPath(partialPath)
-    local basePath = GetBasePath()
+    local basePath = AvatarIO.getBasePath()
     local pathPrefix = basePath .. '/' .. partialPath .. '.'
     local extension = 'png'
     local path = pathPrefix .. extension
@@ -45,7 +46,6 @@ end
 function AvatarIO.loadPlayerAvatarFromNames(path, username, firstName, lastName)
     local key = AvatarIO.createFileName(username, firstName, lastName)
     local partialPath = path .. '/' .. key
-    File.createDirectory(path, 'move_your_avatar_here')
     print('yacm info: load avatar for "' .. partialPath .. '"')
     local fullPath, extension = GetAvatarPath(partialPath)
     if fullPath == nil then
@@ -56,7 +56,6 @@ function AvatarIO.loadPlayerAvatarFromNames(path, username, firstName, lastName)
         print('yacm error: failed to read file at path: "' .. fullPath .. '"')
         return
     end
-    print('avatar loaded, checksum is ' .. checksum:tonumber())
     return {
         data = data,
         checksum = checksum:tonumber(),
@@ -74,10 +73,11 @@ function AvatarIO.loadPlayerAvatar(path, player)
 end
 
 function AvatarIO.savePlayerAvatar(username, firstName, lastName, extension, data, path)
-    local basePath = GetBasePath()
+    local basePath = AvatarIO.getBasePath()
     local fileName = AvatarIO.createFileName(username, firstName, lastName)
-    local fullPath = basePath .. '/' .. path .. '/' .. fileName '.' .. extension
+    local fullPath = basePath .. '/' .. path .. '/' .. fileName .. '.' .. extension
     File.writeAllBytes(data, fullPath)
+    return fullPath
 end
 
 return AvatarIO

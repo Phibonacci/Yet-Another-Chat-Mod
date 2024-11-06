@@ -125,15 +125,15 @@ end
 local function UpdateRangeIndicatorVisibility()
     if ISChat.instance.rangeButtonState == 'visible' then
         if ISChat.instance.rangeIndicator and ISChat.instance.focused then
-            ISChat.instance.rangeIndicator.enabled = true
+            ISChat.instance.rangeIndicator:subscribe()
         end
     elseif ISChat.instance.rangeButtonState == 'hidden' then
         if ISChat.instance.rangeIndicator then
-            ISChat.instance.rangeIndicator.enabled = false
+            ISChat.instance.rangeIndicator:unsubscribe()
         end
     else
         if ISChat.instance.rangeIndicator then
-            ISChat.instance.rangeIndicator.enabled = true
+            ISChat.instance.rangeIndicator:subscribe()
         end
     end
 end
@@ -150,7 +150,6 @@ local function UpdateRangeIndicator(stream)
         local range = YacmServerSettings[stream.name]['range']
         ISChat.instance.rangeIndicator = RangeIndicator:new(getPlayer(), range,
             YacmServerSettings[stream.name]['color'])
-        ISChat.instance.rangeIndicator:subscribe()
         UpdateRangeIndicatorVisibility()
     else
         if ISChat.instance.rangeIndicator then
@@ -1279,11 +1278,15 @@ function ISChat:prerender()
 
     if instance.rangeIndicator ~= nil then
         if instance.rangeButtonState == 'visible' then
-            instance.rangeIndicator.enabled = ISChat.instance.focused
+            if ISChat.instance.focused then
+                instance.rangeIndicator:subscribe()
+            else
+                instance.rangeIndicator:unsubscribe()
+            end
         elseif instance.rangeButtonState == 'hidden' then
-            instance.rangeIndicator.enabled = false
+            instance.rangeIndicator:unsubscribe()
         else
-            instance.rangeIndicator.enabled = true
+            instance.rangeIndicator:subscribe()
         end
     end
 
@@ -1567,7 +1570,9 @@ ISChat.onRecvSandboxVars = function(messageTypeSettings)
         ISChat.instance.radioRangeIndicator:unsubscribe()
     end
     ISChat.instance.radioRangeIndicator = RadioRangeIndicator:new(25, radioMaxRange, ISChat.instance.isRadioIconEnabled)
-    ISChat.instance.radioRangeIndicator:subscribe()
+    if ISChat.instance.radioButtonState == true then
+        ISChat.instance.radioRangeIndicator:subscribe()
+    end
     ISChat.instance.online = true
 end
 
@@ -1676,10 +1681,10 @@ local function OnRadioButtonClick()
     end
     ISChat.instance.radioButtonState = not ISChat.instance.radioButtonState
     if ISChat.instance.radioButtonState == true then
-        ISChat.instance.radioRangeIndicator:enable()
+        ISChat.instance.radioRangeIndicator:subscribe()
         ISChat.instance.radioButton:setImage(getTexture("media/ui/yacm/icons/mic-on.png"))
     else
-        ISChat.instance.radioRangeIndicator:disable()
+        ISChat.instance.radioRangeIndicator:unsubscribe()
         ISChat.instance.radioButton:setImage(getTexture("media/ui/yacm/icons/mic-off.png"))
     end
 end

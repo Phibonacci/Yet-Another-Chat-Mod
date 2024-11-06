@@ -1,6 +1,6 @@
 local Character = require('yacm/shared/utils/Character')
 
-local YacmClientSendCommands = {}
+local SendYacmClient = {}
 
 function SendYacmClientCommand(commandName, args)
     sendClientCommand('YACM', commandName, args)
@@ -11,7 +11,7 @@ local function FormatCharacterName(player)
     return first .. ' ' .. last
 end
 
-function YacmClientSendCommands.sendChatMessage(message, playerColor, type, pitch, disableVerb)
+function SendYacmClient.sendChatMessage(message, playerColor, type, pitch, disableVerb)
     if not isClient() then return end
     local player = getPlayer()
     SendYacmClientCommand('ChatMessage', {
@@ -25,7 +25,7 @@ function YacmClientSendCommands.sendChatMessage(message, playerColor, type, pitc
     })
 end
 
-function YacmClientSendCommands.sendPrivateMessage(message, playerColor, target, pitch)
+function SendYacmClient.sendPrivateMessage(message, playerColor, target, pitch)
     if not isClient() then return end
     local player = getPlayer()
     SendYacmClientCommand('ChatMessage', {
@@ -39,7 +39,7 @@ function YacmClientSendCommands.sendPrivateMessage(message, playerColor, target,
     })
 end
 
-function YacmClientSendCommands.sendTyping(author, type)
+function SendYacmClient.sendTyping(author, type)
     if not isClient() then return end
     SendYacmClientCommand('Typing', {
         author = author,
@@ -47,16 +47,16 @@ function YacmClientSendCommands.sendTyping(author, type)
     })
 end
 
-function YacmClientSendCommands.sendAskSandboxVars()
+function SendYacmClient.sendAskSandboxVars()
     if not isClient() then return end
     SendYacmClientCommand('AskSandboxVars', {})
 end
 
-function YacmClientSendCommands.sendMuteRadio(radio, state)
+function SendYacmClient.sendMuteRadio(radio, state)
     if not isClient() then return end
     local radioData = radio:getDeviceData()
     if radioData == nil then
-        print('yacm error: YacmClientSendCommands.sendMuteRadio: no radioData found')
+        print('yacm error: SendYacmClient.sendMuteRadio: no radioData found')
         return
     end
     if radioData:isIsoDevice() then
@@ -80,7 +80,7 @@ function YacmClientSendCommands.sendMuteRadio(radio, state)
             beltType = radio:getType()
         end
         if id == nil then
-            print('yacm error: YacmClientSendCommands.sendMuteRadio: no id found')
+            print('yacm error: SendYacmClient.sendMuteRadio: no id found')
             return
         end
         SendYacmClientCommand('MuteInHandRadio', {
@@ -93,11 +93,11 @@ function YacmClientSendCommands.sendMuteRadio(radio, state)
 end
 
 -- only for belt items
-function YacmClientSendCommands.sendGiveRadioState(radio)
+function SendYacmClient.sendGiveRadioState(radio)
     if not isClient() then return end
     local radioData = radio:getDeviceData()
     if radioData == nil then
-        print('yacm error: YacmClientSendCommands.sendTellRadioState: no radioData found')
+        print('yacm error: SendYacmClient.sendTellRadioState: no radioData found')
         return
     end
 
@@ -131,11 +131,11 @@ function YacmClientSendCommands.sendGiveRadioState(radio)
     end
 end
 
-function YacmClientSendCommands.sendAskRadioState(radio)
+function SendYacmClient.sendAskRadioState(radio)
     if not isClient() then return end
     local radioData = radio:getDeviceData()
     if radioData == nil then
-        print('yacm error: YacmClientSendCommands.sendAskRadioState: no radioData found')
+        print('yacm error: SendYacmClient.sendAskRadioState: no radioData found')
         return
     end
     if radioData:isIsoDevice() then
@@ -158,7 +158,7 @@ function YacmClientSendCommands.sendAskRadioState(radio)
             beltType = radio:getType()
         end
         if id == nil then
-            print('yacm error: YacmClientSendCommands.sendAskRadioState: no id found')
+            print('yacm error: SendYacmClient.sendAskRadioState: no id found')
             return
         end
         SendYacmClientCommand('AskInHandRadioState', {
@@ -169,14 +169,32 @@ function YacmClientSendCommands.sendAskRadioState(radio)
     end
 end
 
-function YacmClientSendCommands.sendKnownAvatars(knownAvatars)
+function SendYacmClient.sendKnownAvatars(knownAvatars)
     SendYacmClientCommand('KnownAvatars', {
         avatars = knownAvatars,
     })
 end
 
-function YacmClientSendCommands.sendAvatarRequest(avatarRequest)
+function SendYacmClient.sendAvatarRequest(avatarRequest)
     SendYacmClientCommand('AvatarRequest', avatarRequest)
 end
 
-return YacmClientSendCommands
+function SendYacmClient.sendApprovePendingAvatar(username, firstName, lastName, checksum)
+    SendYacmClientCommand('ApproveAvatar', {
+        username = username,
+        firstName = firstName,
+        lastName = lastName,
+        checksum = checksum,
+    })
+end
+
+function SendYacmClient.sendRejectPendingAvatar(username, firstName, lastName, checksum)
+    SendYacmClientCommand('RejectAvatar', {
+        username = username,
+        firstName = firstName,
+        lastName = lastName,
+        checksum = checksum,
+    })
+end
+
+return SendYacmClient

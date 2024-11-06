@@ -10,7 +10,7 @@ end
 -- draw a square at the center and parts of losanges on the borders to avoid
 -- drawing too many losanges and hurt the performances
 function RangeIndicator:render(z)
-    if not self.enabled or (z ~= nil and z ~= 0) then
+    if (z ~= nil and z ~= 0) then
         return
     end
     local width         = 128
@@ -127,7 +127,6 @@ function RangeIndicator:new(object, range, color)
     o.range = range
     o.color = color
     o.keepOnScreen = false
-    o.enabled = false
     o:instantiate()
 
     -- TODO: try to use of the non documented events with missleading names to do that

@@ -35,7 +35,6 @@ function RadioRangeIndicator:registerRadio(object, radio)
             local indicator = RangeIndicator:new(object, range, Colors[NextColorIndex])
             NextColorIndex = (NextColorIndex) % #Colors + 1
             indicator:subscribe()
-            indicator.enabled = self.enabled
             table.insert(self.indicators, indicator)
             table.insert(self.radios, { object = object, radio = radio, range = range })
         end
@@ -99,6 +98,7 @@ function RadioRangeIndicator:updateIcons()
 end
 
 function RadioRangeIndicator:subscribe()
+    self:subscribeIndicators()
     if self.event then
         return
     end
@@ -114,6 +114,7 @@ function RadioRangeIndicator:subscribe()
 end
 
 function RadioRangeIndicator:unsubscribe()
+    self:unsubscribeIndicators()
     if not self.event then
         return
     end
@@ -125,20 +126,16 @@ function RadioRangeIndicator:unsubscribe()
     self.radioStatusIcons:unsubscribe()
 end
 
-function RadioRangeIndicator:updateIndicators()
+function RadioRangeIndicator:subscribeIndicators()
     for _, indicator in pairs(self.indicators) do
-        indicator.enabled = self.enabled
+        indicator:subscribe()
     end
 end
 
-function RadioRangeIndicator:enable()
-    self.enabled = true
-    self:updateIndicators()
-end
-
-function RadioRangeIndicator:disable()
-    self.enabled = false
-    self:updateIndicators()
+function RadioRangeIndicator:unsubscribeIndicators()
+    for _, indicator in pairs(self.indicators) do
+        indicator:unsubscribe()
+    end
 end
 
 function RadioRangeIndicator:new(discoveringRange, radioMaxRange, showIcon)
@@ -154,7 +151,6 @@ function RadioRangeIndicator:new(discoveringRange, radioMaxRange, showIcon)
     o.radios = {}
     o.previousTime = 0
     o.radioStatusIcons = RadioStatusIcons:new(o.player)
-    o.enabled = false
     return o
 end
 

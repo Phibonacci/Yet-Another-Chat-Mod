@@ -11,24 +11,27 @@ function File.createDirectory(path, fileName)
     else
         fullPath = path .. '/delete_me'
     end
-    getFileInput(fullPath)
-    endFileInput()
+    if serverFileExists('../Lua/' .. fullPath) then
+        return
+    end
+    getFileOutput(fullPath)
+    endFileOutput()
 end
 
 function File.readAllBytes(path)
     if path == nil then
-        print('yacm error: File.write: path is nil')
+        print('yacm error: File.readAllBytes: path is nil')
         return
     end
     local file = getFileInput(path)
     if file == nil then
-        print('yacm error: File.write: could not read avatar file at :"' .. path .. '"')
+        print('yacm error: File.readAllBytes: could not read avatar file at :"' .. path .. '"')
         return
     end
     local data = {}
     local checksum = CRC32.newcrc32()
     print(
-        'yacm info: File.write: ignore the InvocationTargetException below, it means the file has been read')
+        'yacm info: File.readAllBytes: ignore the InvocationTargetException below, it means the file has been read')
     while true do
         local byte = file:readUnsignedByte()
         -- an exception will be thrown, it's unavoidable unless we know the size of the file
@@ -36,7 +39,7 @@ function File.readAllBytes(path)
         -- the exception does not stop the execution flow
         if byte == nil then
             print(
-                'yacm info: File.write: ignore the InvocationTargetException above, it means the file has been read')
+                'yacm info: File.readAllBytes: ignore the InvocationTargetException above, it means the file has been read')
             break
         end
         checksum:update(byte)
@@ -49,13 +52,17 @@ end
 function File.writeAllBytes(data, path)
     local outFile = getFileOutput(path)
     if outFile == nil then
-        print('yacm error: failed to write file in path: ' .. path)
+        print('yacm error: File.writeAllBytes: failed to write file in path: ' .. path)
         return
     end
     for _, byte in pairs(data) do
         outFile:writeByte(byte)
     end
     endFileOutput()
+end
+
+function File.remove(path) -- we can only erase the bytes of the file, not the file
+    File.writeAllBytes({}, path)
 end
 
 return File

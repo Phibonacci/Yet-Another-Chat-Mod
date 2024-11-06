@@ -1,11 +1,11 @@
 local Coordinates = require('yacm/client/utils/Coordinates')
 
-local TypingDots = ISUIElement:derive("TypingDots");
+local TypingDots = ISUIElement:derive('TypingDots');
 
 function TypingDots:render()
-    local typingDots1 = getTexture("media/ui/yacm/typing-dots/typing-dots-1.png")
-    local typingDots2 = getTexture("media/ui/yacm/typing-dots/typing-dots-2.png")
-    local typingDots3 = getTexture("media/ui/yacm/typing-dots/typing-dots-3.png")
+    local typingDots1 = getTexture('media/ui/yacm/typing-dots/typing-dots-1.png')
+    local typingDots2 = getTexture('media/ui/yacm/typing-dots/typing-dots-2.png')
+    local typingDots3 = getTexture('media/ui/yacm/typing-dots/typing-dots-3.png')
 
     local time = Calendar.getInstance():getTimeInMillis()
     if time - self.startingTime > self.timer then
