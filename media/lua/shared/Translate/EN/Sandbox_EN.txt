@@ -7,9 +7,8 @@ Sandbox_EN          = {
     Sandbox_YetAnotherChatMod_BubblePortrait                        = "Show player portrait on the left of the Bubble (custom goes in: Zomboid/Lua/avatars/username.png on server)",
     Sandbox_YetAnotherChatMod_BubblePortrait_help                   = "Show player portrait on the left of the Bubble.\nCustom avatars go to: Zomboid/Lua/avatars/username.png on the server.\nVanilla portrait will be used if no image is found for the username.\n1 = None\n2 = Vanilla\n 3 = Steam Avatar\n4 = Custom",
     Sandbox_YetAnotherChatMod_BubblePortrait_Values_option1         = "None",
-    Sandbox_YetAnotherChatMod_BubblePortrait_Values_option2         = "Vanilla",
+    Sandbox_YetAnotherChatMod_BubblePortrait_Values_option2         = "Custom and Vanilla",
     Sandbox_YetAnotherChatMod_BubblePortrait_Values_option3         = "Steam Avatar",
-    Sandbox_YetAnotherChatMod_BubblePortrait_Values_option4         = "Custom (use Vanilla if no image found)",
 
     Sandbox_YetAnotherChatMod_BubbleTimerInSeconds                  = "Bubble timer (seconds)",
     Sandbox_YetAnotherChatMod_BubbleOpacity                         = "Bubble opacity",

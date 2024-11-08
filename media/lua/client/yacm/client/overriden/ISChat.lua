@@ -1240,9 +1240,7 @@ end
 function ISChat:prerender()
     local instance = ISChat.instance
 
-    if YacmServerSettings and YacmServerSettings['options']['portrait'] == 4 then
-        instance:createValidationWindowButton()
-    end
+    instance:createValidationWindowButton()
 
     if instance.rangeIndicator ~= nil then
         if instance.rangeButtonState == 'visible' then
@@ -1695,25 +1693,53 @@ local function PanelActivateView(panel, viewName)
 end
 
 function ISChat:createValidationWindowButton()
-    if self.avatarValidationWindowButton then
+    if YacmServerSettings == nil or YacmServerSettings['options']['portrait'] ~= 2 then
+        if self.avatarUploadButton then
+            self:removeChild(self.avatarUploadButton)
+            self.avatarUploadButton = nil
+        end
+        if self.avatarValidationWindowButton then
+            self:removeChild(self.avatarValidationWindowButton)
+            self.avatarValidationWindowButton = nil
+        end
         return
     end
-    local accessLevel = getPlayer():getAccessLevel()
-    if accessLevel == 'Admin' or accessLevel == 'Moderator' then
-        ISChat.avatarValidationWindowButtonName = "avatar validation window button"
-        local th = self:titleBarHeight()
-        self.avatarValidationWindowButton = ISButton:new(self.avatarUploadButton:getX() - th / 2 - th, 1, th, th,
-            "", self, OnAvatarValidationWindowButtonClick)
-        self.avatarValidationWindowButton.anchorRight = true
-        self.avatarValidationWindowButton.anchorLeft = false
-        self.avatarValidationWindowButton:initialise()
-        self.avatarValidationWindowButton.borderColor.a = 0.0
-        self.avatarValidationWindowButton.backgroundColor.a = 0
-        self.avatarValidationWindowButton.backgroundColorMouseOver.a = 0.5
-        self.avatarValidationWindowButton:setImage(getTexture("media/ui/yacm/icons/portrait.png"))
-        self.avatarValidationWindowButton:setUIName(ISChat.avatarValidationWindowButtonName)
-        self:addChild(self.avatarValidationWindowButton)
-        self.avatarValidationWindowButton:setVisible(true)
+
+    local th = self:titleBarHeight()
+    if self.avatarUploadButton == nil then
+        --avatar upload button
+        ISChat.avatarUploadButtonName = "avatar upload"
+        self.avatarUploadButton = ISButton:new(self.radioButton:getX() - th / 2 - th, 1, th, th, "", self,
+            OnAvatarUploadButtonClick)
+        self.avatarUploadButton.anchorRight = true
+        self.avatarUploadButton.anchorLeft = false
+        self.avatarUploadButton:initialise()
+        self.avatarUploadButton.borderColor.a = 0.0
+        self.avatarUploadButton.backgroundColor.a = 0
+        self.avatarUploadButton.backgroundColorMouseOver.a = 0.5
+        self.avatarUploadButton:setImage(getTexture("media/ui/yacm/icons/upload.png"))
+        self.avatarUploadButton:setUIName(ISChat.avatarUploadButtonName)
+        self:addChild(self.avatarUploadButton)
+        self.avatarUploadButton:setVisible(true)
+    end
+
+    if self.avatarValidationWindowButton == nil then
+        local accessLevel = getPlayer():getAccessLevel()
+        if accessLevel == 'Admin' or accessLevel == 'Moderator' then
+            ISChat.avatarValidationWindowButtonName = 'avatar validation window button'
+            self.avatarValidationWindowButton = ISButton:new(self.avatarUploadButton:getX() - th / 2 - th, 1, th, th,
+                '', self, OnAvatarValidationWindowButtonClick)
+            self.avatarValidationWindowButton.anchorRight = true
+            self.avatarValidationWindowButton.anchorLeft = false
+            self.avatarValidationWindowButton:initialise()
+            self.avatarValidationWindowButton.borderColor.a = 0.0
+            self.avatarValidationWindowButton.backgroundColor.a = 0
+            self.avatarValidationWindowButton.backgroundColorMouseOver.a = 0.5
+            self.avatarValidationWindowButton:setImage(getTexture('media/ui/yacm/icons/portrait.png'))
+            self.avatarValidationWindowButton:setUIName(ISChat.avatarValidationWindowButtonName)
+            self:addChild(self.avatarValidationWindowButton)
+            self.avatarValidationWindowButton:setVisible(true)
+        end
     end
 end
 
@@ -1829,21 +1855,6 @@ function ISChat:createChildren()
     self.radioButton:setUIName(ISChat.radioButtonName)
     self:addChild(self.radioButton)
     self.radioButton:setVisible(true)
-
-    --avatar upload button
-    ISChat.avatarUploadButtonName = "avatar upload"
-    self.avatarUploadButton = ISButton:new(self.radioButton:getX() - th / 2 - th, 1, th, th, "", self,
-        OnAvatarUploadButtonClick)
-    self.avatarUploadButton.anchorRight = true
-    self.avatarUploadButton.anchorLeft = false
-    self.avatarUploadButton:initialise()
-    self.avatarUploadButton.borderColor.a = 0.0
-    self.avatarUploadButton.backgroundColor.a = 0
-    self.avatarUploadButton.backgroundColorMouseOver.a = 0.5
-    self.avatarUploadButton:setImage(getTexture("media/ui/yacm/icons/upload.png"))
-    self.avatarUploadButton:setUIName(ISChat.avatarUploadButtonName)
-    self:addChild(self.avatarUploadButton)
-    self.avatarUploadButton:setVisible(true)
 
     --avatar validation window button
     self:createValidationWindowButton()
@@ -2048,9 +2059,9 @@ function ISChat:onGearButtonClick()
     end
     context:addOption(radioIconOptionName, ISChat.instance, ISChat.onToggleRadioIcon)
 
-    if YacmServerSettings and YacmServerSettings['options']['portrait'] ~= 0 then
+    if YacmServerSettings and YacmServerSettings['options']['portrait'] ~= 1 then
         local portraitOptionName = getText("UI_YACM_enable_portrait")
-        if self.isRadioIconEnabled then
+        if self.isPortraitEnabled then
             portraitOptionName = getText("UI_YACM_disable_portrait")
         end
         context:addOption(portraitOptionName, ISChat.instance, ISChat.onTogglePortrait)

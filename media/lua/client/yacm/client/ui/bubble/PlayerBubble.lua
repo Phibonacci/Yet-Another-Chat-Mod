@@ -29,14 +29,14 @@ function PlayerBubble:loadTextures()
         if steamId ~= nil then
             self.playerAvatar = getSteamAvatarFromSteamID(steamId)
         end
-    elseif self.portrait == 4 then
+    elseif self.portrait == 2 then
         self.avatarWidth = 60
         self.avatarHeight = 80
         local firstName, lastName = Character.getFirstAndLastName(self.player)
         self.playerAvatar = AvatarManager:getAvatar(self.player:getUsername(), firstName, lastName)
     end
 
-    if self.portrait == 2 or (self.portrait == 4 and self.playerAvatar == nil) then
+    if self.portrait == 2 and self.playerAvatar == nil then
         self.avatarWidth = 25
         self.avatarHeight = 80
         self.playerModel = UI3DModel:new()
@@ -80,7 +80,7 @@ function PlayerBubble:render()
     end
     self:updateText(x, y)
     self:drawBubble()
-    if self.playerAvatar and (self.portrait == 3 or self.portrait == 4) then
+    if self.playerAvatar and (self.portrait == 3 or self.portrait == 2) then
         self:drawTextureScaled(self.playerAvatar,
             2, self:getHeight() - self.avatarHeight - 2,
             self.avatarWidth, self.avatarHeight,

@@ -91,12 +91,6 @@ end
 function AvatarManager:getAvatarData(username, firstName, lastName)
     local avatars = ModData.getOrCreate('yacmApprovedAvatars')
     local key = AvatarIO.createFileName(username, firstName, lastName)
-    if avatars[key] then
-        print('yacm debug: loading avatar:')
-        print(avatars[key]['path'])
-    else
-        print('yacm debug: no avatar found for ' .. key)
-    end
     if avatars[key] and not File.exists(avatars[key]['path']) then
         avatars[key] = nil
         ModData.add("yacmApprovedAvatars", avatars)
