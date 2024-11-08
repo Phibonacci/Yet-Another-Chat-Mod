@@ -228,6 +228,13 @@ function AvatarManager:notifyAvatarProcessed(username, firstName, lastName, chec
         if accessLevel == 'Admin' or accessLevel == 'Moderator' then
             SendServer.AvatarProcessed(player, username, firstName, lastName, checksum)
         end
+        local key = AvatarIO.createFileName(username, firstName, lastName)
+        if self.players and
+            self.players[player:getUsername()] and
+            self.players[player:getUsername()]['pending']
+        then
+            self.players[player:getUsername()]['pending'][key] = nil
+        end
     end
 end
 

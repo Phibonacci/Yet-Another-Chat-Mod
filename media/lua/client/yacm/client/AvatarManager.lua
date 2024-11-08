@@ -9,7 +9,7 @@ function AvatarManager:getKnownAvatars()
     local toDelete = {}
     local somethingToDelete = false
     local toSend = {}
-    local avatars = ModData.getOrCreate('yacmAvatars')
+    local avatars = ModData.getOrCreate('yacmApprovedAvatars')
     for username, avatar in pairs(avatars) do
         local path = avatar['path']
         local checksum = avatar['checksum']
@@ -24,9 +24,17 @@ function AvatarManager:getKnownAvatars()
         for _, username in pairs(toDelete) do
             avatars[username] = nil
         end
-        ModData.add('yacmAvatars', avatars)
+        ModData.add('yacmApprovedAvatars', avatars)
     end
     return toSend
+end
+
+function AvatarManager:createRequestDirectory()
+    local player = getPlayer()
+    local username = player:getUsername()
+    local path = username .. '/request/'
+    local directoryPath = AvatarIO.getBasePath() .. path
+    File.createDirectory(directoryPath, 'move_your_avatar_here')
 end
 
 function AvatarManager:loadAvatarRequest()
@@ -36,7 +44,7 @@ function AvatarManager:loadAvatarRequest()
     local directoryPath = AvatarIO.getBasePath() .. path
     File.createDirectory(directoryPath, 'move_your_avatar_here')
     local avatar = AvatarIO.loadPlayerAvatar(path, player)
-    if avatar == nil then -- to make it clear this can be nil
+    if avatar == nil then
         return nil
     end
     local firstName, lastName = Character.getFirstAndLastName(player)
@@ -80,6 +88,16 @@ end
 function AvatarManager:getAvatarData(username, firstName, lastName)
     local avatars = ModData.getOrCreate('yacmApprovedAvatars')
     local key = AvatarIO.createFileName(username, firstName, lastName)
+    if avatars[key] then
+        print('yacm debug: loading avatar:')
+        print(avatars[key]['path'])
+    else
+        print('yacm debug: no avatar found for ' .. key)
+    end
+    if avatars[key] and not File.exists(avatars[key]['path']) then
+        avatars[key] = nil
+        ModData.add("yacmApprovedAvatars", avatars)
+    end
     return avatars[key]
 end
 
@@ -87,6 +105,25 @@ function AvatarManager:removeAvatarData(username, firstName, lastName)
     local avatars = ModData.getOrCreate('yacmApprovedAvatars')
     local key = AvatarIO.createFileName(username, firstName, lastName)
     avatars[key] = nil
+    ModData.add("yacmApprovedAvatars", avatars)
+end
+
+function AvatarManager:getRequestAvatar()
+    local player = getPlayer()
+    local username = player:getUsername()
+    local firstName, lastName = Character.getFirstAndLastName(player)
+    local fileName = AvatarIO.createFileName(username, firstName, lastName)
+    local path = AvatarIO.getAvatarPath(username .. '/request/' .. fileName)
+    if path == nil then
+        return nil
+    end
+    local texture = getTextureFromSaveDir(path, '../Lua')
+    if texture == nil then
+        print('yacm error: failed to load the request avatar for username "'
+            .. username .. '" with character named "'
+            .. firstName .. ' ' .. lastName .. '"')
+    end
+    return texture
 end
 
 function AvatarManager:getAvatar(username, firstName, lastName)

@@ -5,6 +5,7 @@ local ChatUI                 = require('yacm/client/ui/ChatUI')
 local ChatText               = require('yacm/client/ui/Chat/ChatText')
 
 local AvatarManager          = require('yacm/client/AvatarManager')
+local AvatarUploadWindow     = require('yacm/client/ui/AvatarUploadWindow')
 local AvatarValidationWindow = require('yacm/client/ui/AvatarValidationWindow')
 local Character              = require('yacm/shared/utils/Character')
 local FakeRadioPacket        = require('yacm/client/FakeRadioPacket')
@@ -13,12 +14,12 @@ local PlayerBubble           = require('yacm/client/ui/bubble/PlayerBubble')
 local RadioBubble            = require('yacm/client/ui/bubble/RadioBubble')
 local RadioRangeIndicator    = require('yacm/client/ui/RadioRangeIndicator')
 local RangeIndicator         = require('yacm/client/ui/RangeIndicator')
+local SendYacmClient         = require('yacm/client/network/SendYacmClient')
+local StringBuilder          = require('yacm/client/parser/StringBuilder')
 local StringFormat           = require('yacm/shared/utils/StringFormat')
 local StringParser           = require('yacm/shared/utils/StringParser')
 local TypingDots             = require('yacm/client/ui/TypingDots')
 local World                  = require('yacm/shared/utils/World')
-local StringBuilder          = require('yacm/client/parser/StringBuilder')
-local YacmClientSendCommands = require('yacm/client/network/SendYacmClient')
 
 
 ISChat.allChatStreams     = {}
@@ -296,7 +297,7 @@ local function AskServerData()
     end
     lastAskedDataTime = Calendar.getInstance():getTimeInMillis()
 
-    YacmClientSendCommands.sendAskSandboxVars()
+    SendYacmClient.sendAskSandboxVars()
 end
 
 ISChat.initChat = function()
@@ -320,6 +321,7 @@ ISChat.initChat = function()
 
     InitGlobalModData()
     AddTab('General', 1)
+    AvatarManager:createRequestDirectory()
     Events.OnPostRender.Add(AskServerData)
 end
 
@@ -361,21 +363,21 @@ local function ProcessChatCommand(stream, command)
         return false
     end
     if stream.name == 'yell' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'yell', pitch, false)
+        SendYacmClient.sendChatMessage(command, playerColor, 'yell', pitch, false)
     elseif stream.name == 'say' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'say', pitch, false)
+        SendYacmClient.sendChatMessage(command, playerColor, 'say', pitch, false)
     elseif stream.name == 'low' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'low', pitch, false)
+        SendYacmClient.sendChatMessage(command, playerColor, 'low', pitch, false)
     elseif stream.name == 'whisper' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'whisper', pitch, false)
+        SendYacmClient.sendChatMessage(command, playerColor, 'whisper', pitch, false)
     elseif stream.name == 'meyell' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'yell', pitch, true)
+        SendYacmClient.sendChatMessage(command, playerColor, 'yell', pitch, true)
     elseif stream.name == 'mesay' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'say', pitch, true)
+        SendYacmClient.sendChatMessage(command, playerColor, 'say', pitch, true)
     elseif stream.name == 'melow' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'low', pitch, true)
+        SendYacmClient.sendChatMessage(command, playerColor, 'low', pitch, true)
     elseif stream.name == 'mewhisper' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'whisper', pitch, true)
+        SendYacmClient.sendChatMessage(command, playerColor, 'whisper', pitch, true)
     elseif stream.name == 'pm' then
         local targetStart, targetEnd = command:find('^%s*"%a+%s?%a+"')
         if targetStart == nil then
@@ -386,18 +388,18 @@ local function ProcessChatCommand(stream, command)
         end
         local target = command:sub(targetStart, targetEnd)
         local pmBody = command:sub(targetEnd + 2)
-        YacmClientSendCommands.sendPrivateMessage(pmBody, playerColor, target, pitch)
+        SendYacmClient.sendPrivateMessage(pmBody, playerColor, target, pitch)
         ISChat.instance.chatText.lastChatCommand = ISChat.instance.chatText.lastChatCommand .. target .. ' '
     elseif stream.name == 'faction' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'faction', pitch, false)
+        SendYacmClient.sendChatMessage(command, playerColor, 'faction', pitch, false)
     elseif stream.name == 'safehouse' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'safehouse', pitch, false)
+        SendYacmClient.sendChatMessage(command, playerColor, 'safehouse', pitch, false)
     elseif stream.name == 'general' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'general', pitch, false)
+        SendYacmClient.sendChatMessage(command, playerColor, 'general', pitch, false)
     elseif stream.name == 'admin' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'admin', pitch, false)
+        SendYacmClient.sendChatMessage(command, playerColor, 'admin', pitch, false)
     elseif stream.name == 'ooc' then
-        YacmClientSendCommands.sendChatMessage(command, playerColor, 'ooc', pitch, false)
+        SendYacmClient.sendChatMessage(command, playerColor, 'ooc', pitch, false)
     else
         return false
     end
@@ -1231,40 +1233,6 @@ ISChat.addLineInChat = function(message, tabID)
     end
 end
 
-function ISChat:update()
-    if not self.online then
-        return
-    end
-    local player = getPlayer()
-    local firstName, lastName = Character.getFirstAndLastName(player)
-    if self.characterNames == nil
-        or self.characterNames.firstName ~= firstName
-        or self.characterNames.lastName ~= lastName
-    then
-        local avatarRequest = AvatarManager:loadAvatarRequest()
-        if avatarRequest then
-            YacmClientSendCommands.sendAvatarRequest(avatarRequest)
-            ISChat.sendInfoToCurrentTab('Uploaded avatar request for "' .. firstName .. ' ' .. lastName .. '"')
-        end
-        self.characterNames = {}
-        self.characterNames.firstName = firstName
-        self.characterNames.lastName = lastName
-    end
-end
-
-local previousUpdateTime = Calendar.getInstance():getTimeInMillis()
-Events.OnTick.Add(function()
-    local currentTime = Calendar.getInstance():getTimeInMillis()
-    local elapsed = currentTime - previousUpdateTime
-    if elapsed < 500 then
-        return
-    end
-    if ISChat.instance then
-        ISChat.instance:update()
-    end
-end
-)
-
 function ISChat:render()
     ChatUI.render(self)
 end
@@ -1347,7 +1315,7 @@ function ISChat.onTextChange()
         if ISChat.instance.currentTabID == stream['tabID'] and not stream['forget'] then
             ISChat.lastTabStream[ISChat.instance.currentTabID] = stream
         end
-        YacmClientSendCommands.sendTyping(getPlayer():getUsername(), stream['name'])
+        SendYacmClient.sendTyping(getPlayer():getUsername(), stream['name'])
     else
         if ISChat.instance.rangeIndicator then
             ISChat.instance.rangeIndicator:unsubscribe()
@@ -1535,7 +1503,7 @@ ISChat.onRecvSandboxVars = function(messageTypeSettings)
     end
 
     local knownAvatars = AvatarManager:getKnownAvatars()
-    YacmClientSendCommands.sendKnownAvatars(knownAvatars)
+    SendYacmClient.sendKnownAvatars(knownAvatars)
 
     YacmServerSettings = messageTypeSettings -- a global
 
@@ -1689,6 +1657,14 @@ local function OnRadioButtonClick()
     end
 end
 
+local function OnAvatarUploadButtonClick()
+    if ISChat.instance.avatarUploadWindow then
+        ISChat.instance.avatarUploadWindow:unsubscribe()
+    end
+    ISChat.instance.avatarUploadWindow = AvatarUploadWindow:new()
+    ISChat.instance.avatarUploadWindow:subscribe()
+end
+
 local function OnAvatarValidationWindowButtonClick()
     if ISChat.instance.avatarValidationWindow then
         ISChat.instance.avatarValidationWindow:unsubscribe()
@@ -1726,7 +1702,7 @@ function ISChat:createValidationWindowButton()
     if accessLevel == 'Admin' or accessLevel == 'Moderator' then
         ISChat.avatarValidationWindowButtonName = "avatar validation window button"
         local th = self:titleBarHeight()
-        self.avatarValidationWindowButton = ISButton:new(self.radioButton:getX() - th / 2 - th, 1, th, th,
+        self.avatarValidationWindowButton = ISButton:new(self.avatarUploadButton:getX() - th / 2 - th, 1, th, th,
             "", self, OnAvatarValidationWindowButtonClick)
         self.avatarValidationWindowButton.anchorRight = true
         self.avatarValidationWindowButton.anchorLeft = false
@@ -1734,7 +1710,7 @@ function ISChat:createValidationWindowButton()
         self.avatarValidationWindowButton.borderColor.a = 0.0
         self.avatarValidationWindowButton.backgroundColor.a = 0
         self.avatarValidationWindowButton.backgroundColorMouseOver.a = 0.5
-        self.avatarValidationWindowButton:setImage(getTexture("media/ui/yacm/icons/mic-off.png"))
+        self.avatarValidationWindowButton:setImage(getTexture("media/ui/yacm/icons/portrait.png"))
         self.avatarValidationWindowButton:setUIName(ISChat.avatarValidationWindowButtonName)
         self:addChild(self.avatarValidationWindowButton)
         self.avatarValidationWindowButton:setVisible(true)
@@ -1853,6 +1829,21 @@ function ISChat:createChildren()
     self.radioButton:setUIName(ISChat.radioButtonName)
     self:addChild(self.radioButton)
     self.radioButton:setVisible(true)
+
+    --avatar upload button
+    ISChat.avatarUploadButtonName = "avatar upload"
+    self.avatarUploadButton = ISButton:new(self.radioButton:getX() - th / 2 - th, 1, th, th, "", self,
+        OnAvatarUploadButtonClick)
+    self.avatarUploadButton.anchorRight = true
+    self.avatarUploadButton.anchorLeft = false
+    self.avatarUploadButton:initialise()
+    self.avatarUploadButton.borderColor.a = 0.0
+    self.avatarUploadButton.backgroundColor.a = 0
+    self.avatarUploadButton.backgroundColorMouseOver.a = 0.5
+    self.avatarUploadButton:setImage(getTexture("media/ui/yacm/icons/upload.png"))
+    self.avatarUploadButton:setUIName(ISChat.avatarUploadButtonName)
+    self:addChild(self.avatarUploadButton)
+    self.avatarUploadButton:setVisible(true)
 
     --avatar validation window button
     self:createValidationWindowButton()

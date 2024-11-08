@@ -3,6 +3,10 @@ local CRC32 = require('yacm/shared/libs/crc32/crc32')
 
 local File = {}
 
+function File.exists(path)
+    return serverFileExists('../Lua/' .. path)
+end
+
 function File.createDirectory(path, fileName)
     -- create useless file to ensure the directory is created
     local fullPath

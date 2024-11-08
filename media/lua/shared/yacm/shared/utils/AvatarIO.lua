@@ -5,16 +5,20 @@ local File = require('yacm/shared/utils/File')
 local AvatarIO = {}
 
 function AvatarIO.getBasePath()
-    local serverName = getServerName()
-    if serverName == nil then
-        serverName = 'unknown'
-        print('yacm error: AvatarIO: unknown server name, using "unknown" directory for avatars')
+    if isClient() then
+        -- a client does not know the server name...
+        return 'avatars/client/' .. getServerIP() .. '/'
+    else
+        local serverName = getServerName()
+        if serverName == nil then
+            serverName = 'unknown'
+            print('yacm error: AvatarIO: unknown server name, using "unknown" directory for avatars')
+        end
+        return 'avatars/server/' .. serverName .. '/'
     end
-    local hostType = isClient() and 'client' or 'server'
-    return 'avatars/' .. hostType .. '/' .. serverName .. '/'
 end
 
-local function GetAvatarPath(partialPath)
+function AvatarIO.getAvatarPath(partialPath)
     local basePath = AvatarIO.getBasePath()
     local pathPrefix = basePath .. '/' .. partialPath .. '.'
     local extension = 'png'
@@ -47,7 +51,7 @@ function AvatarIO.loadPlayerAvatarFromNames(path, username, firstName, lastName)
     local key = AvatarIO.createFileName(username, firstName, lastName)
     local partialPath = path .. '/' .. key
     print('yacm info: load avatar for "' .. partialPath .. '"')
-    local fullPath, extension = GetAvatarPath(partialPath)
+    local fullPath, extension = AvatarIO.getAvatarPath(partialPath)
     if fullPath == nil then
         return
     end

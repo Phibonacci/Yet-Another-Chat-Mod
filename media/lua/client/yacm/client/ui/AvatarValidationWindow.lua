@@ -5,7 +5,7 @@ local AvatarManager = require('yacm/client/AvatarManager')
 local SendYacmClient = require('yacm/client/network/SendYacmClient')
 
 
-local AvatarValidationWindow = ISCollapsableWindow:derive("AvatarValidationWindow")
+local AvatarValidationWindow = ISCollapsableWindow:derive('AvatarValidationWindow')
 
 
 local FONT_HGT_NORMAL = getTextManager():getFontHeight(UIFont.Normal)
@@ -110,7 +110,7 @@ end
 function AvatarValidationWindow:render()
     self._parentClass.render(self)
     if self._avatar == nil or
-        AvatarManager:isPendingAvatarAlive(self._avatar['username'],
+        not AvatarManager:isPendingAvatarAlive(self._avatar['username'],
             self._avatar['firstName'], self._avatar['lastName'], self._avatar['checksum'])
     then
         self._avatar = AvatarManager:getFirstAvatarPending()
@@ -185,7 +185,7 @@ function AvatarValidationWindow:drawButtons()
         r, g, b = 0.5, 0.5, 0.5
     end
     self:drawTexture(rejectButtonTexture, leftMargin, y, 1, r, g, b)
-    local r, g, b = 1.0, 1.0, 1.0
+    r, g, b = 1.0, 1.0, 1.0
     if self._approveButtonState == true then
         r, g, b = 0.5, 0.5, 0.5
     end

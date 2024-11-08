@@ -90,6 +90,7 @@ YacmClientRecvCommands['ApprovedAvatar'] = function(args)
 end
 
 YacmClientRecvCommands['PendingAvatar'] = function(args)
+    print('yacm debug: received PendingAvatar packet')
     local username  = args['username']
     local firstName = args['firstName']
     local lastName  = args['lastName']
