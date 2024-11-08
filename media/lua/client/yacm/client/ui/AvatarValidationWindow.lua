@@ -76,36 +76,15 @@ function AvatarValidationWindow:onMouseDown(x, y)
     end
 end
 
--- function AvatarValidationWindow:onMouseMove(dx, dy)
---     self._parentClass.onMouseMove(self, x, y)
--- end
-
--- function AvatarValidationWindow:onMouseMoveOutside(x, y)
---     self._parentClass.onMouseMoveOutside(self, x, y)
--- end
-
 function AvatarValidationWindow:onMouseUpOutside(x, y)
     self._parentClass.onMouseUpOutside(self, x, y)
     self._rejectButtonState = false
     self._approveButtonState = false
 end
 
--- function AvatarValidationWindow:addView(view)
---     self._parentClass.addView(self, view)
--- end
-
 function AvatarValidationWindow:close()
     self:unsubscribe()
 end
-
--- function AvatarValidationWindow:initialise()
---     self._parentClass.initialise(self)
---     self:setTitle('')
--- end
-
--- function AvatarValidationWindow:prerender()
---     self._parentClass.prerender(self)
--- end
 
 function AvatarValidationWindow:render()
     self._parentClass.render(self)

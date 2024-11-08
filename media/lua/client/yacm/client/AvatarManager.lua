@@ -68,7 +68,10 @@ local function SaveAvatar(username, firstName, lastName, extension, checksum, da
         lastName = lastName,
     }
     ModData.add(modDataPath, avatars)
-    -- TODO: free texture if already loaded
+    local texture = getTextureFromSaveDir(fullPath, '../Lua')
+    if texture then
+        Texture.reload(texture:getName())
+    end
 end
 
 function AvatarManager:saveApprovedAvatar(username, firstName, lastName, extension, checksum, data)

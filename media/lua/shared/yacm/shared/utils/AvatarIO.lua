@@ -50,7 +50,6 @@ end
 function AvatarIO.loadPlayerAvatarFromNames(path, username, firstName, lastName)
     local key = AvatarIO.createFileName(username, firstName, lastName)
     local partialPath = path .. '/' .. key
-    print('yacm info: load avatar for "' .. partialPath .. '"')
     local fullPath, extension = AvatarIO.getAvatarPath(partialPath)
     if fullPath == nil then
         return
