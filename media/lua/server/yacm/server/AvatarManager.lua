@@ -102,6 +102,7 @@ function AvatarManager:trackPlayersOnline()
     )
     for username, player in pairs(self.connectedPlayers) do
         if newConnectedPlayers[username] == nil then
+            self.players[username] = nil
             self:freePlayerAvatar(player)
         end
     end
