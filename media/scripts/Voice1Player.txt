@@ -1,10 +1,10 @@
-module YetAnotherChatMod {
+module TICS {
     sound Voice1PlayerA {
         category = EHE: Main,
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/A.ogg,
+            file = media/sound/tics/phonemes/1/player/A.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -17,7 +17,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/AI.ogg,
+            file = media/sound/tics/phonemes/1/player/AI.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -30,7 +30,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/AIR.ogg,
+            file = media/sound/tics/phonemes/1/player/AIR.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -43,7 +43,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/AR.ogg,
+            file = media/sound/tics/phonemes/1/player/AR.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -56,7 +56,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/B.ogg,
+            file = media/sound/tics/phonemes/1/player/B.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -69,7 +69,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/C.ogg,
+            file = media/sound/tics/phonemes/1/player/C.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -82,7 +82,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/CH.ogg,
+            file = media/sound/tics/phonemes/1/player/CH.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -95,7 +95,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/D.ogg,
+            file = media/sound/tics/phonemes/1/player/D.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -108,7 +108,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/E.ogg,
+            file = media/sound/tics/phonemes/1/player/E.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -121,7 +121,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/EE.ogg,
+            file = media/sound/tics/phonemes/1/player/EE.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -134,7 +134,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/ER.ogg,
+            file = media/sound/tics/phonemes/1/player/ER.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -147,7 +147,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/ERE.ogg,
+            file = media/sound/tics/phonemes/1/player/ERE.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -160,7 +160,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/F.ogg,
+            file = media/sound/tics/phonemes/1/player/F.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -173,7 +173,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/G.ogg,
+            file = media/sound/tics/phonemes/1/player/G.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -186,7 +186,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/H.ogg,
+            file = media/sound/tics/phonemes/1/player/H.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -199,7 +199,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/I.ogg,
+            file = media/sound/tics/phonemes/1/player/I.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -212,7 +212,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/IR.ogg,
+            file = media/sound/tics/phonemes/1/player/IR.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -225,7 +225,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/IS.ogg,
+            file = media/sound/tics/phonemes/1/player/IS.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -238,7 +238,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/J.ogg,
+            file = media/sound/tics/phonemes/1/player/J.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -251,7 +251,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/L.ogg,
+            file = media/sound/tics/phonemes/1/player/L.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -264,7 +264,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/M.ogg,
+            file = media/sound/tics/phonemes/1/player/M.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -277,7 +277,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/N.ogg,
+            file = media/sound/tics/phonemes/1/player/N.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -290,7 +290,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/NG.ogg,
+            file = media/sound/tics/phonemes/1/player/NG.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -303,7 +303,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/O.ogg,
+            file = media/sound/tics/phonemes/1/player/O.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -316,7 +316,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/OO.ogg,
+            file = media/sound/tics/phonemes/1/player/OO.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -329,7 +329,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/OOR.ogg,
+            file = media/sound/tics/phonemes/1/player/OOR.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -342,7 +342,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/OW.ogg,
+            file = media/sound/tics/phonemes/1/player/OW.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -355,7 +355,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/OY.ogg,
+            file = media/sound/tics/phonemes/1/player/OY.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -368,7 +368,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/P.ogg,
+            file = media/sound/tics/phonemes/1/player/P.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -381,7 +381,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/R.ogg,
+            file = media/sound/tics/phonemes/1/player/R.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -394,7 +394,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/S.ogg,
+            file = media/sound/tics/phonemes/1/player/S.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -407,7 +407,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/SH.ogg,
+            file = media/sound/tics/phonemes/1/player/SH.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -420,7 +420,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/T.ogg,
+            file = media/sound/tics/phonemes/1/player/T.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -433,7 +433,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/TH.ogg,
+            file = media/sound/tics/phonemes/1/player/TH.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -446,7 +446,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/U.ogg,
+            file = media/sound/tics/phonemes/1/player/U.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -459,7 +459,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/UR.ogg,
+            file = media/sound/tics/phonemes/1/player/UR.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -472,7 +472,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/V.ogg,
+            file = media/sound/tics/phonemes/1/player/V.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -485,7 +485,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/W.ogg,
+            file = media/sound/tics/phonemes/1/player/W.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -498,7 +498,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/Y.ogg,
+            file = media/sound/tics/phonemes/1/player/Y.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -511,7 +511,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/YStart.ogg,
+            file = media/sound/tics/phonemes/1/player/YStart.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,
@@ -524,7 +524,7 @@ module YetAnotherChatMod {
         loop = false,
         is3D = true,
         clip {
-            file = media/sound/yacm/phonemes/1/player/Z.ogg,
+            file = media/sound/tics/phonemes/1/player/Z.ogg,
             distanceMax = 650,
             reverbFactor = 0.1,
             volume = 0.7,

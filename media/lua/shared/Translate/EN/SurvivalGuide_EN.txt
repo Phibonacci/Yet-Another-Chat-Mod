@@ -1,39 +1,39 @@
 SurvivalGuide_EN {
-    SurvivalGuide_YetAnotherChatMod           = " <H1> YET ANOTHER CHAT MOD <BR>" ..
+    SurvivalGuide_TICS           = " <H1> YET ANOTHER CHAT MOD <BR>" ..
                                                 " <TEXT> <SIZE:medium>" ..
                                                 " <CENTRE> %1 <BR>" ..
                                                 " <TEXT> <SIZE:small>" ..
-                                                " <IMAGE:media/ui/yacm/icons/eye-on.png> Show the speaking range of the current channel when chat is focused <BR>" ..
-                                                " <IMAGE:media/ui/yacm/icons/eye-on-plus.png> Always show the speaking range of the current channel <BR>" ..
-                                                " <IMAGE:media/ui/yacm/icons/mic-on.png> Show the listening range of the surrounding radios <BR>",
-    SurvivalGuide_YetAnotherChatMod_Whisper   = " /whisper or /w to whisper <BR>",
-    SurvivalGuide_YetAnotherChatMod_MeWhisper = " /mewhisper or /mw to express an action without verb formatting <BR>",
-    SurvivalGuide_YetAnotherChatMod_Low       = " /low or /l to talk quietly <BR>",
-    SurvivalGuide_YetAnotherChatMod_MeLow     = " /melow or /ml to express an action without verb formatting <BR>",
-    SurvivalGuide_YetAnotherChatMod_Say       = " /say or /s to speak at normal volume <BR>",
-    SurvivalGuide_YetAnotherChatMod_MeSay     = " /mesay or /ms to express an action without verb formatting <BR>",
-    SurvivalGuide_YetAnotherChatMod_Yell      = " /yell or /y to scream <BR>",
-    SurvivalGuide_YetAnotherChatMod_MeYell    = " /meyell or /my to express an action without verb formatting <BR>",
-    SurvivalGuide_YetAnotherChatMod_Faction   = " /faction or /f to speak to faction channel <BR>",
-    SurvivalGuide_YetAnotherChatMod_SafeHouse = " /safehouse or /sh to speak to safehouse channel <BR>",
-    SurvivalGuide_YetAnotherChatMod_General   = " /general or /g to speak to general channel <BR>",
-    SurvivalGuide_YetAnotherChatMod_Ooc       = " /ooc or /o to speak out of character <BR>",
-    SurvivalGuide_YetAnotherChatMod_Pm        = " /pm username or /p username to send a private message (/r to answer) <BR>",
-    SurvivalGuide_YetAnotherChatMod_Admin     = " /admin or /a to speak in admin channel <BR>",
-    SurvivalGuide_YetAnotherChatMod_Color     = " "/color r,g,b" with r,g,b a number from 0 to 255 or /color #FFFFFF to update player color or just "/color" to see the current color <BR>",
-    SurvivalGuide_YetAnotherChatMod_Pitch     = " "/pitch value" with value from 0.85 to 1.45 to update player voice pitch or just "/pitch" to see the current pitch",
+                                                " <IMAGE:media/ui/tics/icons/eye-on.png> Show the speaking range of the current channel when chat is focused <BR>" ..
+                                                " <IMAGE:media/ui/tics/icons/eye-on-plus.png> Always show the speaking range of the current channel <BR>" ..
+                                                " <IMAGE:media/ui/tics/icons/mic-on.png> Show the listening range of the surrounding radios <BR>",
+    SurvivalGuide_TICS_Whisper   = " /whisper or /w to whisper <BR>",
+    SurvivalGuide_TICS_MeWhisper = " /mewhisper or /mw to express an action without verb formatting <BR>",
+    SurvivalGuide_TICS_Low       = " /low or /l to talk quietly <BR>",
+    SurvivalGuide_TICS_MeLow     = " /melow or /ml to express an action without verb formatting <BR>",
+    SurvivalGuide_TICS_Say       = " /say or /s to speak at normal volume <BR>",
+    SurvivalGuide_TICS_MeSay     = " /mesay or /ms to express an action without verb formatting <BR>",
+    SurvivalGuide_TICS_Yell      = " /yell or /y to scream <BR>",
+    SurvivalGuide_TICS_MeYell    = " /meyell or /my to express an action without verb formatting <BR>",
+    SurvivalGuide_TICS_Faction   = " /faction or /f to speak to faction channel <BR>",
+    SurvivalGuide_TICS_SafeHouse = " /safehouse or /sh to speak to safehouse channel <BR>",
+    SurvivalGuide_TICS_General   = " /general or /g to speak to general channel <BR>",
+    SurvivalGuide_TICS_Ooc       = " /ooc or /o to speak out of character <BR>",
+    SurvivalGuide_TICS_Pm        = " /pm username or /p username to send a private message (/r to answer) <BR>",
+    SurvivalGuide_TICS_Admin     = " /admin or /a to speak in admin channel <BR>",
+    SurvivalGuide_TICS_Color     = " "/color r,g,b" with r,g,b a number from 0 to 255 or /color #FFFFFF to update player color or just "/color" to see the current color <BR>",
+    SurvivalGuide_TICS_Pitch     = " "/pitch value" with value from 0.85 to 1.45 to update player voice pitch or just "/pitch" to see the current pitch",
 
-    SurvivalGuide_YetAnotherChatMod_AvatarUploadHelp =  " <H1> HOW TO UPLOAD YOUR AVATAR <BR>" ..
+    SurvivalGuide_TICS_AvatarUploadHelp =  " <H1> HOW TO UPLOAD YOUR AVATAR <BR>" ..
                                                         " <TEXT> <SIZE:small>" ..
                                                         " It is possible to upload a custom avatar image that will be displayed in the player bubble when speaking instead of a 3D portrait. <BR>" ..
                                                         " To do so a PNG image named after your username and your character first and last name, '%1.png', must be moved in the following windows directory: <BR>" ..
                                                         " <CENTRE> %2 <BR>" ..
                                                         " <TEXT> <SIZE:small> " ..
                                                         " The image MUST be exactly 60 in width and 80 in height. Transparency is supported an encouraged. <BR>" ..
-                                                        " <IMAGE:media/ui/yacm/icons/upload.png> Once the image has been moved in the right directory, click the upload icon on the chat window to upload it so an admin can approve your avatar.",
-    SurvivalGuide_YetAnotherChatMod_AvatarUploadPrompt =  " <TEXT> <SIZE:small>" ..
+                                                        " <IMAGE:media/ui/tics/icons/upload.png> Once the image has been moved in the right directory, click the upload icon on the chat window to upload it so an admin can approve your avatar.",
+    SurvivalGuide_TICS_AvatarUploadPrompt =  " <TEXT> <SIZE:small>" ..
                                                           "Do you want to send a request of approval for this avatar?",
-    SurvivalGuide_YetAnotherChatMod_AvatarSizeError    =  " <TEXT> <SIZE:small>" ..
+    SurvivalGuide_TICS_AvatarSizeError    =  " <TEXT> <SIZE:small>" ..
                                                           " Avatar of invalid size found." ..
                                                           " Your avatar size must be %1x%2.",
 }

@@ -1,394 +1,394 @@
 VERSION = 1,
 
-option YetAnotherChatMod.ShowCharacterName
+option TICS.ShowCharacterName
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_ShowCharacterName,
+	page = TICS,
+	translation = TICS_ShowCharacterName,
 }
 
-option YetAnotherChatMod.BubblePortrait
+option TICS.BubblePortrait
 {
 	type = enum,
 	numValues = 3,
 	default = 2,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_BubblePortrait,
-	valueTranslation = YetAnotherChatMod_BubblePortrait_Values,
+	page = TICS,
+	translation = TICS_BubblePortrait,
+	valueTranslation = TICS_BubblePortrait_Values,
 }
-option YetAnotherChatMod.BubbleTimerInSeconds
+option TICS.BubbleTimerInSeconds
 {
 	type = integer,
 	min = 1,
 	max = 20,
 	default = 8,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_BubbleTimerInSeconds,
+	page = TICS,
+	translation = TICS_BubbleTimerInSeconds,
 }
-option YetAnotherChatMod.BubbleOpacity
+option TICS.BubbleOpacity
 {
 	type = integer,
 	min = 0,
 	max = 100,
 	default = 75,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_BubbleOpacity,
+	page = TICS,
+	translation = TICS_BubbleOpacity,
 }
 
-option YetAnotherChatMod.VoiceEnabled
+option TICS.VoiceEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_VoiceEnabled,
+	page = TICS,
+	translation = TICS_VoiceEnabled,
 }
 
 
-option YetAnotherChatMod.VerbEnabled
+option TICS.VerbEnabled
 {
 	type = boolean,
 	default = false,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_VerbEnabled,
+	page = TICS,
+	translation = TICS_VerbEnabled,
 }
 
-option YetAnotherChatMod.HideCallout
+option TICS.HideCallout
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_HideCallout,
+	page = TICS,
+	translation = TICS_HideCallout,
 }
 
-option YetAnotherChatMod.MarkdownOneAsteriskColor
+option TICS.MarkdownOneAsteriskColor
 {
 	type = string,
 	default = #ADD4A0,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_MarkdownOneAsteriskColor,
+	page = TICS,
+	translation = TICS_MarkdownOneAsteriskColor,
 }
-option YetAnotherChatMod.MarkdownTwoAsterisksColor
+option TICS.MarkdownTwoAsterisksColor
 {
 	type = string,
 	default = #C3A4CF,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_MarkdownTwoAsterisksColor,
+	page = TICS,
+	translation = TICS_MarkdownTwoAsterisksColor,
 }
 
-option YetAnotherChatMod.GeneralDiscordEnabled
+option TICS.GeneralDiscordEnabled
 {
 	type = boolean,
 	default = false,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_GeneralDiscordEnabled,
+	page = TICS,
+	translation = TICS_GeneralDiscordEnabled,
 }
-option YetAnotherChatMod.RadioDiscordEnabled
+option TICS.RadioDiscordEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_RadioDiscordEnabled,
+	page = TICS,
+	translation = TICS_RadioDiscordEnabled,
 }
 
-option YetAnotherChatMod.RadioDiscordFrequency
+option TICS.RadioDiscordFrequency
 {
 	type = integer,
 	min = 200,
 	max = 1000000,
 	default = 100000,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_RadioDiscordFrequency,
+	page = TICS,
+	translation = TICS_RadioDiscordFrequency,
 }
 
-option YetAnotherChatMod.RadioColor
+option TICS.RadioColor
 {
 	type = string,
 	default = #ABF08C,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_RadioColor,
+	page = TICS,
+	translation = TICS_RadioColor,
 }
 
-option YetAnotherChatMod.RadioSoundMaxRange
+option TICS.RadioSoundMaxRange
 {
 	type = integer,
 	min = 1,
 	max = 15,
 	default = 6,
 
-	page = YetAnotherChatMod,
-	translation = YetAnotherChatMod_RadioSoundMaxRange,
+	page = TICS,
+	translation = TICS_RadioSoundMaxRange,
 }
 
-option YetAnotherChatMod.WhisperEnabled
+option TICS.WhisperEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_WhisperEnabled,
+	page = TICSChannels,
+	translation = TICS_WhisperEnabled,
 }
-option YetAnotherChatMod.WhisperRange
+option TICS.WhisperRange
 {
 	type = integer,
 	min = 1,
 	max = 10000,
 	default = 3,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_WhisperRange,
+	page = TICSChannels,
+	translation = TICS_WhisperRange,
 }
-option YetAnotherChatMod.WhisperZombieRange
+option TICS.WhisperZombieRange
 {
 	type = integer,
 	min = 1,
 	max = 10000,
 	default = 3,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_WhisperZombieRange,
+	page = TICSChannels,
+	translation = TICS_WhisperZombieRange,
 }
-option YetAnotherChatMod.WhisperColor
+option TICS.WhisperColor
 {
 	type = string,
 	default = #B4FFC5,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_WhisperColor,
+	page = TICSChannels,
+	translation = TICS_WhisperColor,
 }
 
-option YetAnotherChatMod.LowEnabled
+option TICS.LowEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_LowEnabled,
+	page = TICSChannels,
+	translation = TICS_LowEnabled,
 }
-option YetAnotherChatMod.LowRange
+option TICS.LowRange
 {
 	type = integer,
 	min = 1,
 	max = 10000,
 	default = 10,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_LowRange,
+	page = TICSChannels,
+	translation = TICS_LowRange,
 }
-option YetAnotherChatMod.LowZombieRange
+option TICS.LowZombieRange
 {
 	type = integer,
 	min = 1,
 	max = 10000,
 	default = 10,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_LowZombieRange,
+	page = TICSChannels,
+	translation = TICS_LowZombieRange,
 }
-option YetAnotherChatMod.LowColor
+option TICS.LowColor
 {
 	type = string,
 	default = #B4FFFF,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_LowColor,
+	page = TICSChannels,
+	translation = TICS_LowColor,
 }
 
-option YetAnotherChatMod.SayEnabled
+option TICS.SayEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_SayEnabled,
+	page = TICSChannels,
+	translation = TICS_SayEnabled,
 }
-option YetAnotherChatMod.SayRange
+option TICS.SayRange
 {
 	type = integer,
 	min = 1,
 	max = 10000,
 	default = 30,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_SayRange,
+	page = TICSChannels,
+	translation = TICS_SayRange,
 }
-option YetAnotherChatMod.SayZombieRange
+option TICS.SayZombieRange
 {
 	type = integer,
 	min = 1,
 	max = 10000,
 	default = 30,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_SayZombieRange,
+	page = TICSChannels,
+	translation = TICS_SayZombieRange,
 }
-option YetAnotherChatMod.SayColor
+option TICS.SayColor
 {
 	type = string,
 	default = #FFFFFF,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_SayColor,
+	page = TICSChannels,
+	translation = TICS_SayColor,
 }
 
-option YetAnotherChatMod.YellEnabled
+option TICS.YellEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_YellEnabled,
+	page = TICSChannels,
+	translation = TICS_YellEnabled,
 }
-option YetAnotherChatMod.YellRange
+option TICS.YellRange
 {
 	type = integer,
 	min = 1,
 	max = 10000,
 	default = 60,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_YellRange,
+	page = TICSChannels,
+	translation = TICS_YellRange,
 }
-option YetAnotherChatMod.YellZombieRange
+option TICS.YellZombieRange
 {
 	type = integer,
 	min = 1,
 	max = 10000,
 	default = 60,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_YellZombieRange,
+	page = TICSChannels,
+	translation = TICS_YellZombieRange,
 }
-option YetAnotherChatMod.YellColor
+option TICS.YellColor
 {
 	type = string,
 	default = #E69696,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_YellColor,
+	page = TICSChannels,
+	translation = TICS_YellColor,
 }
 
-option YetAnotherChatMod.PrivateMessageEnabled
+option TICS.PrivateMessageEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_PrivateMessageEnabled,
+	page = TICSChannels,
+	translation = TICS_PrivateMessageEnabled,
 }
-option YetAnotherChatMod.PrivateMessageColor
+option TICS.PrivateMessageColor
 {
 	type = string,
 	default = #FFB8DA,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_PrivateMessageColor,
+	page = TICSChannels,
+	translation = TICS_PrivateMessageColor,
 }
 
-option YetAnotherChatMod.FactionMessageEnabled
+option TICS.FactionMessageEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_FactionMessageEnabled,
+	page = TICSChannels,
+	translation = TICS_FactionMessageEnabled,
 }
-option YetAnotherChatMod.FactionMessageColor
+option TICS.FactionMessageColor
 {
 	type = string,
 	default = #AAFFAA,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_FactionMessageColor,
+	page = TICSChannels,
+	translation = TICS_FactionMessageColor,
 }
 
-option YetAnotherChatMod.SafeHouseMessageEnabled
+option TICS.SafeHouseMessageEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_SafeHouseMessageEnabled,
+	page = TICSChannels,
+	translation = TICS_SafeHouseMessageEnabled,
 }
-option YetAnotherChatMod.SafeHouseMessageColor
+option TICS.SafeHouseMessageColor
 {
 	type = string,
 	default = #FFFF60,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_SafeHouseMessageColor,
+	page = TICSChannels,
+	translation = TICS_SafeHouseMessageColor,
 }
 
-option YetAnotherChatMod.GeneralMessageEnabled
+option TICS.GeneralMessageEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_GeneralMessageEnabled,
+	page = TICSChannels,
+	translation = TICS_GeneralMessageEnabled,
 }
-option YetAnotherChatMod.GeneralMessageColor
+option TICS.GeneralMessageColor
 {
 	type = string,
 	default = #BEBEFF,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_GeneralMessageColor,
+	page = TICSChannels,
+	translation = TICS_GeneralMessageColor,
 }
 
-option YetAnotherChatMod.AdminMessageEnabled
+option TICS.AdminMessageEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_AdminMessageEnabled,
+	page = TICSChannels,
+	translation = TICS_AdminMessageEnabled,
 }
-option YetAnotherChatMod.AdminMessageColor
+option TICS.AdminMessageColor
 {
 	type = string,
 	default = #FFAAAA,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_AdminMessageColor,
+	page = TICSChannels,
+	translation = TICS_AdminMessageColor,
 }
 
-option YetAnotherChatMod.OutOfCharacterMessageEnabled
+option TICS.OutOfCharacterMessageEnabled
 {
 	type = boolean,
 	default = true,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_OutOfCharacterMessageEnabled,
+	page = TICSChannels,
+	translation = TICS_OutOfCharacterMessageEnabled,
 }
-option YetAnotherChatMod.OutOfCharacterMessageRange
+option TICS.OutOfCharacterMessageRange
 {
 	type = integer,
 	min = 1,
 	max = 10000,
 	default = 120,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_OutOfCharacterMessageRange,
+	page = TICSChannels,
+	translation = TICS_OutOfCharacterMessageRange,
 }
-option YetAnotherChatMod.OutOfCharacterMessageColor
+option TICS.OutOfCharacterMessageColor
 {
 	type = string,
 	default = #92FF94,
 
-	page = YetAnotherChatModChannels,
-	translation = YetAnotherChatMod_OutOfCharacterMessageColor,
+	page = TICSChannels,
+	translation = TICS_OutOfCharacterMessageColor,
 }
