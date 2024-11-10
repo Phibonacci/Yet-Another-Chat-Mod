@@ -1,6 +1,6 @@
 Sandbox_EN          = {
-    Sandbox_TICS                                       = "Yet Another Chat Mod",
-    Sandbox_TICSChannels                               = "Yet Another Chat Mod: Channels",
+    Sandbox_TICS                                       = "Total Immersive Chat System",
+    Sandbox_TICSChannels                               = "Total Immersive Chat System: Channels",
 
     Sandbox_TICS_ShowCharacterName                     = "Show character name in chat instead of username",
 

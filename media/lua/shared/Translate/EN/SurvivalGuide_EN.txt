@@ -1,5 +1,5 @@
 SurvivalGuide_EN {
-    SurvivalGuide_TICS           = " <H1> YET ANOTHER CHAT MOD <BR>" ..
+    SurvivalGuide_TICS           = " <H1> TOTAL IMMERSIVE CHAT SYSTEM <BR>" ..
                                                 " <TEXT> <SIZE:medium>" ..
                                                 " <CENTRE> %1 <BR>" ..
                                                 " <TEXT> <SIZE:small>" ..
