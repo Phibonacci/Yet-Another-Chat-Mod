@@ -318,6 +318,7 @@ ISChat.initChat = function()
     instance.currentTabID = 0
     instance.rangeButtonState = 'hidden'
     instance.online = false
+    instance.lastDiscordMessages = {}
 
     InitGlobalModData()
     AddTab('General', 1)
@@ -1174,6 +1175,31 @@ ISChat.addLineInChat = function(message, tabID)
     end
 
     if message:isFromDiscord() then
+        local currentDiscordMessage = message:getDatetimeStr() .. message:getText()
+        local currentTime = Calendar.getInstance():getTimeInMillis()
+        local isDuplicate = false
+        local toRemove = {}
+        for key, discordMessageInfo in pairs(ISChat.instance.lastDiscordMessages) do
+            local discordMessage = discordMessageInfo['message']
+            local discordMessageTime = discordMessageInfo['time']
+            if currentTime - discordMessageTime < 2000 then
+                if discordMessage == currentDiscordMessage then
+                    isDuplicate = true
+                end
+            else
+                table.insert(toRemove, key)
+            end
+        end
+        for _, key in pairs(toRemove) do
+            ISChat.instance.lastDiscordMessages[key] = nil
+        end
+        if isDuplicate then
+            return
+        end
+        table.insert(ISChat.instance.lastDiscordMessages, {
+            message = currentDiscordMessage,
+            time = currentTime
+        })
         local discordColor = { 88, 101, 242 } -- discord logo color
         local messageWithoutPrefix = RemoveDiscordMessagePrefix(line)
         if messageWithoutPrefix == nil then
