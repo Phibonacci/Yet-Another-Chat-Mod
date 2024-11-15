@@ -27,6 +27,7 @@ function RadioBubble:render()
         self.texturesLoaded = true
     end
     local x, y = RadioBubble.CenterTop(self.type, self.object, self:getWidth(), self:getHeight())
+    y = y - self.offsetY * Core.getTileScale() / (Coordinates.GetZoom())
     if x == nil then
         return
     end
@@ -55,7 +56,7 @@ RadioBubble.types = {
     vehicle = 3,
 }
 
-function RadioBubble:new(object, message, messageColor, timer, opacity, type, isVoicesEnabled, voicePitch)
+function RadioBubble:new(object, message, messageColor, timer, opacity, type, isVoicesEnabled, voicePitch, offsetY)
     local parsedMessages = Parser.ParseTicsMessage(message, messageColor, 20, 200)
     local textLength = getTextManager():MeasureStringX(UIFont.medium, parsedMessages['rawMessage'])
     local width = math.min(textLength * 1.25, 162) + 40
@@ -80,6 +81,7 @@ function RadioBubble:new(object, message, messageColor, timer, opacity, type, is
     end
     o.message = message
     o.color = messageColor
+    o.offsetY = offsetY or 0
     return o
 end
 

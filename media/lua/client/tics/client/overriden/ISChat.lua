@@ -716,9 +716,15 @@ local function CreateSquareRadioBubble(position, message, messageColor, voicePit
         local timer = 10
         local opacity = 70
         local square = getSquare(x, y, z)
+        local radios = World.getSquareItemsByGroup(square, 'IsoRadio')
+        local offsetY = 0
+        if radios ~= nil and #radios > 0 then
+            local radio = radios[1]
+            offsetY = radio:getRenderYOffset()
+        end
         local bubble = RadioBubble:new(
             square, message, messageColor, timer, opacity, RadioBubble.types.square,
-            ISChat.instance.isVoiceEnabled, voicePitch)
+            ISChat.instance.isVoiceEnabled, voicePitch, offsetY)
         ISChat.instance.radioBubble['x' .. x .. 'y' .. y .. 'z' .. z] = bubble
     end
 end
