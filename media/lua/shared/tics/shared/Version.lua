@@ -1,1 +1,1 @@
-return 'v0.13.3'
+return 'v1.0.0'
