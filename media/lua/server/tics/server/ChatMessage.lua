@@ -199,6 +199,7 @@ local function SetMessageTypeSettings()
         },
         ['options'] = {
             ['showCharacterName'] = SandboxVars.TICS.ShowCharacterName,
+            ['boredomReduction'] = SandboxVars.TICS.BoredomReduction,
             ['verb'] = SandboxVars.TICS.VerbEnabled,
             ['bubble'] = {
                 ['timer'] = SandboxVars.TICS.BubbleTimerInSeconds,

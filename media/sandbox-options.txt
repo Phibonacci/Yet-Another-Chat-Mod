@@ -9,6 +9,17 @@ option TICS.ShowCharacterName
 	translation = TICS_ShowCharacterName,
 }
 
+option TICS.BoredomReduction
+{
+	type = double,
+	min = 0.0,
+	max = 50.0,
+	default = 1.2,
+
+	page = TICS,
+	translation = TICS_BoredomReduction,
+}
+
 option TICS.BubblePortrait
 {
 	type = enum,

@@ -857,7 +857,11 @@ end
 local function ReduceBoredom()
     local player = getPlayer()
     local boredom = player:getBodyDamage():getBoredomLevel()
-    player:getBodyDamage():setBoredomLevel(boredom - 0.6)
+    local boredomReduction = 0
+    if TicsServerSettings then
+        boredomReduction = TicsServerSettings['options']['boredomReduction']
+    end
+    player:getBodyDamage():setBoredomLevel(boredom - boredomReduction)
 end
 
 function ISChat.onMessagePacket(type, author, characterName, message, color, hideInChat, target, isFromDiscord,

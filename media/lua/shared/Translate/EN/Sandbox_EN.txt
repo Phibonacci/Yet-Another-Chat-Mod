@@ -4,6 +4,8 @@ Sandbox_EN          = {
 
     Sandbox_TICS_ShowCharacterName                     = "Show character name in chat instead of username",
 
+    Sandbox_TICS_BoredomReduction                      = "Boredom reduction by message heard",
+
     Sandbox_TICS_BubblePortrait                        = "Show player portrait on the left of the Bubble (custom goes in: Zomboid/Lua/avatars/username.png on server)",
     Sandbox_TICS_BubblePortrait_help                   = "Show player portrait on the left of the Bubble.\nCustom avatars go to: Zomboid/Lua/avatars/username.png on the server.\nVanilla portrait will be used if no image is found for the username.\n1 = None\n2 = Vanilla\n 3 = Steam Avatar\n4 = Custom",
     Sandbox_TICS_BubblePortrait_Values_option1         = "None",
