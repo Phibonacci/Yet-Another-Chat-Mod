@@ -1147,7 +1147,7 @@ ISChat.addLineInChat = function(message, tabID)
     if message:getRadioChannel() ~= -1 then -- scripted radio message
         local messageWithoutColorPrefix = message:getText():gsub('*%d+,%d+,%d+*', '')
         message:setText(messageWithoutColorPrefix)
-        local color = (TicsServerSettings and TicsServerSettings['options']['scriptedRadio']['color']) or {
+        local color = (TicsServerSettings and TicsServerSettings['scriptedRadio']['color']) or {
             171, 240, 140,
         }
         ISChat.onRadioPacket(
@@ -1156,7 +1156,7 @@ ISChat.addLineInChat = function(message, tabID)
             nil,
             messageWithoutColorPrefix,
             color,
-            nil, -- todo find a way to locate the radio
+            {}, -- todo find a way to locate the radio
             message:getRadioChannel(),
             false
         )
