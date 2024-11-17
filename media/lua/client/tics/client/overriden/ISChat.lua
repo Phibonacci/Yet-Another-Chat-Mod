@@ -1147,8 +1147,11 @@ end
 -- TODO: try to clean this mess copied from the base game
 ISChat.addLineInChat = function(message, tabID)
     local line = message:getText()
+    print('TICS debug: line: ' .. line)
     local messageType = GetMessageType(message)
-    if message:getRadioChannel() ~= -1 then -- scripted radio message
+    if message:getAuthor() == 'Server' then
+        ISChat.sendInfoToCurrentTab(line)
+    elseif message:getRadioChannel() ~= -1 then -- scripted radio message
         local messageWithoutColorPrefix = message:getText():gsub('*%d+,%d+,%d+*', '')
         message:setText(messageWithoutColorPrefix)
         local color = (TicsServerSettings and TicsServerSettings['scriptedRadio']['color']) or {

@@ -2,7 +2,7 @@ local ChatText = ISRichTextPanel:derive("ChatText");
 
 -- from ISRichTextPanel:render
 function ChatText:render()
-    local drawLineBackground = true
+    local drawLineBackground = false
     self.r = 1;
     self.g = 1;
     self.b = 1;
@@ -107,7 +107,7 @@ function ChatText:render()
                         if drawLineBackground then
                             self:drawRect(
                                 0,
-                                self.lineY[c],
+                                self.lineY[c] + 3,
                                 self.width + self.marginLeft + self.marginRight,
                                 lineHeight,
                                 0.05, 0.5, 0.5, 0.5)
