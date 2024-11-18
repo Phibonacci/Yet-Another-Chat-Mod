@@ -6,6 +6,7 @@ SurvivalGuide_EN {
                                                 " <IMAGE:media/ui/tics/icons/eye-on.png> Show the speaking range of the current channel when chat is focused <BR>" ..
                                                 " <IMAGE:media/ui/tics/icons/eye-on-plus.png> Always show the speaking range of the current channel <BR>" ..
                                                 " <IMAGE:media/ui/tics/icons/mic-on.png> Show the listening range of the surrounding radios <BR>",
+    SurvivalGuide_TICS_Markdown   = " text writen between * or ** will be colored differently (**text**) <BR>",
     SurvivalGuide_TICS_Whisper   = " /whisper or /w to whisper <BR>",
     SurvivalGuide_TICS_MeWhisper = " /mewhisper or /mw to express an action without verb formatting <BR>",
     SurvivalGuide_TICS_Low       = " /low or /l to talk quietly <BR>",
@@ -21,8 +22,8 @@ SurvivalGuide_EN {
     SurvivalGuide_TICS_Pm        = " /pm username or /p username to send a private message (/r to answer) <BR>",
     SurvivalGuide_TICS_Admin     = " /admin or /a to speak in admin channel <BR>",
     SurvivalGuide_TICS_Color     = " "/color r,g,b" with r,g,b a number from 0 to 255 or /color #FFFFFF to update player color or just "/color" to see the current color <BR>",
-    SurvivalGuide_TICS_Pitch     = " "/pitch value" with value from 0.85 to 1.45 to update player voice pitch or just "/pitch" to see the current pitch",
-
+    SurvivalGuide_TICS_Pitch     = " "/pitch value" with value from 0.85 to 1.45 to update player voice pitch or just "/pitch" to see the current pitch <BR>",
+    SurvivalGuide_TICS_Roll      = " "/roll xdy" with x and y numbers and x from 1 to 20 to roll dice <BR>",
     SurvivalGuide_TICS_AvatarUploadHelp =  " <H1> HOW TO UPLOAD YOUR AVATAR <BR>" ..
                                                         " <TEXT> <SIZE:small>" ..
                                                         " It is possible to upload a custom avatar image that will be displayed in the player bubble when speaking instead of a 3D portrait. <BR>" ..

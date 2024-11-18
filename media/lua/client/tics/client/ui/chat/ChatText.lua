@@ -31,9 +31,18 @@ function ChatText:render()
     end
     self.font = self.defaultFont
     local orient = "left"
-    local c = self.firstPrintableLine
-    if self.lines[self.firstPrintableLine] == nil then
-        c = 1
+    local c = 1
+    if self.lines[self.firstPrintableLine] ~= nil then
+        c = self.firstPrintableLine
+        if self.firstPrintableLineColor then
+            self.r = self.firstPrintableLineColor.r
+            self.g = self.firstPrintableLineColor.g
+            self.b = self.firstPrintableLineColor.b
+        end
+        if self.firstPrintableLineOrient then
+            orient = self.firstPrintableLineOrient
+        end
+    else
         self.firstPrintableLine = 1
     end
     local previousLineY = nil
@@ -62,6 +71,12 @@ function ChatText:render()
             if not printableLineFound then
                 printableLineFound = true
                 self.firstPrintableLine = c
+                self.firstPrintableLineColor = {
+                    r = self.r,
+                    g = self.g,
+                    b = self.b,
+                }
+                self.firstPrintableLineOrient = orient
             end
         end
 

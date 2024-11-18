@@ -291,6 +291,20 @@ RecvServer['RejectAvatar'] = function(player, args)
     AvatarManager:rejectAvatar(player, username, firstName, lastName, checksum)
 end
 
+RecvServer['Roll'] = function(player, args)
+    local diceCount = args['diceCount']
+    local diceType  = args['diceType']
+    if type(diceCount) ~= 'number' then
+        print('TICS error: Roll packet does not contain a "diceCount" variable')
+        return
+    end
+    if type(diceType) ~= 'number' then
+        print('TICS error: Roll packet does not contain a "diceType" variable')
+        return
+    end
+    ChatMessage.RollDice(player, diceCount, diceType)
+end
+
 local function OnClientCommand(module, command, player, args)
     if module == 'TICS' and RecvServer[command] then
         RecvServer[command](player, args)

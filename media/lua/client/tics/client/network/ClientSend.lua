@@ -197,4 +197,11 @@ function ClientSend.sendRejectPendingAvatar(username, firstName, lastName, check
     })
 end
 
+function ClientSend.sendRoll(diceCount, diceType)
+    ClientSendCommand('Roll', {
+        diceCount = diceCount,
+        diceType = diceType,
+    })
+end
+
 return ClientSend

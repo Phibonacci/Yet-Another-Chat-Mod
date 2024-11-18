@@ -435,14 +435,6 @@ local function GetVehiclesRadios(player, args, radioFrequencies, range)
 end
 
 local function SendRadioPackets(author, player, args, sourceRadioByFrequencies)
-    if ChatMessage.MessageTypeSettings['say'] == nil then -- the radio volume range is always set to 'say'
-        print('TICS error: SendRadioPackets: no setting for type "say"')
-        return
-    end
-    if ChatMessage.MessageTypeSettings['say']['range'] == nil or ChatMessage.MessageTypeSettings[args.type]['range'] <= -1 then
-        print('TICS error: SendRadioPackets: no range for type "say"')
-        return
-    end
     local range = ChatMessage.MessageTypeSettings['options']['radio']['soundMaxRange']
     local squaresRadios, squaresRadiosFound = GetSquaresRadios(player, args, sourceRadioByFrequencies, range)
     local playersRadios, playersRadiosFound = GetPlayerRadios(player, args, sourceRadioByFrequencies, range)
@@ -581,6 +573,31 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
             end
         end
     end
+end
+
+function ChatMessage.RollDice(player, diceCount, diceType)
+    if diceCount < 1 or diceCount > 20 or diceType < 1 then
+        return
+    end
+    local results = {}
+    local result = 0
+    for _ = 1, diceCount do
+        local diceResult = ZombRand(diceType) + 1
+        table.insert(results, diceResult)
+        result = result + diceResult
+    end
+    local firstName, lastName = Character.getFirstAndLastName(player)
+    local username = player:getUsername()
+    local characterName = firstName .. ' ' .. lastName
+    local messageRange = 20
+    if ChatMessage.MessageTypeSettings and ChatMessage.MessageTypeSettings['say'] and ChatMessage.MessageTypeSettings['say']['range'] then
+        local messageRange = ChatMessage.MessageTypeSettings['say']['range']
+    end
+    World.forAllPlayers(function(targetPlayer)
+        if PlayersDistance(player, targetPlayer) < messageRange then
+            ServerSend.RollResult(targetPlayer, username, characterName, diceCount, diceType, results, result)
+        end
+    end)
 end
 
 Events.OnServerStarted.Add(SetMessageTypeSettings)

@@ -46,6 +46,7 @@ ISChat.noVerbStreams[4] = { name = 'meyell', command = '/meyell ', shortCommand 
 ISChat.ticsCommand    = {}
 ISChat.ticsCommand[1] = { name = 'color', command = '/color', shortCommand = nil }
 ISChat.ticsCommand[2] = { name = 'pitch', command = '/pitch', shortCommand = nil }
+ISChat.ticsCommand[3] = { name = 'roll', command = '/roll', shortCommand = nil }
 
 
 ISChat.defaultTabStream    = {}
@@ -476,6 +477,21 @@ local function ProcessPitchCommand(arguments)
     return false
 end
 
+local function ProcessRollCommand(arguments)
+    if arguments == nil then
+        return false
+    end
+    local regex = '^(%d+)d(%d+) *$'
+    local m1, m2 = arguments:match(regex)
+    local diceCount = tonumber(m1)
+    local diceType = tonumber(m2)
+    if diceType == nil or diceType < 1 or diceCount == nil or diceCount < 1 or diceCount > 20 then
+        return false
+    end
+    ClientSend.sendRoll(diceCount, diceType)
+    return true
+end
+
 local function ProcessTicsCommand(ticsCommand, message)
     local arguments = GetArgumentsFromMessage(ticsCommand, message)
     if ticsCommand['name'] == 'color' then
@@ -487,6 +503,12 @@ local function ProcessTicsCommand(ticsCommand, message)
     elseif ticsCommand['name'] == 'pitch' then
         if ProcessPitchCommand(arguments) == false then
             ISChat.sendErrorToCurrentTab('pitch command expects the format: "/pitch value" with value from 0.85 to 1.45')
+            return false
+        end
+    elseif ticsCommand['name'] == 'roll' then
+        if ProcessRollCommand(arguments) == false then
+            ISChat.sendErrorToCurrentTab(
+                'roll command expects the format: "/roll xdy" with x and y numbers and x from 1 to 20')
             return false
         end
     end
@@ -540,6 +562,16 @@ local function BuildChannelPrefixString(channel)
     return StringBuilder.BuildBracketColorString(color) .. '[' .. channel .. '] '
 end
 
+local function FontStringToEnum(fontString)
+    if fontString == 'small' then
+        return UIFont.NewSmall
+    elseif fontString == 'medium' then
+        return UIFont.Medium
+    else
+        return UIFont.Large
+    end
+end
+
 function ISChat:updateChatPrefixSettings()
     updateChatSettings(self.chatFont, self.showTimestamp, self.showTitle)
     for tabNumber, chatText in pairs(self.tabs) do
@@ -548,6 +580,7 @@ function ISChat:updateChatPrefixSettings()
         local newText = ""
         chatText.chatTextLines = {}
         chatText.chatTextRawLines = chatText.chatTextRawLines or {}
+        chatText.defaultFont = FontStringToEnum(self.chatFont or 'medium')
         for i, msg in ipairs(chatText.chatTextRawLines) do
             self.chatFont = self.chatFont or 'medium'
             local line = StringBuilder.BuildFontSizeString(self.chatFont)
@@ -559,7 +592,7 @@ function ISChat:updateChatPrefixSettings()
             end
             line = line .. msg.line .. StringBuilder.BuildNewLine()
             table.insert(chatText.chatTextLines, line)
-            if i == #chatText.chatMessages then
+            if i == #chatText.chatTextRawLines then
                 line = string.gsub(line, " <LINE> $", "")
             end
             newText = newText .. line
@@ -816,9 +849,7 @@ local function AddMessageToTab(tabID, time, formattedMessage, line, channel)
             channel = channel,
         })
     local chatTextRawLinesSize = #chatText.chatTextRawLines
-    -- Messages can be splitted with <LINE> in the server message so I'm adding this uggly buffer of 50
-    -- this entire chat window should be rewritten
-    local maxRawMessages = chatText.maxLines + 50
+    local maxRawMessages = chatText.maxLines
     if chatTextRawLinesSize > maxRawMessages then
         local newRawLines = {}
         for i = chatTextRawLinesSize - maxRawMessages, chatTextRawLinesSize do
@@ -875,6 +906,25 @@ local function ReduceBoredom()
         boredomReduction = TicsServerSettings['options']['boredomReduction']
     end
     player:getBodyDamage():setBoredomLevel(boredom - boredomReduction)
+end
+
+function ISChat.onDiceResult(author, characterName, diceCount, diceType, diceResults, finalResult)
+    local name = characterName
+    if TicsServerSettings and not TicsServerSettings['options']['showCharacterName'] then
+        name = author
+    end
+    local message = name .. ' rolled ' .. diceCount .. 'd' .. diceType .. ' ('
+    local first = true
+    for _, r in pairs(diceResults) do
+        if first then
+            first = false
+        else
+            message = message .. ', '
+        end
+        message = message .. r
+    end
+    message = message .. ') = ' .. finalResult
+    ISChat.sendInfoToCurrentTab(message)
 end
 
 function ISChat.onMessagePacket(type, author, characterName, message, color, hideInChat, target, isFromDiscord,
@@ -1448,6 +1498,7 @@ end
 
 local function UpdateInfoWindow()
     local info = getText('SurvivalGuide_TICS', TICS_VERSION)
+    info = info .. getText('SurvivalGuide_TICS_Markdown')
     if TicsServerSettings['whisper']['enabled'] then
         info = info .. getText('SurvivalGuide_TICS_Whisper')
     end
@@ -1492,6 +1543,7 @@ local function UpdateInfoWindow()
     end
     info = info .. getText('SurvivalGuide_TICS_Color')
     info = info .. getText('SurvivalGuide_TICS_Pitch')
+    info = info .. getText('SurvivalGuide_TICS_Roll')
     ISChat.instance:setInfo(info)
 end
 

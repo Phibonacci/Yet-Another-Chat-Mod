@@ -150,6 +150,41 @@ ClientRecv['AvatarProcessed'] = function(args)
     AvatarManager:removeAvatarPending(username, firstName, lastName, checksum)
 end
 
+ClientRecv['RollResult'] = function(args)
+    local username      = args['username']
+    local characterName = args['characterName']
+    local diceCount     = args['diceCount']
+    local diceType      = args['diceType']
+    local diceResults   = args['diceResults']
+    local finalResult   = args['finalResult']
+
+    if type(username) ~= 'string' then
+        print('TICS error: RollResult packet does not contain a valid "username"')
+        return
+    end
+    if type(characterName) ~= 'string' then
+        print('TICS error: RollResult packet does not contain a valid "characterName"')
+        return
+    end
+    if type(diceCount) ~= 'number' then
+        print('TICS error: RollResult packet does not contain a valid "diceCount"')
+        return
+    end
+    if type(diceType) ~= 'number' then
+        print('TICS error: RollResult packet does not contain a valid "diceType"')
+        return
+    end
+    if type(diceResults) ~= 'table' then
+        print('TICS error: RollResult packet does not contain a valid "diceResults"')
+        return
+    end
+    if type(finalResult) ~= 'number' then
+        print('TICS error: RollResult packet does not contain a valid "finalResult"')
+        return
+    end
+    ISChat.onDiceResult(username, characterName, diceCount, diceType, diceResults, finalResult)
+end
+
 function OnServerCommand(module, command, args)
     if module == 'TICS' and ClientRecv[command] then
         ClientRecv[command](args)

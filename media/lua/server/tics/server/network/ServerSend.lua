@@ -67,4 +67,15 @@ function ServerSend.AvatarProcessed(player, username, firstName, lastName, check
     })
 end
 
+function ServerSend.RollResult(player, username, characterName, diceCount, diceType, diceResults, finalResult)
+    ServerSend.Command(player, 'RollResult', {
+        username = username,
+        characterName = characterName,
+        diceCount = diceCount,
+        diceType = diceType,
+        diceResults = diceResults,
+        finalResult = finalResult,
+    })
+end
+
 return ServerSend
