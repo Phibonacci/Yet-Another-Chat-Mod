@@ -543,6 +543,7 @@ end
 function ISChat:updateChatPrefixSettings()
     updateChatSettings(self.chatFont, self.showTimestamp, self.showTitle)
     for tabNumber, chatText in pairs(self.tabs) do
+        chatText.firstPrintableLine = 1
         chatText.text = ""
         local newText = ""
         chatText.chatTextLines = {}
@@ -565,6 +566,7 @@ function ISChat:updateChatPrefixSettings()
         end
         chatText.text = newText
         chatText:paginate()
+        chatText:scrollToBottom()
     end
 end
 
@@ -813,6 +815,17 @@ local function AddMessageToTab(tabID, time, formattedMessage, line, channel)
             line = formattedMessage,
             channel = channel,
         })
+    local chatTextRawLinesSize = #chatText.chatTextRawLines
+    -- Messages can be splitted with <LINE> in the server message so I'm adding this uggly buffer of 50
+    -- this entire chat window should be rewritten
+    local maxRawMessages = chatText.maxLines + 50
+    if chatTextRawLinesSize > maxRawMessages then
+        local newRawLines = {}
+        for i = chatTextRawLinesSize - maxRawMessages, chatTextRawLinesSize do
+            table.insert(newRawLines, chatText.chatTextRawLines[i])
+        end
+        chatText.chatTextRawLines = newRawLines
+    end
     if chatText.tabTitle ~= ISChat.instance.chatText.tabTitle then
         local alreadyExist = false
         for _, blinkedTab in pairs(ISChat.instance.panel.blinkTabs) do
@@ -1384,7 +1397,7 @@ function ISChat:createTab()
     local chatY = self:titleBarHeight() + self.btnHeight + 2 * self.inset
     local chatHeight = self.textEntry:getY() - chatY
     local chatText = ChatText:new(0, chatY, self:getWidth(), chatHeight)
-    chatText.maxLines = 500
+    chatText.maxLines = 100
     chatText:initialise()
     chatText.background = false
     chatText:setAnchorBottom(true)
