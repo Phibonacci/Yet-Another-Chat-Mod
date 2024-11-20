@@ -1408,7 +1408,9 @@ function ISChat.onTextChange()
         return
     end
 
-    if internalText == '/r' and ISChat.instance.lastPrivateMessageAuthor ~= nil then
+    if internalText == '/r' and ISChat.instance.lastPrivateMessageAuthor ~= nil
+        and ISChat.instance.currentTabID == 3
+    then
         t:setText('/pm ' .. ISChat.instance.lastPrivateMessageAuthor .. ' ')
         return
     end
