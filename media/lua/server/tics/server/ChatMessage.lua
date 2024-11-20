@@ -543,7 +543,8 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
     end
 
     if args.type == 'general' and
-        ChatMessage.MessageTypeSettings and ChatMessage.MessageTypeSettings['general']['discord']
+        ChatMessage.MessageTypeSettings and ChatMessage.MessageTypeSettings['general']['discord'] and
+        packetType ~= 'Typing'
     then
         ServerSend.Command(player, 'DiscordMessage', {
             message = args.message,
@@ -555,8 +556,12 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
         error('TICS error: No range for message type "' .. args.type .. '".')
         return
     end
-    local radioEmission, radioFrequencies = GetEmittingRadios(player, packetType, args['type'], range)
-    SendRadioEmittingPackets(player, args, radioFrequencies)
+    local radioEmission = false
+    local radioFrequencies = {}
+    if packetType ~= 'Typing' then
+        radioEmission, radioFrequencies = GetEmittingRadios(player, packetType, args['type'], range)
+        SendRadioEmittingPackets(player, args, radioFrequencies)
+    end
     local connectedPlayers = getOnlinePlayers()
     for i = 0, connectedPlayers:size() - 1 do
         local connectedPlayer = connectedPlayers:get(i)
