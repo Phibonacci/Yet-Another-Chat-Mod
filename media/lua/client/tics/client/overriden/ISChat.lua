@@ -29,7 +29,7 @@ ISChat.allChatStreams[3]  = { name = 'low', command = '/low ', shortCommand = '/
 ISChat.allChatStreams[4]  = { name = 'yell', command = '/yell ', shortCommand = '/y ', tabID = 1 }
 ISChat.allChatStreams[5]  = { name = 'faction', command = '/faction ', shortCommand = '/f ', tabID = 1 }
 ISChat.allChatStreams[6]  = { name = 'safehouse', command = '/safehouse ', shortCommand = '/sh ', tabID = 1 }
-ISChat.allChatStreams[7]  = { name = 'general', command = '/general ', shortCommand = '/g ', tabID = 1 }
+ISChat.allChatStreams[7]  = { name = 'general', command = '/all ', shortCommand = '/g ', tabID = 1 }
 ISChat.allChatStreams[8]  = { name = 'scriptedRadio', command = nil, shortCommand = nil, tabID = 1 }
 ISChat.allChatStreams[9]  = { name = 'ooc', command = '/ooc ', shortCommand = '/o ', tabID = 2 }
 ISChat.allChatStreams[10] = { name = 'pm', command = '/pm ', shortCommand = '/p ', tabID = 3 }
@@ -37,7 +37,7 @@ ISChat.allChatStreams[11] = { name = 'admin', command = '/admin ', shortCommand 
 
 
 ISChat.noVerbStreams    = {}
-ISChat.noVerbStreams[1] = { name = 'mesay', command = '/mesay ', shortCommand = '/ms ', tabID = 1, forget = true }
+ISChat.noVerbStreams[1] = { name = 'mesay', command = '/me ', shortCommand = '/ms ', tabID = 1, forget = true }
 ISChat.noVerbStreams[2] = { name = 'mewhisper', command = '/mewhisper ', shortCommand = '/mw ', tabID = 1, forget = true }
 ISChat.noVerbStreams[3] = { name = 'melow', command = '/melow ', shortCommand = '/ml ', tabID = 1, forget = true }
 ISChat.noVerbStreams[4] = { name = 'meyell', command = '/meyell ', shortCommand = '/my ', tabID = 1, forget = true }
