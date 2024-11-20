@@ -1209,8 +1209,15 @@ end
 
 -- TODO: try to clean this mess copied from the base game
 ISChat.addLineInChat = function(message, tabID)
+    if UdderlyUpToDate and
+        message.setOverHeadSpeech == nil and
+        message.isFromDiscord == nil and
+        message.getDatetimeStr == nil
+    then -- probably a fake message from UdderlyUpToDate mod
+        ISChat.sendErrorToCurrentTab(message:getText())
+        return
+    end
     local line = message:getText()
-    print('TICS debug: line: ' .. line)
     local messageType = GetMessageType(message)
     if message:getAuthor() == 'Server' then
         ISChat.sendInfoToCurrentTab(line)
