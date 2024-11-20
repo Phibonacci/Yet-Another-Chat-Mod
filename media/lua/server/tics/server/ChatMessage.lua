@@ -591,7 +591,7 @@ function ChatMessage.RollDice(player, diceCount, diceType)
     local characterName = firstName .. ' ' .. lastName
     local messageRange = 20
     if ChatMessage.MessageTypeSettings and ChatMessage.MessageTypeSettings['say'] and ChatMessage.MessageTypeSettings['say']['range'] then
-        local messageRange = ChatMessage.MessageTypeSettings['say']['range']
+        messageRange = ChatMessage.MessageTypeSettings['say']['range']
     end
     World.forAllPlayers(function(targetPlayer)
         if PlayersDistance(player, targetPlayer) < messageRange then
