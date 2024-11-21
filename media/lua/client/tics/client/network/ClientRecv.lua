@@ -155,6 +155,7 @@ ClientRecv['RollResult'] = function(args)
     local characterName = args['characterName']
     local diceCount     = args['diceCount']
     local diceType      = args['diceType']
+    local addCount      = args['addCount']
     local diceResults   = args['diceResults']
     local finalResult   = args['finalResult']
 
@@ -174,6 +175,10 @@ ClientRecv['RollResult'] = function(args)
         print('TICS error: RollResult packet does not contain a valid "diceType"')
         return
     end
+    if addCount ~= nil and type(addCount) ~= 'number' then
+        print('TICS error: RollResult packet does not contain a valid "addCount"')
+        return
+    end
     if type(diceResults) ~= 'table' then
         print('TICS error: RollResult packet does not contain a valid "diceResults"')
         return
@@ -182,7 +187,7 @@ ClientRecv['RollResult'] = function(args)
         print('TICS error: RollResult packet does not contain a valid "finalResult"')
         return
     end
-    ISChat.onDiceResult(username, characterName, diceCount, diceType, diceResults, finalResult)
+    ISChat.onDiceResult(username, characterName, diceCount, diceType, addCount, diceResults, finalResult)
 end
 
 function OnServerCommand(module, command, args)

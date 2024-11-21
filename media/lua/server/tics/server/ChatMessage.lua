@@ -580,7 +580,7 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
     end
 end
 
-function ChatMessage.RollDice(player, diceCount, diceType)
+function ChatMessage.RollDice(player, diceCount, diceType, addCount)
     if diceCount < 1 or diceCount > 20 or diceType < 1 then
         return
     end
@@ -591,6 +591,9 @@ function ChatMessage.RollDice(player, diceCount, diceType)
         table.insert(results, diceResult)
         result = result + diceResult
     end
+    if addCount ~= nil then
+        result = result + addCount
+    end
     local firstName, lastName = Character.getFirstAndLastName(player)
     local username = player:getUsername()
     local characterName = firstName .. ' ' .. lastName
@@ -600,7 +603,7 @@ function ChatMessage.RollDice(player, diceCount, diceType)
     end
     World.forAllPlayers(function(targetPlayer)
         if PlayersDistance(player, targetPlayer) < messageRange then
-            ServerSend.RollResult(targetPlayer, username, characterName, diceCount, diceType, results, result)
+            ServerSend.RollResult(targetPlayer, username, characterName, diceCount, diceType, addCount, results, result)
         end
     end)
 end

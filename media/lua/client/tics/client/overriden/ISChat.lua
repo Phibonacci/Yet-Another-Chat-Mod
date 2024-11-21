@@ -481,14 +481,22 @@ local function ProcessRollCommand(arguments)
     if arguments == nil then
         return false
     end
-    local regex = '^(%d+)d(%d+) *$'
-    local m1, m2 = arguments:match(regex)
+    local regex = '^(%d*)d(%d+)(%+?)(%d*) *$'
+    local m1, m2, m3, m4 = arguments:match(regex)
     local diceCount = tonumber(m1)
     local diceType = tonumber(m2)
-    if diceType == nil or diceType < 1 or diceCount == nil or diceCount < 1 or diceCount > 20 then
+    local hasPlus = m3 == '+'
+    local addCount = tonumber(m4)
+    if diceType == nil or diceType < 1 then
         return false
     end
-    ClientSend.sendRoll(diceCount, diceType)
+    if diceCount == nil then
+        diceCount = 1
+    end
+    if diceCount < 1 or diceCount > 20 or (hasPlus and addCount == nil) then
+        return false
+    end
+    ClientSend.sendRoll(diceCount, diceType, addCount)
     return true
 end
 
@@ -908,12 +916,16 @@ local function ReduceBoredom()
     player:getBodyDamage():setBoredomLevel(boredom - boredomReduction)
 end
 
-function ISChat.onDiceResult(author, characterName, diceCount, diceType, diceResults, finalResult)
+function ISChat.onDiceResult(author, characterName, diceCount, diceType, addCount, diceResults, finalResult)
     local name = characterName
     if TicsServerSettings and not TicsServerSettings['options']['showCharacterName'] then
         name = author
     end
-    local message = name .. ' rolled ' .. diceCount .. 'd' .. diceType .. ' ('
+    local message = name .. ' rolled ' .. diceCount .. 'd' .. diceType
+    if addCount ~= nil then
+        message = message .. '+' .. addCount
+    end
+    message = message .. ' ('
     local first = true
     for _, r in pairs(diceResults) do
         if first then
@@ -923,7 +935,11 @@ function ISChat.onDiceResult(author, characterName, diceCount, diceType, diceRes
         end
         message = message .. r
     end
-    message = message .. ') = ' .. finalResult
+    message = message .. ')'
+    if addCount ~= nil then
+        message = message .. '+' .. addCount
+    end
+    message = message .. ' = ' .. finalResult
     ISChat.sendInfoToCurrentTab(message)
 end
 

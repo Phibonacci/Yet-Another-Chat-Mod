@@ -294,6 +294,7 @@ end
 RecvServer['Roll'] = function(player, args)
     local diceCount = args['diceCount']
     local diceType  = args['diceType']
+    local addCount  = args['addCount']
     if type(diceCount) ~= 'number' then
         print('TICS error: Roll packet does not contain a "diceCount" variable')
         return
@@ -302,7 +303,11 @@ RecvServer['Roll'] = function(player, args)
         print('TICS error: Roll packet does not contain a "diceType" variable')
         return
     end
-    ChatMessage.RollDice(player, diceCount, diceType)
+    if addCount ~= nil and type(addCount) ~= 'number' then
+        print('TICS error: Roll packet does not contain a "diceType" variable')
+        return
+    end
+    ChatMessage.RollDice(player, diceCount, diceType, addCount)
 end
 
 local function OnClientCommand(module, command, player, args)
