@@ -534,7 +534,7 @@ function ChatMessage.ProcessMessage(player, args, packetType, sendError)
     end
 
     if AuthorHasAccessByType[args.type] == nil then
-        print('TICS error: AuthorHasAccessByType has not method for type ' .. args.type)
+        print('TICS error: AuthorHasAccessByType has no method for type ' .. args.type)
         return
     end
 

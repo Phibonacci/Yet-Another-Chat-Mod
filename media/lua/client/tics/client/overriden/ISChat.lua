@@ -1440,7 +1440,20 @@ function ISChat.onTextChange()
         if ISChat.instance.currentTabID == stream['tabID'] and not stream['forget'] then
             ISChat.lastTabStream[ISChat.instance.currentTabID] = stream
         end
-        ClientSend.sendTyping(getPlayer():getUsername(), stream['name'])
+        local streamName = stream['name']
+        if streamName == 'mesay' then
+            streamName = 'say'
+        end
+        if streamName == 'melow' then
+            streamName = 'low'
+        end
+        if streamName == 'mewhisper' then
+            streamName = 'whisper'
+        end
+        if streamName == 'meyell' then
+            streamName = 'yell'
+        end
+        ClientSend.sendTyping(getPlayer():getUsername(), streamName)
     else
         if ISChat.instance.rangeIndicator then
             ISChat.instance.rangeIndicator:unsubscribe()
