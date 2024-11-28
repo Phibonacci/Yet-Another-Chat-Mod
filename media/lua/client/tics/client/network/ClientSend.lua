@@ -12,7 +12,7 @@ local function FormatCharacterName(player)
 end
 
 local function autoFormatString(str)
-    str = string.gsub(" "..str, "%W%l", string.upper):sub(2)
+    str = str:gsub("^%l", string.upper)
     local lastChar = string.sub(str, str:len())
     if not (lastChar == "." or lastChar == "!" or lastChar == "?") then
         str = str .. "."
