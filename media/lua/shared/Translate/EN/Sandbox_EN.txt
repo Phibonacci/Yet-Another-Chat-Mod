@@ -19,6 +19,8 @@ Sandbox_EN          = {
 
     Sandbox_TICS_VerbEnabled                           = "Add verb prefix to messages, and quotes",
 
+    Sandbox_TICS_Capitalize                            = "Automatically capitalize the first letter of a message and add punctuation",
+
     Sandbox_TICS_HideCallout                           = "Hide callouts in chat window (Q spam)",
 
     Sandbox_TICS_MarkdownOneAsteriskColor              = "Markdown one asterisk color",
