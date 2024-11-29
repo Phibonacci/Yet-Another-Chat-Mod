@@ -11,19 +11,9 @@ local function FormatCharacterName(player)
     return first .. ' ' .. last
 end
 
-local function autoFormatString(str)
-    str = str:gsub("^%l", string.upper)
-    local lastChar = string.sub(str, str:len())
-    if not (lastChar == "." or lastChar == "!" or lastChar == "?") then
-        str = str .. "."
-    end
-    return str
-end
-
 function ClientSend.sendChatMessage(message, playerColor, type, pitch, disableVerb)
     if not isClient() then return end
     local player = getPlayer()
-    message = autoFormatString(message)
     ClientSendCommand('ChatMessage', {
         author = player:getUsername(),
         characterName = FormatCharacterName(player),
@@ -38,7 +28,6 @@ end
 function ClientSend.sendPrivateMessage(message, playerColor, target, pitch)
     if not isClient() then return end
     local player = getPlayer()
-    message = autoFormatString(message)
     ClientSendCommand('ChatMessage', {
         author = getPlayer():getUsername(),
         characterName = FormatCharacterName(player),
