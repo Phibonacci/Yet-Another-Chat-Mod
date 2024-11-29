@@ -70,6 +70,15 @@ option TICS.VerbEnabled
 	translation = TICS_VerbEnabled,
 }
 
+option TICS.Capitalize
+{
+	type = boolean,
+	default = false,
+
+	page = TICS,
+	translation = TICS_Capitalize,
+}
+
 option TICS.HideCallout
 {
 	type = boolean,
