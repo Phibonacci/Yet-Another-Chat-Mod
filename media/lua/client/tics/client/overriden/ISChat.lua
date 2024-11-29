@@ -943,6 +943,15 @@ function ISChat.onDiceResult(author, characterName, diceCount, diceType, addCoun
     ISChat.sendInfoToCurrentTab(message)
 end
 
+local function CapitalizeAndPonctuate(message)
+    message = message:gsub("^%l", string.upper)
+    local lastChar = string.sub(message, message:len())
+    if not (lastChar == "." or lastChar == "!" or lastChar == "?") then
+        message = message .. "."
+    end
+    return message
+end
+
 function ISChat.onMessagePacket(type, author, characterName, message, color, hideInChat, target, isFromDiscord,
                                 voicePitch, disableVerb)
     if author ~= getPlayer():getUsername() then
@@ -952,13 +961,17 @@ function ISChat.onMessagePacket(type, author, characterName, message, color, hid
     if TicsServerSettings and not TicsServerSettings['options']['showCharacterName'] then
         name = author
     end
-    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, message, name, color, nil, disableVerb)
+    local cleanMessage = message
+    if TicsServerSettings ~= nil and TicsServerSettings['options']['capitalize'] == true then
+        cleanMessage = CapitalizeAndPonctuate(message)
+    end
+    local formattedMessage, parsedMessage = BuildMessageFromPacket(type, cleanMessage, name, color, nil, disableVerb)
     if type == 'pm' and target:lower() == getPlayer():getUsername():lower() then
         ISChat.instance.lastPrivateMessageAuthor = author
     end
     ISChat.instance.chatFont = ISChat.instance.chatFont or 'medium'
     if not isFromDiscord and voicePitch ~= nil then
-        CreatePlayerBubble(author, message, BuildColorFromMessageType(type), voicePitch)
+        CreatePlayerBubble(author, cleanMessage, BuildColorFromMessageType(type), voicePitch)
     end
     local time = Calendar.getInstance():getTimeInMillis()
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
@@ -1122,7 +1135,11 @@ function ISChat.onRadioEmittingPacket(type, author, characterName, message, colo
     if TicsServerSettings and not TicsServerSettings['options']['showCharacterName'] then
         name = author
     end
-    local formattedMessage, parsedMessages = BuildMessageFromPacket(type, message, name, color, frequency, disableVerb)
+    local cleanMessage = message
+    if TicsServerSettings ~= nil and TicsServerSettings['options']['capitalize'] == true then
+        cleanMessage = CapitalizeAndPonctuate(message)
+    end
+    local formattedMessage, parsedMessages = BuildMessageFromPacket(type, cleanMessage, name, color, frequency, disableVerb)
     local line = BuildChatMessage(ISChat.instance.chatFont, ISChat.instance.showTimestamp, ISChat.instance.showTitle,
         formattedMessage, time, type)
     AddMessageToTab(stream['tabID'], time, formattedMessage, line, stream['name'])
